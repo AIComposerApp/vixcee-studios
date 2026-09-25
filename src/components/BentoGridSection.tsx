@@ -73,27 +73,25 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
   ]);
 
   const updateTransforms = useCallback((scrollY: number) => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const windowHeight = typeof window !== 'undefined' ? window.innerHeight || 800 : 800;
+    const currentViewportCenter = scrollY + windowHeight / 2;
 
     rowsMeta.current.forEach((row) => {
-      // On mobile, lock image completely stable (zero sideways drift when scrolling vertically)
-      if (row.mImgEl) {
-        row.mImgEl.style.transform = 'none';
-      }
-
-      if (isMobile) return;
-
-      const windowHeight = typeof window !== 'undefined' ? window.innerHeight || 800 : 800;
-      const currentViewportCenter = scrollY + windowHeight / 2;
       const centerY = row.rowCenterY || (scrollY + windowHeight / 2);
       const verticalDiff = currentViewportCenter - centerY;
       const normalizedProgress = verticalDiff / (windowHeight * 1.05);
 
       const desktopTravel = 135;
+      const mobileTabletTravel = 48;
+
       const currentDesktopX = row.directionSign * normalizedProgress * desktopTravel;
+      const currentMobileTabletX = row.directionSign * normalizedProgress * mobileTabletTravel;
 
       if (row.dImgEl) {
         row.dImgEl.style.transform = `translate3d(${currentDesktopX.toFixed(2)}px, 0, 0)`;
+      }
+      if (row.mImgEl) {
+        row.mImgEl.style.transform = `translate3d(${currentMobileTabletX.toFixed(2)}px, 0, 0)`;
       }
     });
   }, []);

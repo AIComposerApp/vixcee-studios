@@ -233,70 +233,6 @@ export const AngledCarousel: React.FC = () => {
     resetTimer();
   };
 
-  // Touch & Swipe gesture handling
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const touchStartTime = useRef<number>(0);
-  const isSwipingRef = useRef<'horizontal' | 'vertical' | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    isHoveredRef.current = true;
-    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    touchStartTime.current = Date.now();
-    isSwipingRef.current = null;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const diffX = e.touches[0].clientX - touchStartX.current;
-    const diffY = e.touches[0].clientY - touchStartY.current;
-
-    // Detect direction on early movement
-    if (!isSwipingRef.current && (Math.abs(diffX) > 8 || Math.abs(diffY) > 8)) {
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        isSwipingRef.current = 'horizontal';
-      } else {
-        isSwipingRef.current = 'vertical';
-      }
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current !== null && touchStartY.current !== null) {
-      const diffX = e.changedTouches[0].clientX - touchStartX.current;
-      const diffY = e.changedTouches[0].clientY - touchStartY.current;
-      const dt = Date.now() - touchStartTime.current;
-
-      // Allow natural swiping: either horizontal distance > 28px, or flick > 18px within 300ms
-      const isHorizontalMove = Math.abs(diffX) > Math.abs(diffY);
-      const isSufficientDist = Math.abs(diffX) > 28;
-      const isQuickFlick = Math.abs(diffX) > 18 && dt < 300;
-
-      if ((isSwipingRef.current === 'horizontal' || isHorizontalMove) && (isSufficientDist || isQuickFlick)) {
-        if (diffX < 0) {
-          handleNext();
-        } else {
-          handlePrev();
-        }
-      }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-    isSwipingRef.current = null;
-    isHoveredRef.current = false;
-    resetTimer();
-  };
-
-  const handleTouchCancel = () => {
-    touchStartX.current = null;
-    touchStartY.current = null;
-    isSwipingRef.current = null;
-    isHoveredRef.current = false;
-    resetTimer();
-  };
-
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -327,11 +263,6 @@ export const AngledCarousel: React.FC = () => {
     <div
       ref={containerRef}
       className="angled-carousel relative w-full max-w-[1466px] h-[190px] sm:h-[270px] md:h-[410px] lg:h-[480px] mx-auto flex items-end justify-center overflow-visible z-20 select-none cursor-default"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchCancel}
-      style={{ touchAction: 'manipulation' }}
       aria-label="Website Showcase Carousel"
     >
       {/* Seamless blend into solid black (#0c0c0e) starting from the vertical center line of the carousel */}
@@ -365,8 +296,7 @@ export const AngledCarousel: React.FC = () => {
                 if (delta === -1) {
                   handlePrev();
                   resetTimer();
-                }
-                if (delta === 1) {
+                } else {
                   handleNext();
                   resetTimer();
                 }
@@ -382,8 +312,8 @@ export const AngledCarousel: React.FC = () => {
                 }
               }}
               className={`angled-carousel__card absolute flex justify-center items-center transition-all duration-[1350ms] ease-[cubic-bezier(0.25,1,0.3,1)] ${
-                !isActive ? 'cursor-pointer hover:brightness-110' : ''
-              }`}
+                !isHidden ? 'cursor-pointer' : ''
+              } ${!isActive ? 'hover:brightness-110' : ''}`}
               style={{
                 width: 'clamp(240px, 52vw, 760px)',
                 aspectRatio: '3220 / 2100',
@@ -484,25 +414,6 @@ export const AngledCarousel: React.FC = () => {
             Next
           </p>
         </div>
-      </div>
-
-      {/* 4. Mobile Pagination Dots Indicator */}
-      <div className="md:hidden absolute -bottom-3 inset-x-0 flex items-center justify-center gap-2 z-30 pointer-events-auto">
-        {CAROUSEL_ITEMS.map((item, idx) => (
-          <button
-            key={item.id}
-            onClick={() => {
-              setActiveIndex(idx);
-              resetTimer();
-            }}
-            className={`transition-all duration-300 rounded-full h-1.5 cursor-pointer ${
-              idx === activeIndex
-                ? 'w-6 bg-[#F04E23] shadow-[0_0_10px_rgba(240,78,35,0.7)]'
-                : 'w-1.5 bg-white/25 hover:bg-white/50'
-            }`}
-            aria-label={`Show ${item.title}`}
-          />
-        ))}
       </div>
     </div>
   );
