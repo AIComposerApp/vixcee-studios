@@ -22,7 +22,7 @@ const FEATURE_ITEMS: FeatureItem[] = [
     id: 'bento-frontend',
     heading: 'Clean code from the first shot',
     description: 'Prompts that give your AI coding agent clear direction. Less debugging and fewer wasted generations.',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790340435/better_prompt_bg_pdcipq.jpg',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790340435/better_prompt_bg_pdcipq.jpg',
     imageAlt: 'Clean code frontend website architecture interface preview',
     promptId: 'clean-code-first-shot',
     textPosition: 'left',
@@ -33,7 +33,7 @@ const FEATURE_ITEMS: FeatureItem[] = [
     tag: 'Animations',
     heading: 'High-end motion on the first try',
     description: 'Prompts that give your AI coding agent exact parameters for easing and timing. Smoother transitions and less endless tweaking.',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790340412/better_animation_jrrzcy.jpg',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790340412/better_animation_jrrzcy.jpg',
     imageAlt: 'High-end motion easing curves and smooth transitions preview',
     promptId: 'high-end-motion',
     textPosition: 'right',
@@ -44,7 +44,7 @@ const FEATURE_ITEMS: FeatureItem[] = [
     tag: 'Backend',
     heading: 'Production-ready server logic immediately',
     description: 'Prompts that give your AI coding agent precise architecture guidelines. Secure API endpoints and less endless debugging.',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790340405/backend_bg_lzgixv.jpg',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790340405/backend_bg_lzgixv.jpg',
     imageAlt: 'Production-ready backend API and database architecture preview',
     promptId: 'production-server-logic',
     textPosition: 'left',
@@ -106,23 +106,41 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
     });
   }, []);
 
-  // Direct, synchronized scroll tracking with zero trailing lerp drift
+  // Organic cushioned scroll tracking with snappy deceleration
   useEffect(() => {
     let animId: number | null = null;
     let isVisible = false;
     let lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
+    let currentY = window.scrollY || document.documentElement.scrollTop;
+    let targetY = currentY;
 
     measureRowCenters();
-    updateTransforms(window.scrollY || document.documentElement.scrollTop);
+    updateTransforms(currentY);
+
+    const tick = () => {
+      if (!isVisible) {
+        animId = null;
+        return;
+      }
+
+      const diff = targetY - currentY;
+      // High-damping 0.28 factor: provides a silky, organic deceleration cushion
+      // that settles within ~90ms, eliminating the rigid sudden stop without any sluggish drift
+      if (Math.abs(diff) > 0.35) {
+        currentY += diff * 0.28;
+        updateTransforms(currentY);
+        animId = requestAnimationFrame(tick);
+      } else {
+        currentY = targetY;
+        updateTransforms(currentY);
+        animId = null;
+      }
+    };
 
     const onScroll = () => {
-      if (!isVisible) return;
-      if (animId === null) {
-        animId = requestAnimationFrame(() => {
-          const scrollY = window.scrollY || document.documentElement.scrollTop;
-          updateTransforms(scrollY);
-          animId = null;
-        });
+      targetY = window.scrollY || document.documentElement.scrollTop;
+      if (!animId && isVisible) {
+        animId = requestAnimationFrame(tick);
       }
     };
 
@@ -133,8 +151,9 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
         lastWidth = window.innerWidth;
       }
       measureRowCenters();
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      updateTransforms(scrollY);
+      targetY = window.scrollY || document.documentElement.scrollTop;
+      currentY = targetY;
+      updateTransforms(currentY);
     };
 
     // IntersectionObserver to completely halt work when offscreen
@@ -143,8 +162,9 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
         isVisible = entry.isIntersecting;
         if (isVisible) {
           measureRowCenters();
-          const scrollY = window.scrollY || document.documentElement.scrollTop;
-          updateTransforms(scrollY);
+          targetY = window.scrollY || document.documentElement.scrollTop;
+          currentY = targetY;
+          updateTransforms(currentY);
         } else if (animId) {
           cancelAnimationFrame(animId);
           animId = null;
@@ -217,7 +237,8 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
                         <img
                           src={item.image}
                           alt={item.imageAlt}
-                          loading="lazy"
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          fetchPriority={index === 0 ? 'high' : 'auto'}
                           decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() => handleImageError(item.id)}
@@ -315,7 +336,8 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
                         <img
                           src={item.image}
                           alt={item.imageAlt}
-                          loading="lazy"
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          fetchPriority={index === 0 ? 'high' : 'auto'}
                           decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() => handleImageError(item.id)}

@@ -10,27 +10,27 @@ const CAROUSEL_ITEMS: CarouselItem[] = [
   {
     id: 'prince-of-web3',
     title: 'Prince of Web3',
-    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
+    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
   },
   {
     id: 'carizma-luxury',
     title: 'Carizma Luxury Hotels',
-    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
+    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
   },
   {
     id: 'chesney-hotel',
     title: 'Chesney Hotel Boutique',
-    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto/v1790358616/Chesney-Hotel-Boutique-bg-front_zde5g3.png',
+    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358616/Chesney-Hotel-Boutique-bg-front_zde5g3.png',
   },
   {
     id: 'alege-official',
     title: 'Alege Official',
-    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto/v1790358607/Alege-Official-bg-front_fgcdvr.png',
+    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358607/Alege-Official-bg-front_fgcdvr.png',
   },
   {
     id: 'alex-hydration',
     title: 'ALEX Form Follows Hydration',
-    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
+    imgUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
   },
 ];
 
@@ -324,17 +324,16 @@ export const AngledCarousel: React.FC = () => {
                 pointerEvents: isHidden ? 'none' : 'auto',
               }}
             >
-              <picture className="w-full h-full block">
-                <source type="image/webp" srcSet={item.imgUrl} />
-                <source type="image/png" srcSet={item.imgUrl} />
+              <div className="w-full h-full block">
                 <img
                   src={item.imgUrl}
                   alt={item.title}
                   loading="eager"
-                  fetchPriority={isActive ? 'high' : 'auto'}
+                  decoding="async"
+                  fetchPriority={isActive ? 'high' : Math.abs(delta) <= 1 ? 'auto' : 'low'}
                   className="w-full h-full object-contain pointer-events-none select-none block"
                 />
-              </picture>
+              </div>
             </div>
           );
         })}

@@ -13,42 +13,42 @@ interface ShowcaseImage {
   src: string;
 }
 
-// 13 High-Performance Optimized Mobile Portrait Screenshots (93% faster payload via Cloudinary f_auto,q_auto:best,w_500)
+// 13 High-Performance Optimized Mobile Portrait Screenshots (93% faster payload via Cloudinary f_auto,q_auto,w_420)
 const COLUMN_1_IMAGES: ShowcaseImage[] = [
   {
     id: 'allbirds',
     title: 'Allbirds Mens Dasher NZ',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355853/Allbirds-Mens-Dasher-NZ-09-25-2026_05_30_PM-portrait_zkp8ls.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355853/Allbirds-Mens-Dasher-NZ-09-25-2026_05_30_PM-portrait_zkp8ls.png',
   },
   {
     id: 'alex-hydrate',
     title: 'ALEX Hydrate',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355853/ALEX-hydrate-mobile-portrait_apcmge.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355853/ALEX-hydrate-mobile-portrait_apcmge.png',
   },
   {
     id: 'balance-wellness',
     title: 'Balance Wellness',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355853/Balance-Wellness-mobile-portrait_vgprfk.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355853/Balance-Wellness-mobile-portrait_vgprfk.png',
   },
   {
     id: 'ijaw-massage',
     title: 'IJAW Massage Plus',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355855/IJAWMASSAGEPLUS-_-Traditional-Healing-Modern-Comfort-09-25-2026_05_18_PM-portrait_orh8ey.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355855/IJAWMASSAGEPLUS-_-Traditional-Healing-Modern-Comfort-09-25-2026_05_18_PM-portrait_orh8ey.png',
   },
   {
     id: 'chesney-hotel',
     title: 'Chesney Hotel',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355855/Chesney-Hotel-mobile-portrait_cjpsj2.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355855/Chesney-Hotel-mobile-portrait_cjpsj2.png',
   },
   {
     id: 'prince-of-web3',
     title: 'Prince of Web3',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355856/Prince-of-Web3-mobile-portrait_mqpqeh.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355856/Prince-of-Web3-mobile-portrait_mqpqeh.png',
   },
   {
     id: 'flowstate',
     title: 'FlowState Intelligent Plumbing',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355856/FlowState-Intelligent-Plumbing-09-25-2026_05_04_PM-portrait_vvlepq.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355856/FlowState-Intelligent-Plumbing-09-25-2026_05_04_PM-portrait_vvlepq.png',
   },
 ];
 
@@ -56,32 +56,32 @@ const COLUMN_2_IMAGES: ShowcaseImage[] = [
   {
     id: 'scribe',
     title: 'Scribe Smarter Lessons',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355857/Scribe-_-Smarter-lessons-Built-with-Scribe--09-25-2026_05_23_PM-portrait_tixcfp.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355857/Scribe-_-Smarter-lessons-Built-with-Scribe--09-25-2026_05_23_PM-portrait_tixcfp.png',
   },
   {
     id: 'google-ai-studio',
     title: 'Google AI Studio App',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355857/My-Google-AI-Studio-App-09-25-2026_05_58_PM-portrait_d8ruby.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355857/My-Google-AI-Studio-App-09-25-2026_05_58_PM-portrait_d8ruby.png',
   },
   {
     id: 'sandra-osaigbovo',
     title: 'Sandra Osaigbovo',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355858/Sandra-Osaigbovo_mobile-portrait_gy9r4g.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355858/Sandra-Osaigbovo_mobile-portrait_gy9r4g.png',
   },
   {
     id: 'shoe-finder',
     title: 'Shoe Finder',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355858/Shoe-Finder-09-25-2026_05_31_PM-portrait_yajud6.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355858/Shoe-Finder-09-25-2026_05_31_PM-portrait_yajud6.png',
   },
   {
     id: 'carizma-luxury',
     title: 'Carizma Luxury Hotels',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355858/Carizma-Luxury-Hotels-mobile-portrait_emb4pi.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355858/Carizma-Luxury-Hotels-mobile-portrait_emb4pi.png',
   },
   {
     id: 'aurelia-hotels',
     title: 'Aurelia Hotels',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto:best,w_500/v1790355860/Aurelia-Hotels-mobile-portrait_yagbgb.png',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355860/Aurelia-Hotels-mobile-portrait_yagbgb.png',
   },
 ];
 
@@ -470,9 +470,9 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                       src={item.src}
                       alt={item.title}
                       onLoad={measureHeights}
-                      loading="eager"
+                      loading={idx < 2 ? 'eager' : 'lazy'}
                       decoding="async"
-                      fetchPriority={idx < 6 ? 'high' : 'auto'}
+                      fetchPriority={idx < 2 ? 'high' : 'low'}
                       className="w-full h-auto object-contain select-none pointer-events-none block"
                     />
                   </div>
@@ -493,9 +493,9 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                       src={item.src}
                       alt={item.title}
                       onLoad={measureHeights}
-                      loading="eager"
+                      loading={idx < 2 ? 'eager' : 'lazy'}
                       decoding="async"
-                      fetchPriority={idx < 6 ? 'high' : 'auto'}
+                      fetchPriority={idx < 2 ? 'high' : 'low'}
                       className="w-full h-auto object-contain select-none pointer-events-none block"
                     />
                   </div>
@@ -535,9 +535,9 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                         src={item.src}
                         alt={item.title}
                         onLoad={measureHeights}
-                        loading="eager"
+                        loading={idx < 2 ? 'eager' : 'lazy'}
                         decoding="async"
-                        fetchPriority={idx < 6 ? 'high' : 'auto'}
+                        fetchPriority={idx < 2 ? 'high' : 'low'}
                         className="w-full h-auto object-contain select-none pointer-events-none block"
                       />
                     </div>
@@ -563,9 +563,9 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                         src={item.src}
                         alt={item.title}
                         onLoad={measureHeights}
-                        loading="eager"
+                        loading={idx < 2 ? 'eager' : 'lazy'}
                         decoding="async"
-                        fetchPriority={idx < 6 ? 'high' : 'auto'}
+                        fetchPriority={idx < 2 ? 'high' : 'low'}
                         className="w-full h-auto object-contain select-none pointer-events-none block"
                       />
                     </div>
