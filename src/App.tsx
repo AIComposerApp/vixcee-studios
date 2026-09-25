@@ -22,10 +22,6 @@ export default function App() {
   const [dockStage, setDockStage] = useState<DockStage>('initial');
 
   useEffect(() => {
-    // Prevent background scrolling while loading screen is active
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
     // 1. Reveal and dwell period: 4400ms -> start docking
     const dockTimer = setTimeout(() => {
       setDockStage('docking');
@@ -34,13 +30,11 @@ export default function App() {
     // 2. Continuous flight completes at 5250ms (4400ms + 850ms) -> docked state
     const finishTimer = setTimeout(() => {
       setDockStage('docked');
-      document.body.style.overflow = originalOverflow;
     }, 5250);
 
     return () => {
       clearTimeout(dockTimer);
       clearTimeout(finishTimer);
-      document.body.style.overflow = originalOverflow;
     };
   }, []);
 
@@ -50,7 +44,7 @@ export default function App() {
   };
 
   return (
-    <div id="homepage-default" className="min-h-screen flex flex-col bg-[#0c0c0e] text-white">
+    <div id="homepage-default" className="min-h-screen flex flex-col bg-[#0c0c0e] text-white overflow-x-clip">
       {/* Coordinated Independent Dark Backdrop & Ambient Bloom Overlay */}
       <LoadingScreen stage={dockStage} />
 

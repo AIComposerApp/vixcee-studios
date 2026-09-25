@@ -75,22 +75,9 @@ export const AngledCarousel: React.FC = () => {
     };
   }, [activeIndex, resetTimer]);
 
-  // Floating cursor follow states
-  const [leftFollower, setLeftFollower] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
-    tiltX: 0,
-    tiltY: 0,
-  });
-
-  const [rightFollower, setRightFollower] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
-    tiltX: 0,
-    tiltY: 0,
-  });
+  // Direct DOM refs for cursor follower pills (zero React re-renders on mousemove)
+  const leftFollowerRef = useRef<HTMLDivElement>(null);
+  const rightFollowerRef = useRef<HTMLDivElement>(null);
 
   const mouseTargets = useRef({
     left: {
@@ -117,7 +104,7 @@ export const AngledCarousel: React.FC = () => {
     },
   });
 
-  // RAF loop for smooth velvet lerped cursor follow
+  // RAF loop for smooth velvet lerped cursor follow directly on DOM elements
   useEffect(() => {
     let animId: number;
 
@@ -126,34 +113,28 @@ export const AngledCarousel: React.FC = () => {
     const updateFollowers = () => {
       const { left, right } = mouseTargets.current;
 
-      if (left.active) {
-        left.currentX = lerp(left.currentX, left.targetX, 0.09);
-        left.currentY = lerp(left.currentY, left.targetY, 0.09);
-        left.currentTiltX = lerp(left.currentTiltX, left.targetTiltX, 0.08);
-        left.currentTiltY = lerp(left.currentTiltY, left.targetTiltY, 0.08);
+      if (left.active && leftFollowerRef.current) {
+        left.currentX = lerp(left.currentX, left.targetX, 0.12);
+        left.currentY = lerp(left.currentY, left.targetY, 0.12);
+        left.currentTiltX = lerp(left.currentTiltX, left.targetTiltX, 0.1);
+        left.currentTiltY = lerp(left.currentTiltY, left.targetTiltY, 0.1);
 
-        setLeftFollower({
-          visible: true,
-          x: left.currentX,
-          y: left.currentY,
-          tiltX: left.currentTiltX,
-          tiltY: left.currentTiltY,
-        });
+        leftFollowerRef.current.style.opacity = '1';
+        leftFollowerRef.current.style.transform = `translate3d(${left.currentX.toFixed(1)}px, ${left.currentY.toFixed(1)}px, 0) translate(-50%, -50%) perspective(500px) rotateX(${left.currentTiltX.toFixed(1)}deg) rotateY(${left.currentTiltY.toFixed(1)}deg)`;
+      } else if (leftFollowerRef.current && leftFollowerRef.current.style.opacity !== '0') {
+        leftFollowerRef.current.style.opacity = '0';
       }
 
-      if (right.active) {
-        right.currentX = lerp(right.currentX, right.targetX, 0.09);
-        right.currentY = lerp(right.currentY, right.targetY, 0.09);
-        right.currentTiltX = lerp(right.currentTiltX, right.targetTiltX, 0.08);
-        right.currentTiltY = lerp(right.currentTiltY, right.targetTiltY, 0.08);
+      if (right.active && rightFollowerRef.current) {
+        right.currentX = lerp(right.currentX, right.targetX, 0.12);
+        right.currentY = lerp(right.currentY, right.targetY, 0.12);
+        right.currentTiltX = lerp(right.currentTiltX, right.targetTiltX, 0.1);
+        right.currentTiltY = lerp(right.currentTiltY, right.targetTiltY, 0.1);
 
-        setRightFollower({
-          visible: true,
-          x: right.currentX,
-          y: right.currentY,
-          tiltX: right.currentTiltX,
-          tiltY: right.currentTiltY,
-        });
+        rightFollowerRef.current.style.opacity = '1';
+        rightFollowerRef.current.style.transform = `translate3d(${right.currentX.toFixed(1)}px, ${right.currentY.toFixed(1)}px, 0) translate(-50%, -50%) perspective(500px) rotateX(${right.currentTiltX.toFixed(1)}deg) rotateY(${right.currentTiltY.toFixed(1)}deg)`;
+      } else if (rightFollowerRef.current && rightFollowerRef.current.style.opacity !== '0') {
+        rightFollowerRef.current.style.opacity = '0';
       }
 
       animId = requestAnimationFrame(updateFollowers);
@@ -168,7 +149,6 @@ export const AngledCarousel: React.FC = () => {
     if (!containerRef.current) return false;
     const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
-    // Calculate current width of the center card: clamp(220px, 48vw, 680.8px) on desktop, clamp(180px, 58vw, 680px) on mobile
     const cardWidth = Math.min(rect.width * 0.52, 680.8);
     const halfWidth = cardWidth / 2;
     return clientX >= centerX - halfWidth && clientX <= centerX + halfWidth;
@@ -177,8 +157,8 @@ export const AngledCarousel: React.FC = () => {
   const hideAllFollowers = () => {
     mouseTargets.current.left.active = false;
     mouseTargets.current.right.active = false;
-    setLeftFollower((prev) => ({ ...prev, visible: false }));
-    setRightFollower((prev) => ({ ...prev, visible: false }));
+    if (leftFollowerRef.current) leftFollowerRef.current.style.opacity = '0';
+    if (rightFollowerRef.current) rightFollowerRef.current.style.opacity = '0';
   };
 
   // Left flank mouse move
@@ -196,7 +176,7 @@ export const AngledCarousel: React.FC = () => {
 
     // Ensure right follower is off
     mouseTargets.current.right.active = false;
-    setRightFollower((prev) => ({ ...prev, visible: false }));
+    if (rightFollowerRef.current) rightFollowerRef.current.style.opacity = '0';
 
     const m = mouseTargets.current.left;
     if (!m.active) {
@@ -212,7 +192,7 @@ export const AngledCarousel: React.FC = () => {
 
   const handleLeftMouseLeave = () => {
     mouseTargets.current.left.active = false;
-    setLeftFollower((prev) => ({ ...prev, visible: false }));
+    if (leftFollowerRef.current) leftFollowerRef.current.style.opacity = '0';
     isHoveredRef.current = false;
     resetTimer();
   };
@@ -232,7 +212,7 @@ export const AngledCarousel: React.FC = () => {
 
     // Ensure left follower is off
     mouseTargets.current.left.active = false;
-    setLeftFollower((prev) => ({ ...prev, visible: false }));
+    if (leftFollowerRef.current) leftFollowerRef.current.style.opacity = '0';
 
     const m = mouseTargets.current.right;
     if (!m.active) {
@@ -248,31 +228,71 @@ export const AngledCarousel: React.FC = () => {
 
   const handleRightMouseLeave = () => {
     mouseTargets.current.right.active = false;
-    setRightFollower((prev) => ({ ...prev, visible: false }));
+    if (rightFollowerRef.current) rightFollowerRef.current.style.opacity = '0';
     isHoveredRef.current = false;
     resetTimer();
   };
 
-  // Touch handling
+  // Touch & Swipe gesture handling
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartTime = useRef<number>(0);
+  const isSwipingRef = useRef<'horizontal' | 'vertical' | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     isHoveredRef.current = true;
+    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+    isSwipingRef.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.touches[0].clientX - touchStartX.current;
+    const diffY = e.touches[0].clientY - touchStartY.current;
+
+    // Detect direction on early movement
+    if (!isSwipingRef.current && (Math.abs(diffX) > 8 || Math.abs(diffY) > 8)) {
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        isSwipingRef.current = 'horizontal';
+      } else {
+        isSwipingRef.current = 'vertical';
+      }
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current !== null) {
-      const diff = e.changedTouches[0].clientX - touchStartX.current;
-      if (Math.abs(diff) > 35) {
-        if (diff > 0) {
-          handlePrev();
-        } else {
+    if (touchStartX.current !== null && touchStartY.current !== null) {
+      const diffX = e.changedTouches[0].clientX - touchStartX.current;
+      const diffY = e.changedTouches[0].clientY - touchStartY.current;
+      const dt = Date.now() - touchStartTime.current;
+
+      // Allow natural swiping: either horizontal distance > 28px, or flick > 18px within 300ms
+      const isHorizontalMove = Math.abs(diffX) > Math.abs(diffY);
+      const isSufficientDist = Math.abs(diffX) > 28;
+      const isQuickFlick = Math.abs(diffX) > 18 && dt < 300;
+
+      if ((isSwipingRef.current === 'horizontal' || isHorizontalMove) && (isSufficientDist || isQuickFlick)) {
+        if (diffX < 0) {
           handleNext();
+        } else {
+          handlePrev();
         }
       }
     }
     touchStartX.current = null;
+    touchStartY.current = null;
+    isSwipingRef.current = null;
+    isHoveredRef.current = false;
+    resetTimer();
+  };
+
+  const handleTouchCancel = () => {
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwipingRef.current = null;
     isHoveredRef.current = false;
     resetTimer();
   };
@@ -308,7 +328,10 @@ export const AngledCarousel: React.FC = () => {
       ref={containerRef}
       className="angled-carousel relative w-full max-w-[1466px] h-[190px] sm:h-[270px] md:h-[410px] lg:h-[480px] mx-auto flex items-end justify-center overflow-visible z-20 select-none cursor-default"
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      style={{ touchAction: 'manipulation' }}
       aria-label="Website Showcase Carousel"
     >
       {/* Seamless blend into solid black (#0c0c0e) starting from the vertical center line of the carousel */}
@@ -387,9 +410,9 @@ export const AngledCarousel: React.FC = () => {
         })}
       </div>
 
-      {/* 2. Left Flank Hit Area (Only on the left side, hides on center) */}
+      {/* 2. Left Flank Hit Area (Only on the left side, desktop only so mobile swipe is never blocked) */}
       <div
-        className="angled-carousel__controls angled-carousel__controls--left absolute left-0 top-0 bottom-0 w-[42%] z-20 flex items-center justify-start cursor-pointer"
+        className="angled-carousel__controls angled-carousel__controls--left absolute left-0 top-0 bottom-0 w-[42%] z-20 hidden md:flex items-center justify-start cursor-pointer"
         onMouseMove={handleLeftMouseMove}
         onMouseLeave={handleLeftMouseLeave}
         onClick={() => {
@@ -411,27 +434,23 @@ export const AngledCarousel: React.FC = () => {
       </div>
 
       {/* Floating pill for Left (Desktop only) */}
-      {leftFollower.visible && (
-        <div
-          className="cursor-follow__follower fixed pointer-events-none z-[1000] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 hidden md:block"
-          style={{
-            left: `${leftFollower.x}px`,
-            top: `${leftFollower.y}px`,
-            opacity: leftFollower.visible ? 1 : 0,
-            transform: `translate3d(-50%, -50%, 0) perspective(500px) rotateX(${leftFollower.tiltX}deg) rotateY(${leftFollower.tiltY}deg)`,
-          }}
-        >
-          <div className="cursor-follow__pill flex items-center justify-center min-w-[92px] h-[45px] px-4 py-3 bg-white text-black rounded-full shadow-[0_18px_11px_rgba(0,0,0,0.12),0_8px_8px_rgba(0,0,0,0.14),0_2px_5px_rgba(0,0,0,0.15)] border border-black/10">
-            <p className="text text--body text-[15px] font-medium tracking-tight text-black m-0 select-none">
-              Previous
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Right Flank Hit Area (Only on the right side, hides on center) */}
       <div
-        className="angled-carousel__controls angled-carousel__controls--right absolute right-0 top-0 bottom-0 w-[42%] z-20 flex items-center justify-end cursor-pointer"
+        ref={leftFollowerRef}
+        className="cursor-follow__follower fixed top-0 left-0 pointer-events-none z-[1000] opacity-0 transition-opacity duration-200 hidden md:block will-change-transform"
+        style={{
+          transform: 'translate3d(-9999px, -9999px, 0)',
+        }}
+      >
+        <div className="cursor-follow__pill flex items-center justify-center min-w-[92px] h-[45px] px-4 py-3 bg-white text-black rounded-full shadow-[0_18px_11px_rgba(0,0,0,0.12),0_8px_8px_rgba(0,0,0,0.14),0_2px_5px_rgba(0,0,0,0.15)] border border-black/10">
+          <p className="text text--body text-[15px] font-medium tracking-tight text-black m-0 select-none">
+            Previous
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Right Flank Hit Area (Only on the right side, desktop only so mobile swipe is never blocked) */}
+      <div
+        className="angled-carousel__controls angled-carousel__controls--right absolute right-0 top-0 bottom-0 w-[42%] z-20 hidden md:flex items-center justify-end cursor-pointer"
         onMouseMove={handleRightMouseMove}
         onMouseLeave={handleRightMouseLeave}
         onClick={() => {
@@ -453,23 +472,38 @@ export const AngledCarousel: React.FC = () => {
       </div>
 
       {/* Floating pill for Right (Desktop only) */}
-      {rightFollower.visible && (
-        <div
-          className="cursor-follow__follower fixed pointer-events-none z-[1000] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 hidden md:block"
-          style={{
-            left: `${rightFollower.x}px`,
-            top: `${rightFollower.y}px`,
-            opacity: rightFollower.visible ? 1 : 0,
-            transform: `translate3d(-50%, -50%, 0) perspective(500px) rotateX(${rightFollower.tiltX}deg) rotateY(${rightFollower.tiltY}deg)`,
-          }}
-        >
-          <div className="cursor-follow__pill flex items-center justify-center min-w-[92px] h-[45px] px-4 py-3 bg-white text-black rounded-full shadow-[0_18px_11px_rgba(0,0,0,0.12),0_8px_8px_rgba(0,0,0,0.14),0_2px_5px_rgba(0,0,0,0.15)] border border-black/10">
-            <p className="text text--body text-[15px] font-medium tracking-tight text-black m-0 select-none">
-              Next
-            </p>
-          </div>
+      <div
+        ref={rightFollowerRef}
+        className="cursor-follow__follower fixed top-0 left-0 pointer-events-none z-[1000] opacity-0 transition-opacity duration-200 hidden md:block will-change-transform"
+        style={{
+          transform: 'translate3d(-9999px, -9999px, 0)',
+        }}
+      >
+        <div className="cursor-follow__pill flex items-center justify-center min-w-[92px] h-[45px] px-4 py-3 bg-white text-black rounded-full shadow-[0_18px_11px_rgba(0,0,0,0.12),0_8px_8px_rgba(0,0,0,0.14),0_2px_5px_rgba(0,0,0,0.15)] border border-black/10">
+          <p className="text text--body text-[15px] font-medium tracking-tight text-black m-0 select-none">
+            Next
+          </p>
         </div>
-      )}
+      </div>
+
+      {/* 4. Mobile Pagination Dots Indicator */}
+      <div className="md:hidden absolute -bottom-3 inset-x-0 flex items-center justify-center gap-2 z-30 pointer-events-auto">
+        {CAROUSEL_ITEMS.map((item, idx) => (
+          <button
+            key={item.id}
+            onClick={() => {
+              setActiveIndex(idx);
+              resetTimer();
+            }}
+            className={`transition-all duration-300 rounded-full h-1.5 cursor-pointer ${
+              idx === activeIndex
+                ? 'w-6 bg-[#F04E23] shadow-[0_0_10px_rgba(240,78,35,0.7)]'
+                : 'w-1.5 bg-white/25 hover:bg-white/50'
+            }`}
+            aria-label={`Show ${item.title}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

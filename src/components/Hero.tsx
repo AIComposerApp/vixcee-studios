@@ -14,10 +14,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
   return (
     <section
       id="homepage-hero"
-      className="homepage-hero relative w-full bg-[#0c0c0e] overflow-x-hidden min-h-[100dvh] flex flex-col justify-between items-center md:min-h-screen md:h-auto md:justify-start"
+      className="homepage-hero relative w-full bg-[#0c0c0e] overflow-x-clip min-h-[100dvh] flex flex-col justify-between items-center md:min-h-screen md:h-auto md:justify-start"
       aria-label="Hero - Your sites live in days, not weeks"
     >
-      {/* 1. Exact Melius Interactive 3D Atomic Orbit Dot Grid in Signature Melius Orange (#F04E23) */}
+      {/* 1. Exact Melius Interactive 3D Atomic Orbit Dot Grid in Signature Melius Orange (#F04E23)
+          Desktop & Tablet (>= 768px): Interactive 3D atomic orbit hover effect
+          Mobile (< 768px): Static pristine grid with zero touch distortion for effortless scrolling */}
       <DotGridBackground
         dotColor="#F04E23"
         dotSize={3}
@@ -27,6 +29,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
         scaleOnHover={1.8}
         enableRevolve={true}
         fadeEdges={true}
+        desktopAndTabletOnly={true}
       />
 
       {/* 2. Seamless radial vignette overlay smoothly dissolving outer dots into #0c0c0e */}
@@ -34,18 +37,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
         className="pointer-events-none absolute inset-0 z-[1] select-none"
         style={{
           background:
-            'radial-gradient(ellipse 85% 75% at 50% 50%, transparent 40%, rgba(12, 12, 14, 0.45) 68%, #0c0c0e 98%)',
-        }}
-      />
-
-      {/* 3. Soft progressive perimeter blur ring */}
-      <div
-        className="pointer-events-none absolute inset-0 z-[2] backdrop-blur-[3px] sm:backdrop-blur-[6px] select-none"
-        style={{
-          WebkitMaskImage:
-            'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.6) 72%, black 100%)',
-          maskImage:
-            'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.6) 72%, black 100%)',
+            'radial-gradient(ellipse 85% 75% at 50% 50%, transparent 35%, rgba(12, 12, 14, 0.65) 65%, #0c0c0e 95%)',
         }}
       />
 

@@ -212,11 +212,19 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
     };
   }, []);
 
-  // Continuous physics animation loop via requestAnimationFrame with continuous modulo
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Continuous physics animation loop via requestAnimationFrame with continuous modulo, active only when visible
   useEffect(() => {
-    let animId: number;
+    let animId: number | null = null;
+    let isVisible = false;
 
     const updatePhysics = () => {
+      if (!isVisible) {
+        animId = null;
+        return;
+      }
+
       // Lerp speed smoothly to prevent jarring speed snaps
       currentSpeedRef.current +=
         (targetSpeedRef.current - currentSpeedRef.current) * 0.05;
@@ -230,12 +238,11 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const h2D = h2DeskRef.current;
       if (col1Ref.current && h1D > 0) {
         const y1 = ((progress1Ref.current % h1D) + h1D) % h1D;
-        col1Ref.current.style.transform = `translate3d(0, ${-y1}px, 0)`;
+        col1Ref.current.style.transform = `translate3d(0, ${-y1.toFixed(1)}px, 0)`;
       }
       if (col2Ref.current && h2D > 0) {
         const y2 = ((progress2Ref.current % h2D) + h2D) % h2D;
-        // Continuous downward glide wrapping smoothly at h2D
-        col2Ref.current.style.transform = `translate3d(0, ${-h2D + y2}px, 0)`;
+        col2Ref.current.style.transform = `translate3d(0, ${(-h2D + y2).toFixed(1)}px, 0)`;
       }
 
       // Mobile 3D transforms (independent dimensions)
@@ -243,18 +250,40 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const h2M = h2MobRef.current;
       if (mCol1Ref.current && h1M > 0) {
         const y1 = ((progress1Ref.current % h1M) + h1M) % h1M;
-        mCol1Ref.current.style.transform = `translate3d(0, ${-y1}px, 0)`;
+        mCol1Ref.current.style.transform = `translate3d(0, ${-y1.toFixed(1)}px, 0)`;
       }
       if (mCol2Ref.current && h2M > 0) {
         const y2 = ((progress2Ref.current % h2M) + h2M) % h2M;
-        mCol2Ref.current.style.transform = `translate3d(0, ${-h2M + y2}px, 0)`;
+        mCol2Ref.current.style.transform = `translate3d(0, ${(-h2M + y2).toFixed(1)}px, 0)`;
       }
 
       animId = requestAnimationFrame(updatePhysics);
     };
 
-    animId = requestAnimationFrame(updatePhysics);
-    return () => cancelAnimationFrame(animId);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          if (!animId) {
+            measureHeights();
+            animId = requestAnimationFrame(updatePhysics);
+          }
+        } else if (animId) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (animId) cancelAnimationFrame(animId);
+    };
   }, []);
 
   // Hover handlers for cushioned stop and resume
@@ -274,6 +303,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
 
   return (
     <section
+      ref={sectionRef}
       id="work-showcase"
       className="relative w-full bg-[#0c0c0e] py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden select-none"
       aria-label="Work that performs - mobile showcase"

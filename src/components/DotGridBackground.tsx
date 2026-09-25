@@ -59,12 +59,13 @@ export interface DotGridBackgroundProps {
   scaleOnHover?: number;
   enableRevolve?: boolean;
   fadeEdges?: boolean;
+  desktopAndTabletOnly?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
 
 export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
-  dotColor = '#F04E23', // Exact Melius signature orange
+  dotColor = '#F04E23',
   dotSize = 3,
   dotSpacing = 28,
   orbitSpeed = 1.5,
@@ -72,6 +73,7 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
   scaleOnHover = 1.8,
   enableRevolve = true,
   fadeEdges = true,
+  desktopAndTabletOnly = true,
   className = '',
   style,
 }) => {
@@ -84,6 +86,7 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
     impactRadius,
     scaleOnHover,
     enableRevolve,
+    desktopAndTabletOnly,
   });
 
   cfgRef.current.dotColor = dotColor;
@@ -93,6 +96,7 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
   cfgRef.current.impactRadius = impactRadius;
   cfgRef.current.scaleOnHover = scaleOnHover;
   cfgRef.current.enableRevolve = enableRevolve;
+  cfgRef.current.desktopAndTabletOnly = desktopAndTabletOnly;
 
   const dotsRef = useRef<Dot[]>([]);
   const spacingSnapRef = useRef(dotSpacing);
@@ -101,18 +105,32 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 to avoid mobile 3x/4x GPU overload
     let W = 0;
     let H = 0;
     const mouse = { x: -9999, y: -9999 };
     let hovering = false;
     let leaveTs = 0;
     let prevTs = 0;
-    let raf = 0;
+    let raf: number | null = null;
     let globalAngle = 0;
+    let isVisible = true;
+
+    // Cache pre-parsed colors
+    let cachedColor = cfgRef.current.dotColor;
+    let rgb = parseColor(cachedColor, canvas);
+    let baseFill = `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`;
+
+    function updateColor() {
+      if (cachedColor !== cfgRef.current.dotColor) {
+        cachedColor = cfgRef.current.dotColor;
+        rgb = parseColor(cachedColor, canvas!);
+        baseFill = `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`;
+      }
+    }
 
     function buildDots() {
       const sp = cfgRef.current.dotSpacing;
@@ -134,38 +152,65 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
       }
     }
 
+    function isInteractionAllowed(): boolean {
+      if (!cfgRef.current.desktopAndTabletOnly) return true;
+      if (typeof window === 'undefined') return true;
+      // Hover effects and dot distortion are strictly enabled for desktop and tablet (>= 768px).
+      // Mobile screens (< 768px) remain static so touch gestures scroll natively without accidental distortion.
+      return window.innerWidth >= 768;
+    }
+
     function resize() {
       const parent = canvas?.parentElement;
       const rect = parent ? parent.getBoundingClientRect() : canvas?.getBoundingClientRect();
-      if (!rect) return;
+      if (!rect || rect.width === 0 || rect.height === 0) return;
       W = rect.width;
       H = rect.height;
       if (!canvas) return;
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // If on mobile, ensure any residual interaction state is immediately cleared
+      if (!isInteractionAllowed()) {
+        mouse.x = -9999;
+        mouse.y = -9999;
+        hovering = false;
+      }
+
       buildDots();
+      drawFrame(performance.now());
     }
 
     const ro = new ResizeObserver(resize);
     ro.observe(canvas.parentElement || canvas);
     resize();
 
-    // Listen to mouse events on the whole section/parent container
     const targetElement = canvas.closest('section') || canvas.parentElement || canvas;
 
+    function wakeLoop() {
+      if (!raf && isVisible) {
+        prevTs = performance.now();
+        raf = requestAnimationFrame(loop);
+      }
+    }
+
     const onMouseMove = (e: MouseEvent) => {
+      if (!isInteractionAllowed()) return;
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
       hovering = true;
+      wakeLoop();
     };
 
     const onMouseEnter = (e: MouseEvent) => {
+      if (!isInteractionAllowed()) return;
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
       hovering = true;
+      wakeLoop();
     };
 
     const onMouseLeave = () => {
@@ -173,109 +218,152 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
       mouse.y = -9999;
       hovering = false;
       leaveTs = performance.now();
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.touches[0].clientX - rect.left;
-        mouse.y = e.touches[0].clientY - rect.top;
-        hovering = true;
-      }
-    };
-
-    const onTouchEnd = () => {
-      mouse.x = -9999;
-      mouse.y = -9999;
-      hovering = false;
-      leaveTs = performance.now();
+      wakeLoop();
     };
 
     targetElement.addEventListener('mousemove', onMouseMove as EventListener);
     targetElement.addEventListener('mouseenter', onMouseEnter as EventListener);
     targetElement.addEventListener('mouseleave', onMouseLeave as EventListener);
-    targetElement.addEventListener('touchmove', onTouchMove as EventListener, { passive: true });
-    targetElement.addEventListener('touchend', onTouchEnd as EventListener);
 
-    function loop(ts: number) {
-      raf = requestAnimationFrame(loop);
+    function drawFrame(ts: number): boolean {
+      if (!ctx || W === 0 || H === 0) return false;
       const dt = Math.min((ts - (prevTs || ts)) / 1000, 0.05);
       prevTs = ts;
       const cfg = cfgRef.current;
+      updateColor();
+
       if (spacingSnapRef.current !== cfg.dotSpacing) buildDots();
       globalAngle += cfg.orbitSpeed * dt;
-      if (!ctx) return;
+
       ctx.clearRect(0, 0, W, H);
-      const rgb = parseColor(cfg.dotColor, canvas!);
+
       const mx = mouse.x;
       const my = mouse.y;
       const timeSinceLeave = hovering ? 0 : Math.max(0, ts - leaveTs) / 1000;
       const decay = hovering ? 1 : smoothstep(Math.max(0, 1 - timeSinceLeave * 1.5));
+      const hasActiveInteraction = hovering || decay > 0.005;
 
-      for (const d of dotsRef.current) {
-        const dx = d.bx - mx;
-        const dy = d.by - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const inRange = dist < cfg.impactRadius && dist > 0;
-        let x = d.bx;
-        let y = d.by;
-        let scale = 1;
-        let alpha = 0.3;
+      const baseR = cfg.dotSize / 2;
+      const dynamicDots: { x: number; y: number; r: number; alpha: number }[] = [];
 
-        if (inRange) {
-          const t = dist / cfg.impactRadius;
-          const inf = smoothstep(1 - t) * decay;
+      // Single batched path for ALL undisturbed background dots
+      ctx.beginPath();
+      const dots = dotsRef.current;
+      const impactR = cfg.impactRadius;
+      const impactRSq = impactR * impactR;
 
-          if (cfg.enableRevolve) {
-            // Orbital radius scales with distance from cursor edge
-            const orbitR = (1 - t) * cfg.dotSpacing * 0.7 * inf;
-            // Current angle along this dot's orbit
-            const theta = globalAngle * d.speedMult + d.phase;
+      for (let i = 0; i < dots.length; i++) {
+        const d = dots[i];
+        let inRange = false;
 
-            // 3-D orbit: parametric ellipse in a tilted plane.
-            // Projected unit circle onto a plane defined by inclination and ascension
-            const cosA = Math.cos(d.ascension);
-            const sinA = Math.sin(d.ascension);
-            const cosI = Math.cos(d.inclination);
-            const sinI = Math.sin(d.inclination);
-            const lx = Math.cos(theta);
-            const ly = Math.sin(theta) * cosI;
-            const lz = Math.sin(theta) * sinI; // +1 = toward viewer, -1 = away
+        if (hasActiveInteraction) {
+          const dx = d.bx - mx;
+          const dy = d.by - my;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < impactRSq && distSq > 0) {
+            inRange = true;
+            const dist = Math.sqrt(distSq);
+            const t = dist / impactR;
+            const inf = smoothstep(1 - t) * decay;
 
-            // Final 2-D screen offset from the dot's rest position
-            const ox = (lx * cosA - ly * sinA) * orbitR;
-            const oy = (lx * sinA + ly * cosA) * orbitR;
-            x = d.bx + ox;
-            y = d.by + oy;
+            let x = d.bx;
+            let y = d.by;
+            let scale = 1;
+            let alpha = 0.3;
 
-            // Depth cue: dots "behind" the plane are slightly smaller and dimmer
-            const depthScale = 0.75 + 0.25 * ((lz + 1) * 0.5); // 0.75 – 1.0
-            scale = (1 + (cfg.scaleOnHover - 1) * inf) * depthScale;
-            alpha = (0.3 + 0.7 * inf) * depthScale;
-          } else {
-            scale = 1 + (cfg.scaleOnHover - 1) * inf;
-            alpha = 0.3 + 0.7 * inf;
+            if (cfg.enableRevolve) {
+              const orbitR = (1 - t) * cfg.dotSpacing * 0.7 * inf;
+              const theta = globalAngle * d.speedMult + d.phase;
+              const cosA = Math.cos(d.ascension);
+              const sinA = Math.sin(d.ascension);
+              const cosI = Math.cos(d.inclination);
+              const sinI = Math.sin(d.inclination);
+              const lx = Math.cos(theta);
+              const ly = Math.sin(theta) * cosI;
+              const lz = Math.sin(theta) * sinI;
+
+              const ox = (lx * cosA - ly * sinA) * orbitR;
+              const oy = (lx * sinA + ly * cosA) * orbitR;
+              x = d.bx + ox;
+              y = d.by + oy;
+
+              const depthScale = 0.75 + 0.25 * ((lz + 1) * 0.5);
+              scale = (1 + (cfg.scaleOnHover - 1) * inf) * depthScale;
+              alpha = (0.3 + 0.7 * inf) * depthScale;
+            } else {
+              scale = 1 + (cfg.scaleOnHover - 1) * inf;
+              alpha = 0.3 + 0.7 * inf;
+            }
+
+            dynamicDots.push({ x, y, r: baseR * scale, alpha });
           }
         }
 
-        const r = (cfg.dotSize / 2) * scale;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
-        ctx.fill();
+        if (!inRange) {
+          ctx.moveTo(d.bx + baseR, d.by);
+          ctx.arc(d.bx, d.by, baseR, 0, Math.PI * 2);
+        }
+      }
+
+      // Draw all undisturbed dots in a SINGLE fill call
+      ctx.fillStyle = baseFill;
+      ctx.fill();
+
+      // Draw dynamic disturbed dots
+      if (dynamicDots.length > 0) {
+        for (let j = 0; j < dynamicDots.length; j++) {
+          const dd = dynamicDots[j];
+          ctx.beginPath();
+          ctx.arc(dd.x, dd.y, dd.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${dd.alpha.toFixed(2)})`;
+          ctx.fill();
+        }
+      }
+
+      return hasActiveInteraction;
+    }
+
+    function loop(ts: number) {
+      if (!isVisible) {
+        raf = null;
+        return;
+      }
+
+      const continueAnimation = drawFrame(ts);
+      if (continueAnimation) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        // Sleep animation when mouse is gone and decay is done!
+        raf = null;
       }
     }
 
-    raf = requestAnimationFrame(loop);
+    // Observer to sleep completely when scrolled out of view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          wakeLoop();
+        } else if (raf) {
+          cancelAnimationFrame(raf);
+          raf = null;
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    observer.observe(canvas);
+
+    // Initial render
+    wakeLoop();
 
     return () => {
-      cancelAnimationFrame(raf);
+      observer.disconnect();
+      if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
       targetElement.removeEventListener('mousemove', onMouseMove as EventListener);
       targetElement.removeEventListener('mouseenter', onMouseEnter as EventListener);
       targetElement.removeEventListener('mouseleave', onMouseLeave as EventListener);
-      targetElement.removeEventListener('touchmove', onTouchMove as EventListener);
-      targetElement.removeEventListener('touchend', onTouchEnd as EventListener);
     };
   }, []);
 
