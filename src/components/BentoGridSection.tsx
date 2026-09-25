@@ -73,25 +73,27 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
   ]);
 
   const updateTransforms = useCallback((scrollY: number) => {
-    const windowHeight = typeof window !== 'undefined' ? window.innerHeight || 800 : 800;
-    const currentViewportCenter = scrollY + windowHeight / 2;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     rowsMeta.current.forEach((row) => {
+      // On mobile, lock image completely stable (zero sideways drift when scrolling vertically)
+      if (row.mImgEl) {
+        row.mImgEl.style.transform = 'none';
+      }
+
+      if (isMobile) return;
+
+      const windowHeight = typeof window !== 'undefined' ? window.innerHeight || 800 : 800;
+      const currentViewportCenter = scrollY + windowHeight / 2;
       const centerY = row.rowCenterY || (scrollY + windowHeight / 2);
       const verticalDiff = currentViewportCenter - centerY;
       const normalizedProgress = verticalDiff / (windowHeight * 1.05);
 
       const desktopTravel = 135;
-      const mobileTabletTravel = 80;
-
       const currentDesktopX = row.directionSign * normalizedProgress * desktopTravel;
-      const currentMobileTabletX = row.directionSign * normalizedProgress * mobileTabletTravel;
 
       if (row.dImgEl) {
         row.dImgEl.style.transform = `translate3d(${currentDesktopX.toFixed(2)}px, 0, 0)`;
-      }
-      if (row.mImgEl) {
-        row.mImgEl.style.transform = `translate3d(${currentMobileTabletX.toFixed(2)}px, 0, 0)`;
       }
     });
   }, []);
@@ -106,46 +108,35 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
     });
   }, []);
 
-  // Butter-smooth RAF loop with zero React re-renders and auto-sleep when idle or offscreen
+  // Direct, synchronized scroll tracking with zero trailing lerp drift
   useEffect(() => {
     let animId: number | null = null;
     let isVisible = false;
-    let currentY = window.scrollY || document.documentElement.scrollTop;
-    let targetY = currentY;
+    let lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
 
     measureRowCenters();
-    updateTransforms(currentY);
+    updateTransforms(window.scrollY || document.documentElement.scrollTop);
 
     const onScroll = () => {
-      targetY = window.scrollY || document.documentElement.scrollTop;
-      if (!animId && isVisible) {
-        animId = requestAnimationFrame(tick);
-      }
-    };
-
-    const tick = () => {
-      if (!isVisible) {
-        animId = null;
-        return;
-      }
-
-      const diff = targetY - currentY;
-      if (Math.abs(diff) > 0.05) {
-        currentY += diff * 0.12;
-        updateTransforms(currentY);
-        animId = requestAnimationFrame(tick);
-      } else {
-        currentY = targetY;
-        updateTransforms(currentY);
-        animId = null; // Sleep when settled
+      if (!isVisible) return;
+      if (animId === null) {
+        animId = requestAnimationFrame(() => {
+          const scrollY = window.scrollY || document.documentElement.scrollTop;
+          updateTransforms(scrollY);
+          animId = null;
+        });
       }
     };
 
     const onResize = () => {
+      if (typeof window !== 'undefined') {
+        // Ignore mobile browser address bar collapse/expand (vertical only)
+        if (Math.abs(window.innerWidth - lastWidth) < 5) return;
+        lastWidth = window.innerWidth;
+      }
       measureRowCenters();
-      targetY = window.scrollY || document.documentElement.scrollTop;
-      currentY = targetY;
-      updateTransforms(currentY);
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      updateTransforms(scrollY);
     };
 
     // IntersectionObserver to completely halt work when offscreen
@@ -154,9 +145,8 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
         isVisible = entry.isIntersecting;
         if (isVisible) {
           measureRowCenters();
-          targetY = window.scrollY || document.documentElement.scrollTop;
-          currentY = targetY;
-          updateTransforms(currentY);
+          const scrollY = window.scrollY || document.documentElement.scrollTop;
+          updateTransforms(scrollY);
         } else if (animId) {
           cancelAnimationFrame(animId);
           animId = null;

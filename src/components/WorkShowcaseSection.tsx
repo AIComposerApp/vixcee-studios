@@ -119,7 +119,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
     });
   }, []);
 
-  // Measure exact repeating period between duplicated sets via child offsetTop
+  // Measure exact repeating period between duplicated sets via child offsetTop with phase preservation
   const measureHeights = () => {
     // Desktop measurement
     if (col1Ref.current && col1Ref.current.children.length >= COLUMN_1_IMAGES.length * 2) {
@@ -127,7 +127,13 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const next = col1Ref.current.children[COLUMN_1_IMAGES.length] as HTMLElement;
       if (first && next) {
         const diff = next.offsetTop - first.offsetTop;
-        if (diff > 50) h1DeskRef.current = diff;
+        if (diff > 50 && Math.abs(diff - h1DeskRef.current) > 2) {
+          if (h1DeskRef.current > 0) {
+            const phase = ((progress1Ref.current % h1DeskRef.current) + h1DeskRef.current) % h1DeskRef.current;
+            progress1Ref.current = (phase / h1DeskRef.current) * diff;
+          }
+          h1DeskRef.current = diff;
+        }
       }
     }
     if (col2Ref.current && col2Ref.current.children.length >= COLUMN_2_IMAGES.length * 2) {
@@ -135,7 +141,13 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const next = col2Ref.current.children[COLUMN_2_IMAGES.length] as HTMLElement;
       if (first && next) {
         const diff = next.offsetTop - first.offsetTop;
-        if (diff > 50) h2DeskRef.current = diff;
+        if (diff > 50 && Math.abs(diff - h2DeskRef.current) > 2) {
+          if (h2DeskRef.current > 0) {
+            const phase = ((progress2Ref.current % h2DeskRef.current) + h2DeskRef.current) % h2DeskRef.current;
+            progress2Ref.current = (phase / h2DeskRef.current) * diff;
+          }
+          h2DeskRef.current = diff;
+        }
       }
     }
 
@@ -145,7 +157,13 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const next = mCol1Ref.current.children[COLUMN_1_IMAGES.length] as HTMLElement;
       if (first && next) {
         const diff = next.offsetTop - first.offsetTop;
-        if (diff > 50) h1MobRef.current = diff;
+        if (diff > 50 && Math.abs(diff - h1MobRef.current) > 2) {
+          if (h1MobRef.current > 0) {
+            const phase = ((progress1Ref.current % h1MobRef.current) + h1MobRef.current) % h1MobRef.current;
+            progress1Ref.current = (phase / h1MobRef.current) * diff;
+          }
+          h1MobRef.current = diff;
+        }
       }
     }
     if (mCol2Ref.current && mCol2Ref.current.children.length >= COLUMN_2_IMAGES.length * 2) {
@@ -153,18 +171,41 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const next = mCol2Ref.current.children[COLUMN_2_IMAGES.length] as HTMLElement;
       if (first && next) {
         const diff = next.offsetTop - first.offsetTop;
-        if (diff > 50) h2MobRef.current = diff;
+        if (diff > 50 && Math.abs(diff - h2MobRef.current) > 2) {
+          if (h2MobRef.current > 0) {
+            const phase = ((progress2Ref.current % h2MobRef.current) + h2MobRef.current) % h2MobRef.current;
+            progress2Ref.current = (phase / h2MobRef.current) * diff;
+          }
+          h2MobRef.current = diff;
+        }
       }
     }
   };
 
   useEffect(() => {
     measureHeights();
-    window.addEventListener('resize', measureHeights);
 
-    // ResizeObserver watches for real DOM layout shifts as images render
-    const observer = new ResizeObserver(() => {
+    let lastW = typeof window !== 'undefined' ? window.innerWidth : 0;
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        // Prevent address bar collapse/expand from triggering re-measurements during mobile scroll
+        if (Math.abs(window.innerWidth - lastW) < 5) return;
+        lastW = window.innerWidth;
+      }
       measureHeights();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // ResizeObserver watches for initial image layout shifts
+    let roTimer: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (roTimer === null) {
+        roTimer = requestAnimationFrame(() => {
+          measureHeights();
+          roTimer = null;
+        });
+      }
     });
 
     if (col1Ref.current) observer.observe(col1Ref.current);
@@ -173,12 +214,13 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
     if (mCol2Ref.current) observer.observe(mCol2Ref.current);
 
     return () => {
-      window.removeEventListener('resize', measureHeights);
+      window.removeEventListener('resize', handleResize);
       observer.disconnect();
+      if (roTimer) cancelAnimationFrame(roTimer);
     };
   }, []);
 
-  // Window scroll momentum & directional reversal with anti-jitter smoothing
+  // Smooth scroll responsiveness with anti-jitter smoothing
   useEffect(() => {
     let lastScrollY = window.scrollY;
     let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -191,9 +233,9 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       if (isHoveredRef.current) return;
 
       // Filter out micro-jitter from trackpad bounce (only respond to intentional scrolls)
-      if (Math.abs(delta) > 3) {
+      if (Math.abs(delta) > 8) {
         const dir = delta > 0 ? 1 : -1;
-        targetSpeedRef.current = 1.18 * dir;
+        targetSpeedRef.current = 0.95 * dir;
         lastDirectionRef.current = dir;
 
         if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -201,7 +243,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
           if (!isHoveredRef.current) {
             targetSpeedRef.current = 0.72 * lastDirectionRef.current;
           }
-        }, 180);
+        }, 140);
       }
     };
 
@@ -462,15 +504,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
             </div>
 
             {/* Mobile / Tablet Stage (< lg): 3D Isometric Ascending Stage */}
-            <div
-              className="flex lg:hidden relative w-full h-full items-center justify-center overflow-hidden"
-              style={{
-                maskImage:
-                  'linear-gradient(205deg, transparent 4%, rgba(0, 0, 0, 0.25) 16%, black 36%, black 86%, transparent 100%)',
-                WebkitMaskImage:
-                  'linear-gradient(205deg, transparent 4%, rgba(0, 0, 0, 0.25) 16%, black 36%, black 86%, transparent 100%)',
-              }}
-            >
+            <div className="flex lg:hidden relative w-full h-full items-center justify-center overflow-hidden isolate">
               <div
                 className="relative w-[130%] sm:w-[120%] h-[145%] flex justify-center gap-4 sm:gap-5"
                 style={{
@@ -478,17 +512,24 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   transform:
                     'rotateX(52deg) rotateY(-6deg) rotateZ(-22deg) translateY(-4%) scale(0.92)',
                   transformStyle: 'preserve-3d',
+                  WebkitBackfaceVisibility: 'hidden',
+                  backfaceVisibility: 'hidden',
                 }}
               >
                 {/* Column 1 (Glides UP - Raw Phones) */}
                 <div
                   ref={mCol1Ref}
                   className="w-1/2 flex flex-col gap-5 sm:gap-6 will-change-transform"
+                  style={{
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translate3d(0, 0, 0)',
+                  }}
                 >
                   {tripleCol1.map((item, idx) => (
                     <div
                       key={`m-col1-${item.id}-${idx}`}
-                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
                     >
                       <img
                         src={item.src}
@@ -507,11 +548,16 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 <div
                   ref={mCol2Ref}
                   className="w-1/2 flex flex-col gap-5 sm:gap-6 will-change-transform"
+                  style={{
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translate3d(0, 0, 0)',
+                  }}
                 >
                   {tripleCol2.map((item, idx) => (
                     <div
                       key={`m-col2-${item.id}-${idx}`}
-                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
                     >
                       <img
                         src={item.src}
