@@ -369,10 +369,14 @@ export const AngledCarousel: React.FC = () => {
                   hasSwipedRef.current = false;
                   return;
                 }
-                if (delta === -1) {
+                // The middle/active card should not swipe when clicked
+                if (isActive || delta === 0) {
+                  return;
+                }
+                if (delta < 0) {
                   handlePrev();
                   resetTimer();
-                } else {
+                } else if (delta > 0) {
                   handleNext();
                   resetTimer();
                 }
@@ -388,8 +392,8 @@ export const AngledCarousel: React.FC = () => {
                 }
               }}
               className={`angled-carousel__card absolute flex justify-center items-center transition-all duration-[1350ms] ease-[cubic-bezier(0.25,1,0.3,1)] ${
-                !isHidden ? 'cursor-pointer' : ''
-              } ${!isActive ? 'hover:brightness-110' : ''}`}
+                !isActive && !isHidden ? 'cursor-pointer hover:brightness-110' : ''
+              }`}
               style={{
                 width: 'clamp(240px, 52vw, 760px)',
                 aspectRatio: '3220 / 2100',
