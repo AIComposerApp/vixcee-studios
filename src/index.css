@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-clarkson: 'Clarkson', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-clarkson);
+    background-color: #0b0c0e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Authentic Squarespace Hero Specific Typography & Layout Classes */
+.homepage-hero__text-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  min-height: auto;
+  padding: 0 1.5rem;
+  color: rgb(255, 255, 255);
+  font-size: 16px;
+  font-family: var(--font-clarkson);
+  font-weight: 400;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .homepage-hero__text-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .homepage-hero__text-container {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .homepage-hero__text-container {
+    padding: 0 1rem;
+  }
+}
+
+.homepage-hero__text-container-localized-hero-text {
+  width: 100%;
+  max-width: 1466.4px;
+}
+
+.text--title3.text--light.hero-text {
+  width: 100%;
+  color: rgb(255, 255, 255);
+  font-size: clamp(2.35rem, 5.2vw, 64.6934px);
+  font-family: var(--font-clarkson);
+  font-weight: 300;
+  line-height: 1.04;
+  letter-spacing: -3.8816px;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .text--title3.text--light.hero-text {
+    letter-spacing: -2px;
+    line-height: 1.08;
+  }
+}
+
+.hero-text__static {
+  display: flex;
+  width: 100%;
+  flex-direction: column-reverse;
+  white-space: nowrap;
+  align-items: center;
+}
+
+.hero-text__static > span {
+  display: block;
+}
+
+/* Primary Hero CTA Button with signature Squarespace slide-in arrow */
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta {
+  display: inline-flex;
+  min-width: 166.25px;
+  height: 60px;
+  margin: 32px 0px 24px;
+  padding: 23px 28px;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  font-size: 14px;
+  font-family: var(--font-clarkson);
+  font-weight: 500;
+  line-height: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  user-select: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta:hover {
+  background-color: #f2f2f2;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta:active {
+  transform: scale(0.985);
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta .cta__label {
+  display: flex;
+  height: 14px;
+  align-items: center;
+  transform: matrix(1, 0, 0, 1, 9, 0);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta .cta__arrow-wrapper {
+  display: flex;
+  width: 14px;
+  height: 14px;
+  margin: 0px -4px 0px 8px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta .cta__arrow-icon {
+  display: block;
+  width: 11.575px;
+  height: 14px;
+  font-size: 16px;
+  line-height: 14px;
+  transform: matrix(1, 0, 0, 1, -11.575, 0);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover trigger state: shifts label and reveals arrow */
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta:hover .cta__label {
+  transform: matrix(1, 0, 0, 1, 0, 0);
+}
+
+.cta.cta--primary-subtle.cta--light.homepage-hero__cta:hover .cta__arrow-icon {
+  transform: matrix(1, 0, 0, 1, 0, 0);
+}
+
+@media (max-width: 768px) {
+  .cta.cta--primary-subtle.cta--light.homepage-hero__cta {
+    margin: 28px 0px 20px;
+  }
+  .cta.cta--primary-subtle.cta--light.homepage-hero__cta .cta__label,
+  .cta.cta--primary-subtle.cta--light.homepage-hero__cta .cta__arrow-wrapper {
+    cursor: pointer;
+  }
+}
+
+.text--body.text--light {
+  width: 100%;
+  max-width: 260.5px;
+  color: rgb(255, 255, 255);
+  font-size: 15px;
+  font-family: var(--font-clarkson);
+  line-height: 21px;
+  letter-spacing: -0.015px;
+  font-weight: 300;
+  margin: 0;
+  opacity: 0.95;
+}
+
+/* Film grain overlay */
+.ambient-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Vertical Text Roller Slide Keyframes */
+@keyframes vRollerSlideUpOut {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes vRollerSlideUpIn {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+/* Bento Grid Fluid Ambient Mesh Animations */
+@keyframes bentoFluidDriftA {
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(14%, -12%, 0) scale(1.15);
+  }
+  100% {
+    transform: translate3d(-10%, 14%, 0) scale(0.92);
+  }
+}
+
+@keyframes bentoFluidDriftB {
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-14%, 12%, 0) scale(1.18);
+  }
+  100% {
+    transform: translate3d(12%, -10%, 0) scale(0.95);
+  }
+}
+
+@keyframes bentoFluidPulse {
+  0%, 100% {
+    opacity: 0.14;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.28;
+    transform: scale(1.08);
+  }
+}
+
+.animate-bento-drift-a {
+  animation: bentoFluidDriftA 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-bento-drift-b {
+  animation: bentoFluidDriftB 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-bento-pulse {
+  animation: bentoFluidPulse 14s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}

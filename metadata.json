@@ -1,0 +1,6 @@
+{
+  "name": "Squarespace Hero - A Website Makes It Real",
+  "description": "Pixel-perfect clone of Squarespace's iconic 'A website makes it real' hero section and navigation header.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
