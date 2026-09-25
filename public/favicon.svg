@@ -1,13 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%" shape-rendering="geometricPrecision">
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none" shape-rendering="geometricPrecision">
   <defs>
-    <linearGradient id="vixcee_favicon_grad" x1="0" y1="0" x2="400" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FC8000" />
-      <stop offset="49.5%" stop-color="#FE5E50" />
-      <stop offset="100%" stop-color="#FF96AD" />
+    <!-- Dynamic sunset-coral linear gradient -->
+    <linearGradient id="paint0_linear_1401_43414" x1="0.446428" y1="0.445313" x2="400" y2="399.553" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FC8000"/>
+      <stop offset="0.494792" stop-color="#FE5E50">
+        <animate attributeName="stop-color" values="#FC8000;#FC8000;#FE5E50;#FE5E50;#FC8000" keyTimes="0;0.05;0.46;0.90;1" dur="6s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0 0 1 1;0.42 0 0.58 1"/>
+      </stop>
+      <stop offset="1" stop-color="#FF96AD">
+        <animate attributeName="stop-color" values="#FC8000;#FE5E50;#FF96AD;#FF96AD;#FC8000" keyTimes="0;0.27;0.46;0.90;1" dur="6s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0 0 1 1;0.42 0 0.58 1"/>
+      </stop>
     </linearGradient>
+    <linearGradient id="symbol-gradient" href="#paint0_linear_1401_43414" x1="93.54" y1="106.25" x2="291.66" y2="261.65" gradientUnits="userSpaceOnUse"/>
+    
+    <!-- Geometric V-Construction Clip Path -->
+    <clipPath id="v-construction" clipPathUnits="userSpaceOnUse">
+      <path d="M93.54 118.25H135.49C140.84 118.25 147.56 122.54 150.5 128.09L189.14 195.32C186.47 202.3 182.09 209.63 179.22 217.08C179.23 217.22 179.34 217.27 179.46 217.19C186.07 208.14 192.78 197.31 198.82 186.44L198.51 185.19L218.25 150.71L233.59 125.71C239.39 115.32 251.59 106.25 263.27 106.25H307.94C288.78 130.59 268.71 162.59 248.22 193.18L222.08 228.06L206.59 248.19C196.15 261.2 181.15 261.85 172.06 247.81Z"/>
+    </clipPath>
+
+    <!-- Animated Sequential Stroke Reveal Mask with 6s Periodic Elegant Loop -->
+    <mask id="sequential-symbol-reveal" x="80" y="85" width="240" height="200" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" style="mask-type:luminance">
+      <g clip-path="url(#v-construction)">
+        <path d="M113 105L185 233Q190 242 196 233L289 91" pathLength="100" fill="none" stroke="white" stroke-width="54" stroke-linecap="butt" stroke-linejoin="round" stroke-dasharray="100 100" stroke-dashoffset="0">
+          <animate attributeName="stroke-dashoffset" values="100;0;0;100" keyTimes="0;0.27;0.90;1" dur="6s" repeatCount="indefinite" calcMode="spline" keySplines="0.38 0 0.62 1;0 0 1 1;0.38 0 0.62 1"/>
+        </path>
+      </g>
+      <path d="M168 108L277 274" pathLength="100" fill="none" stroke="white" stroke-width="54" stroke-linecap="butt" stroke-dasharray="100 100" stroke-dashoffset="0">
+        <animate attributeName="stroke-dashoffset" values="100;100;0;0;100" keyTimes="0;0.27;0.46;0.90;1" dur="6s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0.38 0 0.62 1;0 0 1 1;0.38 0 0.62 1"/>
+      </path>
+    </mask>
   </defs>
-  <!-- Slightly curved edged badge with gradient -->
-  <rect x="0" y="0" width="400" height="400" rx="76" ry="76" fill="url(#vixcee_favicon_grad)" />
-  <!-- Clear high-contrast Vixcee Studios emblem -->
-  <path d="M 248.22,193.18 C 268.71,162.59 288.78,130.59 307.94,106.25 H 263.27 C 251.59,106.25 239.39,115.32 233.59,125.71 L 218.25,150.71 L 201.61,123.33 C 199.76,120.1 196.22,118.08 192.74,118.14 L 154.71,118.53 C 156.49,120.12 158.19,121.57 159.64,123.65 C 173.22,143.69 186.21,165.87 198.51,185.19 L 218.25,151.53 L 244.47,194.33 L 222.05,227.06 L 198.82,186.44 C 192.78,197.31 186.07,208.14 179.46,217.19 C 179.34,217.27 179.23,217.22 179.22,217.08 C 182.09,209.63 186.47,202.3 189.14,195.32 L 150.5,128.09 C 147.56,122.54 140.84,118.25 135.49,118.25 H 93.54 L 172.06,247.81 C 181.15,261.85 196.15,261.2 206.59,248.19 L 222.08,228.06 L 237.32,255.52 C 239.39,259.31 243.25,261.65 247.17,261.65 H 291.66 L 248.22,193.18 Z" fill="#FFFFFF" />
+
+  <!-- Slightly curved edged badge with refined border for dark and light browser tabs -->
+  <rect x="6" y="6" width="388" height="388" rx="76" ry="76" fill="#0C0C0E" stroke="rgba(255,255,255,0.18)" stroke-width="8" />
+
+  <!-- Animated Vixcee Studios emblem -->
+  <path d="M 248.22,193.18 C 268.71,162.59 288.78,130.59 307.94,106.25 H 263.27 C 251.59,106.25 239.39,115.32 233.59,125.71 L 218.25,150.71 L 201.61,123.33 C 199.76,120.1 196.22,118.08 192.74,118.14 L 154.71,118.53 C 156.49,120.12 158.19,121.57 159.64,123.65 C 173.22,143.69 186.21,165.87 198.51,185.19 L 218.25,151.53 L 244.47,194.33 L 222.05,227.06 L 198.82,186.44 C 192.78,197.31 186.07,208.14 179.46,217.19 C 179.34,217.27 179.23,217.22 179.22,217.08 C 182.09,209.63 186.47,202.3 189.14,195.32 L 150.5,128.09 C 147.56,122.54 140.84,118.25 135.49,118.25 H 93.54 L 172.06,247.81 C 181.15,261.85 196.15,261.2 206.59,248.19 L 222.08,228.06 L 237.32,255.52 C 239.39,259.31 243.25,261.65 247.17,261.65 H 291.66 L 248.22,193.18 Z" fill="url(#symbol-gradient)" mask="url(#sequential-symbol-reveal)"/>
 </svg>
