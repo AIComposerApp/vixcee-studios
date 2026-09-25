@@ -13,7 +13,7 @@ interface ShowcaseImage {
   src: string;
 }
 
-// 13 High-Performance Optimized Mobile Portrait Screenshots (93% faster payload via Cloudinary f_auto,q_auto,w_420)
+// 13 High-Performance Optimized Mobile Portrait Screenshots across 3 balanced columns
 const COLUMN_1_IMAGES: ShowcaseImage[] = [
   {
     id: 'allbirds',
@@ -36,6 +36,14 @@ const COLUMN_1_IMAGES: ShowcaseImage[] = [
     src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355855/IJAWMASSAGEPLUS-_-Traditional-Healing-Modern-Comfort-09-25-2026_05_18_PM-portrait_orh8ey.png',
   },
   {
+    id: 'aurelia-hotels',
+    title: 'Aurelia Hotels',
+    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355860/Aurelia-Hotels-mobile-portrait_yagbgb.png',
+  },
+];
+
+const COLUMN_2_IMAGES: ShowcaseImage[] = [
+  {
     id: 'chesney-hotel',
     title: 'Chesney Hotel',
     src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355855/Chesney-Hotel-mobile-portrait_cjpsj2.png',
@@ -50,14 +58,14 @@ const COLUMN_1_IMAGES: ShowcaseImage[] = [
     title: 'FlowState Intelligent Plumbing',
     src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355856/FlowState-Intelligent-Plumbing-09-25-2026_05_04_PM-portrait_vvlepq.png',
   },
-];
-
-const COLUMN_2_IMAGES: ShowcaseImage[] = [
   {
     id: 'scribe',
     title: 'Scribe Smarter Lessons',
     src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355857/Scribe-_-Smarter-lessons-Built-with-Scribe--09-25-2026_05_23_PM-portrait_tixcfp.png',
   },
+];
+
+const COLUMN_3_IMAGES: ShowcaseImage[] = [
   {
     id: 'google-ai-studio',
     title: 'Google AI Studio App',
@@ -78,11 +86,6 @@ const COLUMN_2_IMAGES: ShowcaseImage[] = [
     title: 'Carizma Luxury Hotels',
     src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355858/Carizma-Luxury-Hotels-mobile-portrait_emb4pi.png',
   },
-  {
-    id: 'aurelia-hotels',
-    title: 'Aurelia Hotels',
-    src: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_420/v1790355860/Aurelia-Hotels-mobile-portrait_yagbgb.png',
-  },
 ];
 
 export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
@@ -91,15 +94,19 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
 }) => {
   const col1Ref = useRef<HTMLDivElement>(null);
   const col2Ref = useRef<HTMLDivElement>(null);
+  const col3Ref = useRef<HTMLDivElement>(null);
   const mCol1Ref = useRef<HTMLDivElement>(null);
   const mCol2Ref = useRef<HTMLDivElement>(null);
+  const mCol3Ref = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
-  // Independent measurement refs for desktop and mobile stages
+  // Independent measurement refs for desktop and mobile stages across 3 columns
   const h1DeskRef = useRef(0);
   const h2DeskRef = useRef(0);
+  const h3DeskRef = useRef(0);
   const h1MobRef = useRef(0);
   const h2MobRef = useRef(0);
+  const h3MobRef = useRef(0);
 
   // Physics state refs (no React re-renders for true 60/120fps hardware motion)
   const currentSpeedRef = useRef(0.72);
@@ -110,10 +117,11 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
   // Cumulative offset trackers (strictly continuous, zero jumps on direction flip)
   const progress1Ref = useRef(0);
   const progress2Ref = useRef(0);
+  const progress3Ref = useRef(0);
 
   // Eager browser preloading to guarantee zero image load wait
   useEffect(() => {
-    [...COLUMN_1_IMAGES, ...COLUMN_2_IMAGES].forEach((item) => {
+    [...COLUMN_1_IMAGES, ...COLUMN_2_IMAGES, ...COLUMN_3_IMAGES].forEach((item) => {
       const img = new Image();
       img.src = item.src;
     });
@@ -150,6 +158,20 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
         }
       }
     }
+    if (col3Ref.current && col3Ref.current.children.length >= COLUMN_3_IMAGES.length * 2) {
+      const first = col3Ref.current.children[0] as HTMLElement;
+      const next = col3Ref.current.children[COLUMN_3_IMAGES.length] as HTMLElement;
+      if (first && next) {
+        const diff = next.offsetTop - first.offsetTop;
+        if (diff > 50 && Math.abs(diff - h3DeskRef.current) > 2) {
+          if (h3DeskRef.current > 0) {
+            const phase = ((progress3Ref.current % h3DeskRef.current) + h3DeskRef.current) % h3DeskRef.current;
+            progress3Ref.current = (phase / h3DeskRef.current) * diff;
+          }
+          h3DeskRef.current = diff;
+        }
+      }
+    }
 
     // Mobile measurement (independent due to 3D perspective scaling)
     if (mCol1Ref.current && mCol1Ref.current.children.length >= COLUMN_1_IMAGES.length * 2) {
@@ -177,6 +199,20 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
             progress2Ref.current = (phase / h2MobRef.current) * diff;
           }
           h2MobRef.current = diff;
+        }
+      }
+    }
+    if (mCol3Ref.current && mCol3Ref.current.children.length >= COLUMN_3_IMAGES.length * 2) {
+      const first = mCol3Ref.current.children[0] as HTMLElement;
+      const next = mCol3Ref.current.children[COLUMN_3_IMAGES.length] as HTMLElement;
+      if (first && next) {
+        const diff = next.offsetTop - first.offsetTop;
+        if (diff > 50 && Math.abs(diff - h3MobRef.current) > 2) {
+          if (h3MobRef.current > 0) {
+            const phase = ((progress3Ref.current % h3MobRef.current) + h3MobRef.current) % h3MobRef.current;
+            progress3Ref.current = (phase / h3MobRef.current) * diff;
+          }
+          h3MobRef.current = diff;
         }
       }
     }
@@ -210,8 +246,10 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
 
     if (col1Ref.current) observer.observe(col1Ref.current);
     if (col2Ref.current) observer.observe(col2Ref.current);
+    if (col3Ref.current) observer.observe(col3Ref.current);
     if (mCol1Ref.current) observer.observe(mCol1Ref.current);
     if (mCol2Ref.current) observer.observe(mCol2Ref.current);
+    if (mCol3Ref.current) observer.observe(mCol3Ref.current);
 
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -274,10 +312,12 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const speed = currentSpeedRef.current;
       progress1Ref.current += speed;
       progress2Ref.current += speed;
+      progress3Ref.current += speed;
 
       // Desktop transforms
       const h1D = h1DeskRef.current;
       const h2D = h2DeskRef.current;
+      const h3D = h3DeskRef.current;
       if (col1Ref.current && h1D > 0) {
         const y1 = ((progress1Ref.current % h1D) + h1D) % h1D;
         col1Ref.current.style.transform = `translate3d(0, ${-y1.toFixed(1)}px, 0)`;
@@ -286,10 +326,15 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
         const y2 = ((progress2Ref.current % h2D) + h2D) % h2D;
         col2Ref.current.style.transform = `translate3d(0, ${(-h2D + y2).toFixed(1)}px, 0)`;
       }
+      if (col3Ref.current && h3D > 0) {
+        const y3 = (((progress3Ref.current + h3D * 0.45) % h3D) + h3D) % h3D;
+        col3Ref.current.style.transform = `translate3d(0, ${-y3.toFixed(1)}px, 0)`;
+      }
 
       // Mobile 3D transforms (independent dimensions)
       const h1M = h1MobRef.current;
       const h2M = h2MobRef.current;
+      const h3M = h3MobRef.current;
       if (mCol1Ref.current && h1M > 0) {
         const y1 = ((progress1Ref.current % h1M) + h1M) % h1M;
         mCol1Ref.current.style.transform = `translate3d(0, ${-y1.toFixed(1)}px, 0)`;
@@ -297,6 +342,10 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       if (mCol2Ref.current && h2M > 0) {
         const y2 = ((progress2Ref.current % h2M) + h2M) % h2M;
         mCol2Ref.current.style.transform = `translate3d(0, ${(-h2M + y2).toFixed(1)}px, 0)`;
+      }
+      if (mCol3Ref.current && h3M > 0) {
+        const y3 = (((progress3Ref.current + h3M * 0.45) % h3M) + h3M) % h3M;
+        mCol3Ref.current.style.transform = `translate3d(0, ${-y3.toFixed(1)}px, 0)`;
       }
 
       animId = requestAnimationFrame(updatePhysics);
@@ -342,6 +391,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
   // Triple datasets for infinite seamless wrapping
   const tripleCol1 = [...COLUMN_1_IMAGES, ...COLUMN_1_IMAGES, ...COLUMN_1_IMAGES];
   const tripleCol2 = [...COLUMN_2_IMAGES, ...COLUMN_2_IMAGES, ...COLUMN_2_IMAGES];
+  const tripleCol3 = [...COLUMN_3_IMAGES, ...COLUMN_3_IMAGES, ...COLUMN_3_IMAGES];
 
   return (
     <section
@@ -351,7 +401,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       aria-label="Work that performs - mobile showcase"
     >
       <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px] items-center gap-12 lg:gap-16">
+        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_560px] xl:grid-cols-[1fr_640px] 2xl:grid-cols-[1fr_720px] items-center gap-12 lg:gap-14 xl:gap-16">
           
           {/* ============================================================ */}
           {/* LEFT COLUMN: Expanded Editorial Stack & CTAs                 */}
@@ -397,13 +447,13 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
           </div>
 
           {/* ============================================================ */}
-          {/* RIGHT COLUMN: Physics-Driven Dual-Column Marquee Stage       */}
+          {/* RIGHT COLUMN: Physics-Driven 3-Column Marquee Stage          */}
           {/* ============================================================ */}
           <div
             ref={stageRef}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className="relative w-full h-[520px] sm:h-[580px] lg:h-[640px] xl:h-[700px] flex items-center justify-center overflow-hidden cursor-default"
+            className="relative w-full h-[520px] sm:h-[580px] lg:h-[650px] xl:h-[720px] flex items-center justify-center overflow-hidden cursor-default"
           >
             {/* Deep Atmospheric Vertical Gradient Edge Vignettes */}
             <div
@@ -448,7 +498,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
 
             {/* Desktop Stage (Upright with Deep Vanishing Gradient Fade Masks) */}
             <div
-              className="hidden lg:flex w-full h-full justify-center gap-5 xl:gap-6 overflow-hidden"
+              className="hidden lg:flex w-full h-full justify-center gap-4 xl:gap-5 overflow-hidden"
               style={{
                 maskImage:
                   'linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%)',
@@ -456,10 +506,10 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   'linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%)',
               }}
             >
-              {/* Column 1 (Glides UP - Raw Phones, No Wrapping Containers) */}
+              {/* Column 1 (Glides UP - Raw Phones) */}
               <div
                 ref={col1Ref}
-                className="w-1/2 flex flex-col gap-6 xl:gap-7 will-change-transform"
+                className="w-1/3 flex flex-col gap-5 xl:gap-6 will-change-transform"
               >
                 {tripleCol1.map((item, idx) => (
                   <div
@@ -479,14 +529,37 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 ))}
               </div>
 
-              {/* Column 2 (Glides DOWN - Raw Phones, No Wrapping Containers) */}
+              {/* Column 2 (Glides DOWN - Raw Phones) */}
               <div
                 ref={col2Ref}
-                className="w-1/2 flex flex-col gap-6 xl:gap-7 will-change-transform"
+                className="w-1/3 flex flex-col gap-5 xl:gap-6 will-change-transform"
               >
                 {tripleCol2.map((item, idx) => (
                   <div
                     key={`d-col2-${item.id}-${idx}`}
+                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.title}
+                      onLoad={measureHeights}
+                      loading={idx < 2 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      fetchPriority={idx < 2 ? 'high' : 'low'}
+                      className="w-full h-auto object-contain select-none pointer-events-none block"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Column 3 (Glides UP - Staggered Offset) */}
+              <div
+                ref={col3Ref}
+                className="w-1/3 flex flex-col gap-5 xl:gap-6 will-change-transform"
+              >
+                {tripleCol3.map((item, idx) => (
+                  <div
+                    key={`d-col3-${item.id}-${idx}`}
                     className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
                   >
                     <img
@@ -506,7 +579,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
             {/* Mobile / Tablet Stage (< lg): 3D Isometric Ascending Stage */}
             <div className="flex lg:hidden relative w-full h-full items-center justify-center overflow-hidden isolate">
               <div
-                className="relative w-[130%] sm:w-[120%] h-[145%] flex justify-center gap-4 sm:gap-5"
+                className="relative w-[140%] sm:w-[130%] md:w-[120%] h-[145%] flex justify-center gap-3 sm:gap-4 md:gap-5"
                 style={{
                   perspective: '1050px',
                   transform:
@@ -519,7 +592,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 {/* Column 1 (Glides UP - Raw Phones) */}
                 <div
                   ref={mCol1Ref}
-                  className="w-1/2 flex flex-col gap-5 sm:gap-6 will-change-transform"
+                  className="w-1/3 flex flex-col gap-4 sm:gap-5 will-change-transform"
                   style={{
                     WebkitBackfaceVisibility: 'hidden',
                     backfaceVisibility: 'hidden',
@@ -547,7 +620,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 {/* Column 2 (Glides DOWN - Raw Phones) */}
                 <div
                   ref={mCol2Ref}
-                  className="w-1/2 flex flex-col gap-5 sm:gap-6 will-change-transform"
+                  className="w-1/3 flex flex-col gap-4 sm:gap-5 will-change-transform"
                   style={{
                     WebkitBackfaceVisibility: 'hidden',
                     backfaceVisibility: 'hidden',
@@ -557,6 +630,34 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   {tripleCol2.map((item, idx) => (
                     <div
                       key={`m-col2-${item.id}-${idx}`}
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
+                    >
+                      <img
+                        src={item.src}
+                        alt={item.title}
+                        onLoad={measureHeights}
+                        loading={idx < 2 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        fetchPriority={idx < 2 ? 'high' : 'low'}
+                        className="w-full h-auto object-contain select-none pointer-events-none block"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Column 3 (Glides UP - Staggered Offset) */}
+                <div
+                  ref={mCol3Ref}
+                  className="w-1/3 flex flex-col gap-4 sm:gap-5 will-change-transform"
+                  style={{
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translate3d(0, 0, 0)',
+                  }}
+                >
+                  {tripleCol3.map((item, idx) => (
+                    <div
+                      key={`m-col3-${item.id}-${idx}`}
                       className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
                     >
                       <img
