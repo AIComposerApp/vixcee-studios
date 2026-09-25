@@ -14,7 +14,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
   return (
     <section
       id="homepage-hero"
-      className="homepage-hero relative w-full bg-[#0c0c0e] overflow-x-clip min-h-[100dvh] flex flex-col justify-between items-center md:min-h-screen md:h-auto md:justify-start"
+      className="homepage-hero relative w-full bg-[#0c0c0e] overflow-x-clip min-h-[100svh] flex flex-col justify-between items-center md:min-h-screen md:h-auto md:justify-start"
+      style={{ minHeight: '100svh' }}
       aria-label="Hero - Your sites live in days, not weeks"
     >
       {/* 1. Exact Melius Interactive 3D Atomic Orbit Dot Grid in Signature Melius Orange (#F04E23)
@@ -45,9 +46,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
       <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0c0c0e] to-transparent z-[2]" />
 
       {/* 4. Hero Text Container:
-          - On Mobile: Compact, elegant vertical spacing fitting alongside the carousel inside 100dvh upfront.
+          - On Mobile: Compact, elegant vertical spacing fitting alongside the carousel inside viewport upfront.
           - On Desktop: Centered, spacious fold with ample breathing room. */}
-      <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center pt-16 sm:pt-20 md:pt-28 pb-3 md:pb-8 px-4 sm:px-6 pointer-events-auto md:min-h-[calc(100dvh-100px)]">
+      <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center pt-16 sm:pt-20 md:pt-28 pb-3 md:pb-8 px-4 sm:px-6 pointer-events-auto md:min-h-[calc(100vh-100px)]">
         <div className="homepage-hero__text-container flex flex-col items-center text-center max-w-4xl mx-auto">
           {/* Headline */}
           <div className="homepage-hero__text-container-localized-hero-text max-w-4xl">

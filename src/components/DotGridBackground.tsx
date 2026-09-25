@@ -160,12 +160,26 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
       return window.innerWidth >= 768;
     }
 
+    let lastW = 0;
+    let lastH = 0;
+
     function resize() {
       const parent = canvas?.parentElement;
       const rect = parent ? parent.getBoundingClientRect() : canvas?.getBoundingClientRect();
       if (!rect || rect.width === 0 || rect.height === 0) return;
-      W = rect.width;
-      H = rect.height;
+
+      const newW = Math.round(rect.width);
+      const newH = Math.round(rect.height);
+
+      // On mobile devices, ignore vertical-only fluctuations caused by browser address bar showing/hiding
+      if (lastW > 0 && Math.abs(newW - lastW) < 2 && Math.abs(newH - lastH) < 140) {
+        return;
+      }
+
+      lastW = newW;
+      lastH = newH;
+      W = newW;
+      H = newH;
       if (!canvas) return;
       canvas.width = Math.floor(W * dpr);
       canvas.height = Math.floor(H * dpr);

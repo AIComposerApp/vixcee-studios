@@ -33,7 +33,12 @@ export const VerticalTextRoller: React.FC<VerticalTextRollerProps> = ({
         el ? Math.ceil(el.getBoundingClientRect().width) : 0
       );
       if (measured.some((w) => w > 0)) {
-        setWidths(measured);
+        setWidths((prev) => {
+          if (prev.length === measured.length && prev.every((w, i) => w === measured[i])) {
+            return prev;
+          }
+          return measured;
+        });
       }
     };
 
