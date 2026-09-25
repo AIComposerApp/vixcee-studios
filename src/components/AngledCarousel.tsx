@@ -233,6 +233,73 @@ export const AngledCarousel: React.FC = () => {
     resetTimer();
   };
 
+  // Touch & Swipe gesture handling with intentional directional lock
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartTime = useRef<number>(0);
+  const isSwipingRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const hasSwipedRef = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isHoveredRef.current = true;
+    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+    isSwipingRef.current = null;
+    hasSwipedRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.touches[0].clientX - touchStartX.current;
+    const diffY = e.touches[0].clientY - touchStartY.current;
+
+    // Detect gesture intent early (horizontal vs vertical)
+    if (!isSwipingRef.current && (Math.abs(diffX) > 8 || Math.abs(diffY) > 8)) {
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        isSwipingRef.current = 'horizontal';
+      } else {
+        isSwipingRef.current = 'vertical';
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current !== null && touchStartY.current !== null) {
+      const diffX = e.changedTouches[0].clientX - touchStartX.current;
+      const diffY = e.changedTouches[0].clientY - touchStartY.current;
+      const dt = Date.now() - touchStartTime.current;
+
+      const isHorizontalMove = Math.abs(diffX) > Math.abs(diffY);
+      const isSufficientDist = Math.abs(diffX) > 32;
+      const isQuickFlick = Math.abs(diffX) > 18 && dt < 280;
+
+      if ((isSwipingRef.current === 'horizontal' || isHorizontalMove) && (isSufficientDist || isQuickFlick)) {
+        hasSwipedRef.current = true;
+        if (diffX < 0) {
+          handleNext();
+        } else {
+          handlePrev();
+        }
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwipingRef.current = null;
+    isHoveredRef.current = false;
+    resetTimer();
+  };
+
+  const handleTouchCancel = () => {
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwipingRef.current = null;
+    isHoveredRef.current = false;
+    resetTimer();
+  };
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -263,6 +330,11 @@ export const AngledCarousel: React.FC = () => {
     <div
       ref={containerRef}
       className="angled-carousel relative w-full max-w-[1466px] h-[190px] sm:h-[270px] md:h-[410px] lg:h-[480px] mx-auto flex items-end justify-center overflow-visible z-20 select-none cursor-default"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      style={{ touchAction: 'pan-y' }}
       aria-label="Website Showcase Carousel"
     >
       {/* Seamless blend into solid black (#0c0c0e) starting from the vertical center line of the carousel */}
@@ -293,6 +365,10 @@ export const AngledCarousel: React.FC = () => {
             <div
               key={item.id}
               onClick={() => {
+                if (hasSwipedRef.current) {
+                  hasSwipedRef.current = false;
+                  return;
+                }
                 if (delta === -1) {
                   handlePrev();
                   resetTimer();
