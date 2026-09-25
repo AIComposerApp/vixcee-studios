@@ -12,12 +12,10 @@ import { WorkShowcaseSection } from './components/WorkShowcaseSection.tsx';
 import { PromptsModal } from './components/PromptsModal.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
 import { LoadingScreen } from './components/LoadingScreen.tsx';
-import { useAnimatedFavicon } from './hooks/useAnimatedFavicon.ts';
 
 export type DockStage = 'initial' | 'docking' | 'docked';
 
 export default function App() {
-  useAnimatedFavicon();
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
