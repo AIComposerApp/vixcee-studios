@@ -27,6 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const resend = new Resend(resendApiKey);
     const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Vixcee Studios <onboarding@resend.dev>';
 
     let ownerDeliveryStatus = 'pending';
     let clientDeliveryStatus = 'pending';
@@ -36,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Send alert notification to Studio Owner
     try {
       const ownerResult = await resend.emails.send({
-        from: 'Vixcee Studios <onboarding@resend.dev>',
+        from: fromEmail,
         to: [studioOwnerEmail],
         subject: `New 15-Min Booking: ${name} (${date} at ${timeSlot})`,
         html: `
@@ -107,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. Send confirmation email to Client
     try {
       const clientResult = await resend.emails.send({
-        from: 'Vixcee Studios <onboarding@resend.dev>',
+        from: fromEmail,
         to: [email],
         subject: `Confirmed: 15-Minute Strategy Consultation — Vixcee Studios`,
         html: `

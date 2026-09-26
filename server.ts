@@ -31,11 +31,12 @@ async function startServer() {
 
       if (resend) {
         const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Vixcee Studios <onboarding@resend.dev>';
 
         // 1. Notify Studio Owner
         try {
           await resend.emails.send({
-            from: 'Vixcee Studios <onboarding@resend.dev>',
+            from: fromEmail,
             to: [studioOwnerEmail],
             subject: `New 15-Min Booking: ${name} (${date} at ${timeSlot})`,
             html: `
@@ -53,7 +54,7 @@ async function startServer() {
 
         // 2. Notify Client
         const { data, error } = await resend.emails.send({
-          from: 'Vixcee Studios <onboarding@resend.dev>',
+          from: fromEmail,
           to: [email],
           subject: `Confirmed: 15-Minute Strategy Consultation — Vixcee Studios`,
           html: `
