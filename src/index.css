@@ -369,4 +369,17 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmerWave 1.8s ease-in-out infinite;
+}
+
 

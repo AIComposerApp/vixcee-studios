@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ScrollReveal } from './motion/ScrollMotion.tsx';
 
 interface BentoGridSectionProps {
   onOpenPrompts: (promptId?: string) => void;
@@ -202,12 +203,16 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
       <div className="w-full max-w-[1520px] mx-auto">
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-14 sm:mb-18 md:mb-24 lg:mb-28 px-4">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
-            Stop burning tokens
-          </h2>
-          <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-[19px] text-white/70 font-light leading-relaxed max-w-2xl text-balance">
-            One-shot prompts for high-end animations and functionality.
-          </p>
+          <ScrollReveal delay={0} clipMask={true}>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
+              Stop burning tokens
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={120}>
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-[19px] text-white/70 font-light leading-relaxed max-w-2xl text-balance">
+              One-shot prompts for high-end animations and functionality.
+            </p>
+          </ScrollReveal>
         </div>
 
         {/* Alternating Full-Width Showcase Rows */}

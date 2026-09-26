@@ -6,12 +6,16 @@ interface HeaderProps {
   onOpenStart: () => void;
   onOpenPrompts: () => void;
   dockStage?: 'initial' | 'docking' | 'docked';
+  onNavigateCaseStudies?: () => void;
+  onNavigateHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenStart,
   onOpenPrompts,
   dockStage = 'docked',
+  onNavigateCaseStudies,
+  onNavigateHome,
 }) => {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,6 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [areItemsVisible, setAreItemsVisible] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isWordmarkVisible, setIsWordmarkVisible] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
 
@@ -121,15 +127,36 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, [isMobileMenuOpen]);
 
-  // Scroll detection for header backdrop and wordmark
+  // Directional scroll detection: hide on scroll down, smooth reveal on scroll up
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
       setIsScrolled(currentY > 20);
+
+      // Keep header visible if mobile menu or dropdown is active
+      if (isMobileMenuOpen || isResourcesOpen) {
+        setIsHeaderVisible(true);
+        lastScrollY.current = currentY;
+        return;
+      }
+
+      // At top of page: always visible
+      if (currentY <= 40) {
+        setIsHeaderVisible(true);
+      } else if (currentY > lastScrollY.current + 8) {
+        // Scrolled down by more than 8px: hide smoothly
+        setIsHeaderVisible(false);
+      } else if (currentY < lastScrollY.current - 6) {
+        // Scrolled up by more than 6px: reveal smoothly
+        setIsHeaderVisible(true);
+      }
+
+      lastScrollY.current = currentY;
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobileMenuOpen, isResourcesOpen]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -173,7 +200,11 @@ export const Header: React.FC<HeaderProps> = ({
   const isNavVisible = dockStage !== 'initial';
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-[80px] pointer-events-none select-none">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 h-[80px] pointer-events-none select-none transition-transform duration-300 ease-out ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       {/* 
         Seamlessly blended background with incremental gradient fade:
         - Fades in smoothly only on scroll down
@@ -216,10 +247,14 @@ export const Header: React.FC<HeaderProps> = ({
             </a>
 
             <a
-              href="#case-studies"
+              href="/case-studies"
               onClick={(e) => {
                 e.preventDefault();
-                onOpenStart();
+                if (onNavigateCaseStudies) {
+                  onNavigateCaseStudies();
+                } else {
+                  onOpenStart();
+                }
               }}
               className="hover:text-white transition-colors"
             >
@@ -359,7 +394,11 @@ export const Header: React.FC<HeaderProps> = ({
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              if (onNavigateHome) {
+                onNavigateHome();
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
             }}
             className="relative flex flex-col items-center justify-center group focus-visible:outline-none cursor-pointer py-1"
             aria-label="Vixcee Studios Home"
@@ -528,9 +567,13 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  onOpenStart();
+                  if (onNavigateCaseStudies) {
+                    onNavigateCaseStudies();
+                  } else {
+                    onOpenStart();
+                  }
                 }}
-                className="w-full text-left py-2 px-2 text-base font-medium text-white hover:text-white/80 flex items-center justify-between group"
+                className="w-full text-left py-2 px-2 text-base font-medium text-white hover:text-white/80 flex items-center justify-between group cursor-pointer"
               >
                 <span>Case studies</span>
                 <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />

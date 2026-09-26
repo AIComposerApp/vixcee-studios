@@ -5,9 +5,16 @@ import { collection, addDoc } from 'firebase/firestore';
 interface FooterProps {
   onOpenPrompts?: () => void;
   onOpenBookCall?: () => void;
+  onNavigateCaseStudies?: () => void;
+  onNavigateHome?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenPrompts, onOpenBookCall }) => {
+export const Footer: React.FC<FooterProps> = ({
+  onOpenPrompts,
+  onOpenBookCall,
+  onNavigateCaseStudies,
+  onNavigateHome,
+}) => {
   const [email, setEmail] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +56,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPrompts, onOpenBookCall })
 
   const scrollToTop = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (onNavigateHome) {
+      onNavigateHome();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const scrollToWork = (e: React.MouseEvent) => {
@@ -62,9 +73,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPrompts, onOpenBookCall })
 
   const scrollToCaseStudies = (e: React.MouseEvent) => {
     e.preventDefault();
-    const el = document.getElementById('case-studies') || document.getElementById('bento-grid');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (onNavigateCaseStudies) {
+      onNavigateCaseStudies();
+    } else {
+      const el = document.getElementById('case-studies') || document.getElementById('bento-grid');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 

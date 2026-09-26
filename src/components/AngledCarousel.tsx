@@ -34,7 +34,11 @@ const CAROUSEL_ITEMS: CarouselItem[] = [
   },
 ];
 
-export const AngledCarousel: React.FC = () => {
+interface AngledCarouselProps {
+  onSelectCaseStudy?: (slug: string) => void;
+}
+
+export const AngledCarousel: React.FC<AngledCarouselProps> = ({ onSelectCaseStudy }) => {
   const [activeIndex, setActiveIndex] = useState(2); // Initial center card
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isHoveredRef = useRef(false);
@@ -369,8 +373,21 @@ export const AngledCarousel: React.FC = () => {
                   hasSwipedRef.current = false;
                   return;
                 }
-                // The middle/active card should not swipe when clicked
+                // The middle/active card should open case study when clicked if callback provided
                 if (isActive || delta === 0) {
+                  if (onSelectCaseStudy) {
+                    const slug =
+                      item.id === 'carizma-luxury'
+                        ? 'carizma-hotels'
+                        : item.id === 'alex-hydration'
+                        ? 'scribe'
+                        : item.id === 'chesney-hotel'
+                        ? 'carizma-hotels'
+                        : item.id === 'alege-official'
+                        ? 'scribe'
+                        : 'prince-of-web3';
+                    onSelectCaseStudy(slug);
+                  }
                   return;
                 }
                 if (delta < 0) {

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { VerticalTextRoller } from './VerticalTextRoller.tsx';
+import { ScrollReveal } from './motion/ScrollMotion.tsx';
 import { db, auth } from '../firebase.ts';
 import { collection, addDoc, onSnapshot, query } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
@@ -323,26 +324,32 @@ export const BookingSection: React.FC = () => {
           <div className="lg:col-span-6 flex flex-col justify-center text-left py-2 sm:py-6 lg:pr-6">
             
             {/* Animated SVG Symbol */}
-            <div className="mb-6 sm:mb-8 flex items-center">
-              <img
-                src="https://res.cloudinary.com/divndlntm/image/upload/v1790414220/vixceestudios_symbol_reveal_01a0cf05-642a-74af-b172-cc2054f40851_u7e4sz.svg"
-                alt="Vixcee Studios Symbol"
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain select-none pointer-events-none"
-                loading="eager"
-              />
-            </div>
+            <ScrollReveal delay={0}>
+              <div className="mb-6 sm:mb-8 flex items-center">
+                <img
+                  src="https://res.cloudinary.com/divndlntm/image/upload/v1790414220/vixceestudios_symbol_reveal_01a0cf05-642a-74af-b172-cc2054f40851_u7e4sz.svg"
+                  alt="Vixcee Studios Symbol"
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain select-none pointer-events-none"
+                  loading="eager"
+                />
+              </div>
+            </ScrollReveal>
 
             {/* Exact Hero H2 Headline with Interchanging VerticalTextRoller */}
-            <h2 className="font-light tracking-[-0.015em] text-white leading-[1.08] text-balance text-3xl sm:text-4xl md:text-5xl lg:text-[54px] select-none [word-spacing:0.08em]">
-              Your{' '}
-              <VerticalTextRoller words={['sites', 'tools', 'apps']} />{' '}
-              live in days, not weeks
-            </h2>
+            <ScrollReveal delay={100} clipMask={true}>
+              <h2 className="font-light tracking-[-0.015em] text-white leading-[1.08] text-balance text-3xl sm:text-4xl md:text-5xl lg:text-[54px] select-none [word-spacing:0.08em]">
+                Your{' '}
+                <VerticalTextRoller words={['sites', 'tools', 'apps']} />{' '}
+                live in days, not weeks
+              </h2>
+            </ScrollReveal>
 
             {/* Clean Subtitle */}
-            <p className="mt-5 text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-lg">
-              Direct engineer consultation. We map out your site architecture, mobile interactions, and timeline in 15 minutes.
-            </p>
+            <ScrollReveal delay={180}>
+              <p className="mt-5 text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-lg">
+                Direct engineer consultation. We map out your site architecture, mobile interactions, and timeline in 15 minutes.
+              </p>
+            </ScrollReveal>
           </div>
 
           {/* ============================================================ */}

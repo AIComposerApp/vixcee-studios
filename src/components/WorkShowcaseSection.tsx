@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { PromptIcon } from './PromptIcon.tsx';
+import { ScrollReveal } from './motion/ScrollMotion.tsx';
 
 interface WorkShowcaseSectionProps {
   onOpenPrompts?: (promptId?: string) => void;
@@ -415,43 +416,51 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
           {/* LEFT COLUMN: Expanded Editorial Stack & CTAs                 */}
           {/* ============================================================ */}
           <div className="flex flex-col items-start text-left z-10 max-w-xl">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
-              Work that performs.
-            </h2>
+            <ScrollReveal delay={0} clipMask={true}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
+                Work that performs.
+              </h2>
+            </ScrollReveal>
             
             <div className="mt-4 sm:mt-5 space-y-3 max-w-xl">
-              <p className="text-base sm:text-lg md:text-xl text-white/80 font-light leading-relaxed text-balance">
-                A curated showcase of mobile-first digital experiences engineered for high conversion, fluid 120fps motion, and uncompromising brand identity.
-              </p>
-              <p className="text-sm sm:text-base text-white/60 font-light leading-relaxed">
-                From bespoke luxury stays and modern wellness brands to scalable SaaS platforms, every site is custom-crafted to turn everyday visitors into loyal clients.
-              </p>
+              <ScrollReveal delay={100}>
+                <p className="text-base sm:text-lg md:text-xl text-white/80 font-light leading-relaxed text-balance">
+                  A curated showcase of mobile-first digital experiences engineered for high conversion, fluid 120fps motion, and uncompromising brand identity.
+                </p>
+              </ScrollReveal>
+              <ScrollReveal delay={180}>
+                <p className="text-sm sm:text-base text-white/60 font-light leading-relaxed">
+                  From bespoke luxury stays and modern wellness brands to scalable SaaS platforms, every site is custom-crafted to turn everyday visitors into loyal clients.
+                </p>
+              </ScrollReveal>
             </div>
 
             {/* Action Buttons Stack */}
-            <div className="mt-7 sm:mt-9 flex flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => onOpenPrompts?.()}
-                className="h-[46px] sm:h-[50px] px-5 sm:px-7 bg-gradient-to-r from-[#F04E23] via-[#FF661F] to-[#FFAA00] text-white font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.08em] rounded-[4px] hover:brightness-110 hover:shadow-[0_8px_30px_rgba(240,78,35,0.45)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-[#F04E23]/30 cursor-pointer group"
-              >
-                <PromptIcon
-                  variant="white"
-                  className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform shrink-0"
-                />
-                <span className="font-semibold tracking-wider text-white">Get prompts</span>
-                <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
-              </button>
+            <ScrollReveal delay={260}>
+              <div className="mt-7 sm:mt-9 flex flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => onOpenPrompts?.()}
+                  className="h-[46px] sm:h-[50px] px-5 sm:px-7 bg-gradient-to-r from-[#F04E23] via-[#FF661F] to-[#FFAA00] text-white font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.08em] rounded-[4px] hover:brightness-110 hover:shadow-[0_8px_30px_rgba(240,78,35,0.45)] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 shadow-lg shadow-[#F04E23]/30 cursor-pointer group"
+                >
+                  <PromptIcon
+                    variant="white"
+                    className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform shrink-0"
+                  />
+                  <span className="font-semibold tracking-wider text-white">Get prompts</span>
+                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
+                </button>
 
-              <button
-                type="button"
-                onClick={() => onOpenBookCall?.()}
-                className="h-[46px] sm:h-[50px] px-4 sm:px-6 bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 hover:border-white/40 text-white font-medium text-[12px] sm:text-[13px] uppercase tracking-[0.08em] rounded-[4px] active:scale-[0.98] transition-all flex items-center justify-center gap-2 backdrop-blur-sm cursor-pointer shadow-lg shadow-black/40"
-              >
-                <Calendar className="w-4 h-4 text-white/80" />
-                <span>Book a call</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenBookCall?.()}
+                  className="h-[46px] sm:h-[50px] px-4 sm:px-6 bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 hover:border-white/40 text-white font-medium text-[12px] sm:text-[13px] uppercase tracking-[0.08em] rounded-[4px] active:scale-[0.98] transition-all flex items-center justify-center gap-2 backdrop-blur-sm cursor-pointer shadow-lg shadow-black/40"
+                >
+                  <Calendar className="w-4 h-4 text-white/80" />
+                  <span>Book a call</span>
+                </button>
+              </div>
+            </ScrollReveal>
           </div>
 
           {/* ============================================================ */}

@@ -16,31 +16,114 @@ import { Footer } from './components/Footer.tsx';
 import { PromptsModal } from './components/PromptsModal.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
 import { LoadingScreen } from './components/LoadingScreen.tsx';
+import { CaseStudiesPage } from './pages/CaseStudiesPage.tsx';
+import { CaseStudyDetailPage } from './pages/CaseStudyDetailPage.tsx';
 
 export type DockStage = 'initial' | 'docking' | 'docked';
+export type AppRoute = 'home' | 'case-studies' | 'case-study-detail';
 
 export default function App() {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [dockStage, setDockStage] = useState<DockStage>('initial');
+  const [dockStage, setDockStage] = useState<DockStage>(() => {
+    try {
+      const alreadySeen = sessionStorage.getItem('vixcee_cinematic_intro_done') === 'true';
+      const isCaseStudy = window.location.pathname.startsWith('/case-studies');
+      return alreadySeen || isCaseStudy ? 'docked' : 'initial';
+    } catch {
+      return 'initial';
+    }
+  });
 
+  // Client-Side Routing State
+  const [currentRoute, setCurrentRoute] = useState<AppRoute>('home');
+  const [selectedCaseStudySlug, setSelectedCaseStudySlug] = useState<string | null>(null);
+
+  // Initialize Route from URL Pathname
   useEffect(() => {
-    // 1. Reveal and dwell period: 4400ms -> start docking
+    const parsePath = () => {
+      const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+
+      if (pathname.startsWith('/case-studies/')) {
+        const slug = pathname.replace('/case-studies/', '');
+        if (slug) {
+          setCurrentRoute('case-study-detail');
+          setSelectedCaseStudySlug(slug);
+          return;
+        }
+      }
+
+      if (pathname === '/case-studies') {
+        setCurrentRoute('case-studies');
+        setSelectedCaseStudySlug(null);
+        return;
+      }
+
+      setCurrentRoute('home');
+      setSelectedCaseStudySlug(null);
+    };
+
+    parsePath();
+
+    const handlePopState = () => {
+      parsePath();
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Cinematic Intro: Only runs once on initial session arrival to homepage
+  useEffect(() => {
+    if (dockStage === 'docked') return;
+
     const dockTimer = setTimeout(() => {
       setDockStage('docking');
     }, 4400);
 
-    // 2. Continuous flight completes at 5250ms (4400ms + 850ms) -> docked state
     const finishTimer = setTimeout(() => {
       setDockStage('docked');
+      try {
+        sessionStorage.setItem('vixcee_cinematic_intro_done', 'true');
+      } catch {}
     }, 5250);
 
     return () => {
       clearTimeout(dockTimer);
       clearTimeout(finishTimer);
     };
-  }, []);
+  }, [dockStage]);
+
+  // Clean Navigation Handlers (Instant Scroll Reset)
+  const navigateToHome = () => {
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/');
+    }
+    setCurrentRoute('home');
+    setSelectedCaseStudySlug(null);
+    window.scrollTo(0, 0);
+  };
+
+  const navigateToCaseStudies = () => {
+    if (window.location.pathname !== '/case-studies') {
+      window.history.pushState({}, '', '/case-studies');
+    }
+    setCurrentRoute('case-studies');
+    setSelectedCaseStudySlug(null);
+    window.scrollTo(0, 0);
+  };
+
+  const navigateToCaseStudyDetail = (slug: string) => {
+    const targetUrl = `/case-studies/${slug}`;
+    if (window.location.pathname !== targetUrl) {
+      window.history.pushState({}, '', targetUrl);
+    }
+    setCurrentRoute('case-study-detail');
+    setSelectedCaseStudySlug(slug);
+    window.scrollTo(0, 0);
+  };
 
   const handleOpenPrompts = (promptId?: string) => {
     setActivePromptId(promptId || null);
@@ -48,50 +131,109 @@ export default function App() {
   };
 
   const handleScrollToBooking = () => {
+    if (currentRoute !== 'home') {
+      if (window.location.pathname !== '/') {
+        window.history.pushState({}, '', '/');
+      }
+      setCurrentRoute('home');
+      setSelectedCaseStudySlug(null);
+
+      // Instant positioning at #book-call with zero dizzying scroll animation
+      requestAnimationFrame(() => {
+        const el = document.getElementById('book-call');
+        if (el) {
+          el.scrollIntoView({ behavior: 'instant', block: 'start' });
+        } else {
+          setTimeout(() => {
+            const elRetry = document.getElementById('book-call');
+            if (elRetry) {
+              elRetry.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+          }, 30);
+        }
+      });
+      return;
+    }
+
     const el = document.getElementById('book-call');
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const rect = el.getBoundingClientRect();
+      const distance = Math.abs(rect.top);
+      // If far away, jump instantly to avoid rapid multi-screen scrolling
+      if (distance > window.innerHeight * 1.5) {
+        el.scrollIntoView({ behavior: 'instant', block: 'start' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } else {
       setIsBookingOpen(true);
     }
   };
 
   return (
-    <div id="homepage-default" className="min-h-screen flex flex-col bg-[#0c0c0e] text-white overflow-x-clip">
-      {/* Coordinated Independent Dark Backdrop & Ambient Bloom Overlay */}
+    <div id="homepage-default" className="min-h-screen flex flex-col bg-[#0c0c0e] text-white overflow-x-clip selection:bg-white selection:text-black">
+      {/* Exact Site Loading Screen with Original Timing and Stage Lifecycle */}
       <LoadingScreen stage={dockStage} />
 
-      {/* Header Navigation hosting the Unified Continuous Single-Element Logo */}
+      {/* Header Navigation with Directional Scroll Hide/Show */}
       <Header
         dockStage={dockStage}
         onOpenStart={handleScrollToBooking}
         onOpenPrompts={() => handleOpenPrompts()}
+        onNavigateCaseStudies={navigateToCaseStudies}
+        onNavigateHome={navigateToHome}
       />
 
-      {/* Main Content Area hosting the Hero Section & Bento Section */}
+      {/* Route Views */}
       <main id="content" className="flex-1 flex flex-col">
-        <Hero
-          onOpenPrompts={() => handleOpenPrompts()}
-          onOpenBookCall={handleScrollToBooking}
-        />
-        <BentoGridSection
-          onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={handleScrollToBooking}
-        />
-        <KingCarousel
-          onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={handleScrollToBooking}
-        />
-        <WorkShowcaseSection
-          onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={handleScrollToBooking}
-        />
-        <HomeTestimonials />
-        <FaqSection />
-        <BookingSection />
+        {currentRoute === 'case-studies' && (
+          <CaseStudiesPage
+            onSelectCaseStudy={navigateToCaseStudyDetail}
+            onOpenBookCall={handleScrollToBooking}
+            onNavigateHome={navigateToHome}
+          />
+        )}
+
+        {currentRoute === 'case-study-detail' && selectedCaseStudySlug && (
+          <CaseStudyDetailPage
+            slug={selectedCaseStudySlug}
+            onBackToCaseStudies={navigateToCaseStudies}
+            onSelectCaseStudy={navigateToCaseStudyDetail}
+            onOpenBookCall={handleScrollToBooking}
+            onNavigateHome={navigateToHome}
+          />
+        )}
+
+        {currentRoute === 'home' && (
+          <>
+            <Hero
+              onOpenPrompts={() => handleOpenPrompts()}
+              onOpenBookCall={handleScrollToBooking}
+            />
+            <BentoGridSection
+              onOpenPrompts={handleOpenPrompts}
+              onOpenBookCall={handleScrollToBooking}
+            />
+            <KingCarousel
+              onOpenPrompts={handleOpenPrompts}
+              onOpenBookCall={handleScrollToBooking}
+            />
+            <WorkShowcaseSection
+              onOpenPrompts={handleOpenPrompts}
+              onOpenBookCall={handleScrollToBooking}
+            />
+            <HomeTestimonials />
+            <FaqSection />
+            <BookingSection />
+          </>
+        )}
+
+        {/* Global Unified Footer */}
         <Footer
           onOpenPrompts={() => handleOpenPrompts()}
           onOpenBookCall={handleScrollToBooking}
+          onNavigateCaseStudies={navigateToCaseStudies}
+          onNavigateHome={navigateToHome}
         />
       </main>
 
@@ -110,4 +252,3 @@ export default function App() {
     </div>
   );
 }
-
