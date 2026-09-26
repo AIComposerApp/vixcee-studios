@@ -258,3 +258,115 @@
   animation: bentoFluidPulse 14s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
+
+@keyframes testimonialFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: testimonialFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Atmospheric Bottom Ember Horizon Flow Animations (Ultra-Smooth Eased Motion) */
+@keyframes emberHorizonPulse {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scaleY(0.96) scaleX(0.98);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(0, -6px, 0) scaleY(1.08) scaleX(1.03);
+    opacity: 0.98;
+  }
+}
+
+@keyframes emberDriftLeft {
+  0% {
+    transform: translate3d(-54%, 0, 0) scale(0.98);
+    opacity: 0.82;
+  }
+  50% {
+    transform: translate3d(-46%, -8px, 0) scale(1.06);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(-54%, 0, 0) scale(0.98);
+    opacity: 0.82;
+  }
+}
+
+@keyframes emberDriftRight {
+  0% {
+    transform: translate3d(-46%, 0, 0) scale(1.05);
+    opacity: 0.88;
+  }
+  50% {
+    transform: translate3d(-54%, 6px, 0) scale(0.98);
+    opacity: 0.78;
+  }
+  100% {
+    transform: translate3d(-46%, 0, 0) scale(1.05);
+    opacity: 0.88;
+  }
+}
+
+.animate-ember-flow {
+  animation: emberHorizonPulse 8s ease-in-out infinite;
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-ember-drift-1 {
+  animation: emberDriftLeft 12s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-ember-drift-2 {
+  animation: emberDriftRight 11s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Authentic Double-Wall Refractive Glass Architecture (Hardware Accelerated) */
+.glass-refraction-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(28px) saturate(190%) brightness(108%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) brightness(108%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.70),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.20),
+    inset 0 -1px 1.5px 0 rgba(255, 255, 255, 0.35);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Micro-Refractive Glass Chip (Inherits Parent Frosted Blur to prevent nested GPU passes) */
+.glass-refraction-chip {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.07) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.60),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translate3d(0, 0, 0);
+}
+
+.glass-refraction-chip:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.12) 100%);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.80),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+

@@ -268,17 +268,23 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
       const delta = currentScrollY - lastScrollY;
       lastScrollY = currentScrollY;
 
-      if (isHoveredRef.current) return;
-
       // Filter out micro-jitter from trackpad bounce (only respond to intentional scrolls)
       if (Math.abs(delta) > 8) {
         const dir = delta > 0 ? 1 : -1;
-        targetSpeedRef.current = 0.95 * dir;
         lastDirectionRef.current = dir;
+
+        if (isHoveredRef.current) {
+          // If hovered, responsive nudge while maintaining slow-motion pace
+          targetSpeedRef.current = 0.28 * dir;
+        } else {
+          targetSpeedRef.current = 0.95 * dir;
+        }
 
         if (scrollTimeout) clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-          if (!isHoveredRef.current) {
+          if (isHoveredRef.current) {
+            targetSpeedRef.current = 0.20 * lastDirectionRef.current;
+          } else {
             targetSpeedRef.current = 0.72 * lastDirectionRef.current;
           }
         }, 140);
@@ -377,14 +383,16 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
     };
   }, []);
 
-  // Hover handlers for cushioned stop and resume
+  // Hover handlers for cushioned slow-motion crawl and resume
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
-    targetSpeedRef.current = 0;
+    // Decelerate smoothly to a gentle 28% slow-motion crawl (no sudden halt)
+    targetSpeedRef.current = 0.20 * (lastDirectionRef.current >= 0 ? 1 : -1);
   };
 
   const handleMouseLeave = () => {
     isHoveredRef.current = false;
+    // Accelerate smoothly back to full cruise speed
     targetSpeedRef.current = 0.72 * (lastDirectionRef.current >= 0 ? 1 : -1);
   };
 

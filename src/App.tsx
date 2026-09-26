@@ -9,6 +9,10 @@ import { Hero } from './components/Hero.tsx';
 import { BentoGridSection } from './components/BentoGridSection.tsx';
 import { KingCarousel } from './components/KingCarousel.tsx';
 import { WorkShowcaseSection } from './components/WorkShowcaseSection.tsx';
+import { HomeTestimonials } from './components/HomeTestimonials.tsx';
+import { FaqSection } from './components/FaqSection.tsx';
+import { BookingSection } from './components/BookingSection.tsx';
+import { Footer } from './components/Footer.tsx';
 import { PromptsModal } from './components/PromptsModal.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
 import { LoadingScreen } from './components/LoadingScreen.tsx';
@@ -43,6 +47,15 @@ export default function App() {
     setIsPromptsOpen(true);
   };
 
+  const handleScrollToBooking = () => {
+    const el = document.getElementById('book-call');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      setIsBookingOpen(true);
+    }
+  };
+
   return (
     <div id="homepage-default" className="min-h-screen flex flex-col bg-[#0c0c0e] text-white overflow-x-clip">
       {/* Coordinated Independent Dark Backdrop & Ambient Bloom Overlay */}
@@ -51,7 +64,7 @@ export default function App() {
       {/* Header Navigation hosting the Unified Continuous Single-Element Logo */}
       <Header
         dockStage={dockStage}
-        onOpenStart={() => setIsBookingOpen(true)}
+        onOpenStart={handleScrollToBooking}
         onOpenPrompts={() => handleOpenPrompts()}
       />
 
@@ -59,19 +72,26 @@ export default function App() {
       <main id="content" className="flex-1 flex flex-col">
         <Hero
           onOpenPrompts={() => handleOpenPrompts()}
-          onOpenBookCall={() => setIsBookingOpen(true)}
+          onOpenBookCall={handleScrollToBooking}
         />
         <BentoGridSection
           onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={() => setIsBookingOpen(true)}
+          onOpenBookCall={handleScrollToBooking}
         />
         <KingCarousel
           onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={() => setIsBookingOpen(true)}
+          onOpenBookCall={handleScrollToBooking}
         />
         <WorkShowcaseSection
           onOpenPrompts={handleOpenPrompts}
-          onOpenBookCall={() => setIsBookingOpen(true)}
+          onOpenBookCall={handleScrollToBooking}
+        />
+        <HomeTestimonials />
+        <FaqSection />
+        <BookingSection />
+        <Footer
+          onOpenPrompts={() => handleOpenPrompts()}
+          onOpenBookCall={handleScrollToBooking}
         />
       </main>
 
