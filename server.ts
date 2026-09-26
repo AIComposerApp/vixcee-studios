@@ -30,6 +30,28 @@ async function startServer() {
       console.log(`[Booking Confirmation] Processing for: ${name} <${email}> on ${date} at ${timeSlot}`);
 
       if (resend) {
+        const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
+
+        // 1. Notify Studio Owner
+        try {
+          await resend.emails.send({
+            from: 'Vixcee Studios <onboarding@resend.dev>',
+            to: [studioOwnerEmail],
+            subject: `New 15-Min Booking: ${name} (${date} at ${timeSlot})`,
+            html: `
+              <div style="font-family: sans-serif; background: #0c0c0e; color: #fff; padding: 24px;">
+                <h2 style="color: #fc8000;">New Strategy Booking Received</h2>
+                <p><strong>Client:</strong> ${name} &lt;${email}&gt;</p>
+                <p><strong>Scheduled:</strong> ${date} at ${timeSlot}</p>
+                ${projectNotes ? `<p><strong>Notes:</strong><br/>${projectNotes}</p>` : ''}
+              </div>
+            `,
+          });
+        } catch (ownerErr) {
+          console.warn('[Resend Owner Alert Warning]', ownerErr);
+        }
+
+        // 2. Notify Client
         const { data, error } = await resend.emails.send({
           from: 'Vixcee Studios <onboarding@resend.dev>',
           to: [email],
