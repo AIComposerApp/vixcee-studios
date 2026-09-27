@@ -72,7 +72,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Morgan"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-md text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-[4px] text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors"
                 />
               </div>
 
@@ -86,7 +86,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@company.com"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-md text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-[4px] text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors"
                 />
               </div>
 
@@ -101,7 +101,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
                         type="button"
                         key={slot}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`p-2.5 text-xs rounded border text-left transition-all ${
+                        className={`p-2.5 text-xs rounded-[4px] border text-left transition-all cursor-pointer ${
                           selectedSlot === slot
                             ? 'border-white bg-white/10 text-white font-medium'
                             : 'border-white/10 bg-white/[0.02] text-white/60 hover:text-white'
@@ -123,7 +123,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
                   value={projectDetails}
                   onChange={(e) => setProjectDetails(e.target.value)}
                   placeholder="Briefly describe what you need..."
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-md text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors resize-none"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-[4px] text-white placeholder-white/30 text-sm focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors resize-none"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 bg-white text-black font-semibold text-xs uppercase tracking-wider rounded hover:bg-white/90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-white text-black font-semibold text-xs uppercase tracking-wider rounded-[4px] hover:bg-white/90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span>Confirming schedule...</span>

@@ -224,12 +224,12 @@ export const Footer: React.FC<FooterProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="flex-1 h-11 sm:h-12 px-4 rounded-xl bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
+                    className="flex-1 h-11 sm:h-12 px-4 rounded-[4px] bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="h-11 sm:h-12 px-6 rounded-xl bg-white text-black font-semibold text-sm hover:bg-white/90 active:scale-[0.98] border border-white transition-all duration-150 cursor-pointer disabled:opacity-50 shrink-0"
+                    className="h-11 sm:h-12 px-6 rounded-[4px] bg-white text-black font-semibold text-sm hover:bg-white/90 active:scale-[0.98] border border-white transition-all duration-150 cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     {isSubmitting ? 'Signing up...' : 'Sign up'}
                   </button>

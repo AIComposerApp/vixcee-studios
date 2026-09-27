@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 interface ImageWithSkeletonProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   containerClassName?: string;
   aspectRatioClass?: string;
+  objectFit?: 'cover' | 'contain';
 }
 
 export const ImageWithSkeleton: React.FC<ImageWithSkeletonProps> = ({
@@ -11,6 +12,7 @@ export const ImageWithSkeleton: React.FC<ImageWithSkeletonProps> = ({
   className = '',
   containerClassName = '',
   aspectRatioClass = 'aspect-[16/10]',
+  objectFit = 'contain',
   loading = 'lazy',
   decoding = 'async',
   fetchPriority,
@@ -62,7 +64,7 @@ export const ImageWithSkeleton: React.FC<ImageWithSkeletonProps> = ({
         fetchPriority={fetchPriority}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
-        className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+        className={`w-full h-full ${objectFit === 'cover' ? 'object-cover' : 'object-contain'} transition-opacity duration-500 ease-out ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         } ${className}`}
         {...props}

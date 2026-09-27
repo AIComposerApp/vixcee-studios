@@ -26,15 +26,7 @@ export default function App() {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [dockStage, setDockStage] = useState<DockStage>(() => {
-    try {
-      const alreadySeen = sessionStorage.getItem('vixcee_cinematic_intro_done') === 'true';
-      const isCaseStudy = window.location.pathname.startsWith('/case-studies');
-      return alreadySeen || isCaseStudy ? 'docked' : 'initial';
-    } catch {
-      return 'initial';
-    }
-  });
+  const [dockStage, setDockStage] = useState<DockStage>('initial');
 
   // Client-Side Routing State
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('home');
@@ -75,26 +67,23 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Cinematic Intro: Only runs once on initial session arrival to homepage
+  // Cinematic Intro: Smooth loading sequence on arrival
   useEffect(() => {
     if (dockStage === 'docked') return;
 
     const dockTimer = setTimeout(() => {
       setDockStage('docking');
-    }, 4400);
+    }, 1500);
 
     const finishTimer = setTimeout(() => {
       setDockStage('docked');
-      try {
-        sessionStorage.setItem('vixcee_cinematic_intro_done', 'true');
-      } catch {}
-    }, 5250);
+    }, 2350);
 
     return () => {
       clearTimeout(dockTimer);
       clearTimeout(finishTimer);
     };
-  }, [dockStage]);
+  }, []);
 
   // Clean Navigation Handlers (Instant Scroll Reset)
   const navigateToHome = () => {

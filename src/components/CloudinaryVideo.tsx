@@ -44,7 +44,10 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Parse embed URL to ensure seamless mute, loop, and no controls
+  const isEmbedPlayer = videoUrl.includes('player.cloudinary.com/embed') || videoUrl.includes('/embed');
+  const isDirectImage = !isEmbedPlayer && (videoUrl.endsWith('.png') || videoUrl.endsWith('.jpg') || videoUrl.endsWith('.webp') || videoUrl.includes('/image/upload/'));
+
+  // Parse embed URL to ensure seamless instant autoplay, mute, loop, and zero controls/overlays
   const getEmbedUrl = () => {
     try {
       const url = new URL(videoUrl);
@@ -52,10 +55,17 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
       url.searchParams.set('muted', 'true');
       url.searchParams.set('loop', 'true');
       url.searchParams.set('controls', 'false');
+      url.searchParams.set('playsinline', 'true');
+      url.searchParams.set('preload', 'auto');
+      url.searchParams.set('showLogo', 'false');
+      url.searchParams.set('hideContextMenu', 'true');
+      url.searchParams.set('bigPlayButton', 'false');
+      url.searchParams.set('showJumpControls', 'false');
       url.searchParams.set('fluid', 'true');
+      url.searchParams.set('colors[accent]', 'transparent');
       return url.toString();
     } catch {
-      return `${videoUrl}&autoplay=true&muted=true&loop=true&controls=false`;
+      return `${videoUrl}&autoplay=true&muted=true&loop=true&controls=false&playsinline=true&preload=auto&showLogo=false&hideContextMenu=true&bigPlayButton=false`;
     }
   };
 
@@ -73,15 +83,7 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full ${aspectClass} overflow-hidden rounded-2xl bg-[#141519] group select-none ${className}`}
-      onMouseEnter={() => {
-        setIsHovered(true);
-        setIsPlaying(true);
-      }}
-      onMouseLeave={() => {
-        if (!alwaysAutoplay) setIsHovered(false);
-      }}
-      onClick={() => setIsPlaying((prev) => !prev)}
+      className={`relative w-full ${aspectClass} overflow-hidden rounded-2xl bg-[#141519] group select-none pointer-events-none ${className}`}
     >
       {/* Background Poster Image - Paints instantly with high priority */}
       <img
@@ -89,29 +91,33 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
         alt={title}
         decoding="async"
         fetchPriority="high"
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-          shouldPlay ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 pointer-events-none ${
+          shouldPlay && !isDirectImage ? 'opacity-0' : 'opacity-100'
         }`}
       />
 
-      {/* Cloudinary Player Embed - Only hydrated when scrolled near */}
-      {shouldPlay && (
+      {/* Cloudinary Player Embed - Completely suppressed from user touches/taps */}
+      {shouldPlay && isEmbedPlayer && (
         <iframe
           src={getEmbedUrl()}
           title={title}
-          className="absolute inset-0 w-full h-full border-0 pointer-events-none"
+          className="absolute inset-0 w-full h-full border-0 pointer-events-none select-none scale-[1.01]"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-          loading="lazy"
+          loading="eager"
         />
       )}
 
-      {/* Hover Indication Badge (when not playing yet) */}
-      {!shouldPlay && (
-        <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[11px] font-medium text-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 pointer-events-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-          <span>Hover to preview</span>
-        </div>
+      {/* Direct Image or Video asset preview */}
+      {shouldPlay && isDirectImage && (
+        <img
+          src={videoUrl}
+          alt={`${title} Preview`}
+          className="absolute inset-0 w-full h-full object-cover animate-in fade-in duration-500 pointer-events-none"
+        />
       )}
+
+      {/* Touch Shielding Overlay: absorbs all mobile taps so player controls are never triggered */}
+      <div className="absolute inset-0 z-20 pointer-events-auto cursor-default" />
     </div>
   );
 };

@@ -395,7 +395,7 @@ export const BookingSection: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Alex Morgan"
-                    className="w-full h-11 px-4 rounded-xl bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
+                    className="w-full h-11 px-4 rounded-[4px] bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
                   />
                 </div>
 
@@ -410,7 +410,7 @@ export const BookingSection: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="alex@company.com"
-                    className="w-full h-11 px-4 rounded-xl bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
+                    className="w-full h-11 px-4 rounded-[4px] bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200"
                   />
                 </div>
 
@@ -423,7 +423,7 @@ export const BookingSection: React.FC = () => {
                         {displayedMonthYear}
                       </span>
                       {weekOffset > 0 && (
-                        <span className="text-[10px] text-white/50 font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+                        <span className="text-[10px] text-white/50 font-mono uppercase tracking-wider px-2 py-0.5 rounded-[4px] bg-white/[0.06] border border-white/10">
                           +{weekOffset} {weekOffset === 1 ? 'wk' : 'wks'}
                         </span>
                       )}
@@ -435,7 +435,7 @@ export const BookingSection: React.FC = () => {
                         type="button"
                         disabled={weekOffset === 0}
                         onClick={() => setWeekOffset((prev) => Math.max(0, prev - 1))}
-                        className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.12] disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                        className="w-7 h-7 rounded-[4px] bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.12] disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
                         aria-label="Previous week"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,7 +446,7 @@ export const BookingSection: React.FC = () => {
                         type="button"
                         disabled={weekOffset >= 8}
                         onClick={() => setWeekOffset((prev) => prev + 1)}
-                        className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.12] disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                        className="w-7 h-7 rounded-[4px] bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.12] disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
                         aria-label="Next week"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -477,7 +477,7 @@ export const BookingSection: React.FC = () => {
                             onClick={() => {
                               if (!isUnavailable) setSelectedDate(day);
                             }}
-                            className={`py-2.5 px-1 rounded-xl flex flex-col items-center justify-center transition-all duration-150 active:scale-95 ${
+                            className={`py-2.5 px-1 rounded-[4px] flex flex-col items-center justify-center transition-all duration-150 active:scale-95 ${
                               isUnavailable
                                 ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border border-white/5 line-through'
                                 : isSelected
@@ -531,7 +531,7 @@ export const BookingSection: React.FC = () => {
                             onClick={() => {
                               if (!isBooked) setSelectedTime(slot);
                             }}
-                            className={`py-2.5 px-2 text-center rounded-xl text-xs font-mono transition-all duration-150 active:scale-95 ${
+                            className={`py-2.5 px-2 text-center rounded-[4px] text-xs font-mono transition-all duration-150 active:scale-95 ${
                               isBooked
                                 ? 'opacity-30 cursor-not-allowed bg-white/[0.02] border border-white/5 line-through'
                                 : isSelected
@@ -562,13 +562,13 @@ export const BookingSection: React.FC = () => {
                     value={projectNotes}
                     onChange={(e) => setProjectNotes(e.target.value)}
                     placeholder="Briefly describe what you're building..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200 resize-none"
+                    className="w-full px-4 py-2.5 rounded-[4px] bg-white/[0.06] border border-white/20 text-white placeholder-white/40 text-sm shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.22)] focus:outline-none focus:border-white/45 focus:bg-white/[0.10] focus:ring-1 focus:ring-white/30 transition-all duration-200 resize-none"
                   />
                 </div>
 
                 {/* Error Banner */}
                 {errorMsg && (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-300 text-xs font-medium">
+                  <div className="p-3 rounded-[4px] bg-red-500/10 border border-red-500/25 text-red-300 text-xs font-medium">
                     {errorMsg}
                   </div>
                 )}
@@ -578,7 +578,7 @@ export const BookingSection: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 rounded-full bg-white text-black font-semibold text-sm tracking-wide transition-all duration-150 hover:bg-white/90 active:scale-[0.98] border border-white cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-[4px] bg-white text-black font-semibold text-sm tracking-wide transition-all duration-150 hover:bg-white/90 active:scale-[0.98] border border-white cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">

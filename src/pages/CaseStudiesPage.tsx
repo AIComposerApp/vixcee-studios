@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { AngledCarousel } from '../components/AngledCarousel.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
+import { VerticalTextRoller } from '../components/VerticalTextRoller.tsx';
 import { ChevronLeft, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
 
 interface CaseStudiesPageProps {
@@ -22,45 +23,13 @@ const CLIENT_LOGOS = [
   'ALSO.',
 ];
 
-// 4-Column minimal case study grid items using hero carousel images
-const MORE_CASE_STUDIES = [
-  {
-    id: 'prince-of-web3',
-    slug: 'prince-of-web3',
-    title: 'Building a premium digital presence for a Web3 growth strategist',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
-  },
-  {
-    id: 'carizma-hotels',
-    slug: 'carizma-hotels',
-    title: 'Designing a smarter front desk for modern hotel operations',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
-  },
-  {
-    id: 'scribe',
-    slug: 'scribe',
-    title: 'Reimagining how people create, learn, and share knowledge with AI',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
-  },
-  {
-    id: 'chesney-hospitality',
-    slug: 'carizma-hotels',
-    title: 'A luxury boutique digital presence engineered for direct booking conversion',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358616/Chesney-Hotel-Boutique-bg-front_zde5g3.png',
-  },
-  {
-    id: 'alege-official',
-    slug: 'prince-of-web3',
-    title: 'Turning personal influence into a recognized institutional advisory brand',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358607/Alege-Official-bg-front_fgcdvr.png',
-  },
-  {
-    id: 'alex-hydration',
-    slug: 'scribe',
-    title: 'Form follows hydration: Direct-to-consumer product experience',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
-  },
-];
+// Dynamic minimal case study grid items from CASE_STUDIES
+const MORE_CASE_STUDIES = CASE_STUDIES.map((cs) => ({
+  id: cs.id,
+  slug: cs.slug,
+  title: cs.subtitle || cs.title,
+  image: cs.imageUrl,
+}));
 
 // Helper to pre-warm image assets in browser cache on hover
 const prewarmImage = (url: string) => {
@@ -76,7 +45,8 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
 }) => {
   const featured = CASE_STUDIES[0]; // Prince of Web3
   const secondary1 = CASE_STUDIES[1]; // Carizma Hotels
-  const secondary2 = CASE_STUDIES[2]; // Scribe (with hero carousel image)
+  const secondary2 = CASE_STUDIES[2]; // Scribe
+  const secondary3 = CASE_STUDIES.find((cs) => cs.slug === 'alex-hydrate') || CASE_STUDIES[3]; // ALEX Hydrate
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -92,13 +62,16 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
         
         {/* Eyebrow */}
         <p className="text-[12px] sm:text-[13px] uppercase tracking-[0.25em] text-white/45 font-medium mb-5">
-          Case Studies
+          PROVEN OUTCOMES
         </p>
 
-        {/* Large Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.03em] text-white max-w-3xl mx-auto leading-[1.12] mb-8">
-          See how the world&apos;s designers are making it real
+        {/* Large Headline with Vertical Roller Transition */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.03em] text-white max-w-4xl mx-auto leading-[1.15] mb-4">
+          Custom <VerticalTextRoller words={['sites', 'tools', 'apps']} /> that turn visitors into paying clients.
         </h1>
+        <p className="text-base sm:text-lg text-white/60 font-light max-w-lg mx-auto leading-relaxed mb-8">
+          High-converting digital products built to scale your business — delivered in days.
+        </p>
 
         {/* Studio Signature Gradient Button */}
         <div>
@@ -163,7 +136,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           {/* Right: Editorial Copy & "Read more →" */}
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             <h2 className="text-2xl sm:text-4xl font-normal tracking-[-0.02em] text-white leading-tight mb-4">
-              AI assisted design at scale, lessons from {featured.title}
+              How {featured.title} built an authority brand and turned cold traffic into high-value retainers
             </h2>
 
             <p className="text-[15px] sm:text-[17px] text-white/60 font-light leading-relaxed mb-6 max-w-xl">
@@ -201,20 +174,20 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
                 <ImageWithSkeleton
                   src={secondary1.imageUrl}
                   alt={secondary1.title}
-                  aspectRatioClass="aspect-square"
+                  aspectRatioClass="aspect-[16/10]"
                   containerClassName="rounded-md"
                 />
               </div>
               <div className="sm:col-span-7 flex flex-col items-start">
                 <h3 className="text-lg sm:text-xl font-normal text-white leading-snug mb-3">
-                  For {secondary1.title}, operations is just another workspace to optimize
+                  How Carizma Hotels replaced chaotic spreadsheets with a custom reservation engine that fills rooms daily.
                 </h3>
                 <button
                   onClick={() => onSelectCaseStudy(secondary1.slug)}
-                  className="inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white font-medium group transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer group shadow-sm"
                 >
                   <span>Read more</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             </div>
@@ -222,27 +195,27 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
             {/* Item 2 */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center text-left pt-6 border-t border-white/[0.06]">
               <div
-                onClick={() => onSelectCaseStudy(featured.slug)}
-                onMouseEnter={() => prewarmImage("https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358616/Chesney-Hotel-Boutique-bg-front_zde5g3.png")}
+                onClick={() => onSelectCaseStudy(secondary3.slug)}
+                onMouseEnter={() => prewarmImage(secondary3.imageUrl)}
                 className="sm:col-span-5 cursor-pointer"
               >
                 <ImageWithSkeleton
-                  src="https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358616/Chesney-Hotel-Boutique-bg-front_zde5g3.png"
-                  alt="Chesney Project"
-                  aspectRatioClass="aspect-square"
+                  src={secondary3.imageUrl}
+                  alt={secondary3.title}
+                  aspectRatioClass="aspect-[16/10]"
                   containerClassName="rounded-md"
                 />
               </div>
               <div className="sm:col-span-7 flex flex-col items-start">
                 <h3 className="text-lg sm:text-xl font-normal text-white leading-snug mb-3">
-                  One sketch became the flagship product. Vixcee helped them finally finish it
+                  How ALEX Hydrate turned everyday water bottles into an e-commerce brand that sells out drops in hours.
                 </h3>
                 <button
-                  onClick={() => onSelectCaseStudy(featured.slug)}
-                  className="inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white font-medium group transition-colors cursor-pointer"
+                  onClick={() => onSelectCaseStudy(secondary3.slug)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer group shadow-sm"
                 >
                   <span>Read more</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             </div>
@@ -265,7 +238,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
             </div>
             
             <h3 className="text-xl sm:text-2xl font-normal text-white leading-snug mb-2">
-              A learning platform that treats technology as a natural extension
+              How Scribe simplified complex AI into a clean web platform that keeps users subscribed and learning.
             </h3>
 
             <p className="text-sm text-white/60 font-light leading-relaxed mb-4 max-w-md">
@@ -274,10 +247,10 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
 
             <button
               onClick={() => onSelectCaseStudy(secondary2.slug)}
-              className="inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white font-medium group transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer group shadow-sm"
             >
               <span>Read more</span>
-              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
 
@@ -289,11 +262,11 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       {/* ============================================================ */}
       <section className="py-20 border-t border-white/[0.08] max-w-3xl mx-auto px-6 text-center">
         <p className="text-lg sm:text-2xl font-light text-white/90 leading-relaxed mb-6">
-          &ldquo;It&apos;s the spectrum of possibilities that defines Vixcee for me, it always keeps my imagination active.&rdquo;
+          &ldquo;Vixcee delivered our entire web platform in 6 days. Our conversion rate doubled on launch week, and clients constantly compliment how effortless the experience feels.&rdquo;
         </p>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-semibold text-white">Alejandro Castaneda</span>
-          <span className="text-[11px] text-white/40">Professor & Coordinator, Centro University</span>
+          <span className="text-xs font-semibold text-white">Marcus Vance</span>
+          <span className="text-[11px] text-white/40">Founder &amp; Managing Director</span>
         </div>
       </section>
 
@@ -326,15 +299,21 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
               </div>
 
               {/* Title */}
-              <h3 className="text-[14px] font-medium text-white leading-snug mb-2 line-clamp-2">
+              <h3 className="text-[14px] font-medium text-white leading-snug mb-3 line-clamp-2">
                 {item.title}
               </h3>
 
               {/* Read More Link */}
-              <div className="inline-flex items-center gap-1 text-[12px] text-white/60 group-hover:text-white font-medium transition-colors">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectCaseStudy(item.slug);
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer group shadow-sm"
+              >
                 <span>Read more</span>
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-              </div>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           ))}
         </div>
@@ -345,10 +324,10 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       {/* ============================================================ */}
       <section className="py-24 border-t border-white/[0.08] text-center px-6">
         <h2 className="text-3xl sm:text-5xl font-normal tracking-[-0.02em] text-white mb-4">
-          Ready to make it real?
+          Have a website, app, or tool you need built?
         </h2>
-        <p className="text-sm sm:text-base text-white/50 font-light max-w-md mx-auto mb-8">
-          Join designers, founders, and leaders shipping next-generation digital products in days.
+        <p className="text-sm sm:text-base text-white/60 font-light max-w-xl mx-auto mb-8 leading-relaxed">
+          Stop waiting months for slow agencies. Let&apos;s discuss your project and ship a high-converting digital product for your business next week.
         </p>
         <button
           onClick={onOpenBookCall}

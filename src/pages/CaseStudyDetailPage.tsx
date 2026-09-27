@@ -437,10 +437,10 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
                   containerClassName="rounded-md"
                 />
               </div>
-              <h4 className="text-[14px] font-medium text-white leading-snug mb-2">
+              <h4 className="text-[14px] font-medium text-white leading-snug mb-3 line-clamp-2">
                 {study.title}
               </h4>
-              <div className="inline-flex items-center gap-1 text-[12px] text-white/60 group-hover:text-white font-medium transition-colors">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 active:scale-[0.98] transition-all group-hover:bg-white/95 shadow-sm">
                 <span>Read more</span>
                 <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </div>
