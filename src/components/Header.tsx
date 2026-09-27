@@ -8,6 +8,8 @@ interface HeaderProps {
   dockStage?: 'initial' | 'docking' | 'docked';
   onNavigateCaseStudies?: () => void;
   onNavigateHome?: () => void;
+  onNavigateWork?: () => void;
+  isStaticPinned?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   dockStage = 'docked',
   onNavigateCaseStudies,
   onNavigateHome,
+  onNavigateWork,
+  isStaticPinned = false,
 }) => {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -202,7 +206,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 h-[80px] pointer-events-none select-none transition-transform duration-300 ease-out ${
-        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        isStaticPinned || isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
       {/* 
@@ -212,7 +216,7 @@ export const Header: React.FC<HeaderProps> = ({
       */}
       <div
         className={`absolute top-0 left-0 right-0 h-[115px] pointer-events-none transition-opacity duration-500 ease-out ${
-          isScrolled ? 'opacity-100' : 'opacity-0'
+          isStaticPinned || isScrolled ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
           background:
@@ -236,10 +240,14 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <nav className="hidden md:flex items-center space-x-7 text-[14px] font-medium tracking-tight text-white/80">
             <a
-              href="#work"
+              href="/work"
               onClick={(e) => {
                 e.preventDefault();
-                onOpenStart();
+                if (onNavigateWork) {
+                  onNavigateWork();
+                } else {
+                  onOpenStart();
+                }
               }}
               className="hover:text-white transition-colors"
             >
@@ -547,9 +555,13 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  onOpenStart();
+                  if (onNavigateWork) {
+                    onNavigateWork();
+                  } else {
+                    onOpenStart();
+                  }
                 }}
-                className="w-full text-left py-2 px-2 text-base font-medium text-white hover:text-white/80 flex items-center justify-between group"
+                className="w-full text-left py-2 px-2 text-base font-medium text-white hover:text-white/80 flex items-center justify-between group cursor-pointer"
               >
                 <span>Work</span>
                 <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />

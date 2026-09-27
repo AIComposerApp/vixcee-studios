@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
-import { AngledCarousel } from '../components/AngledCarousel.tsx';
+import CardSwap, { Card } from '../components/CardSwap.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
 import { VerticalTextRoller } from '../components/VerticalTextRoller.tsx';
 import { ChevronLeft, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
@@ -10,6 +10,40 @@ interface CaseStudiesPageProps {
   onOpenBookCall: () => void;
   onNavigateHome: () => void;
 }
+
+// Flagship showcase cards for 3D CardSwap stack
+const SHOWCASE_CARDS = [
+  {
+    slug: 'prince-of-web3',
+    title: 'Prince of Web3',
+    tag: 'Web3 & Growth Advisory',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
+  },
+  {
+    slug: 'carizma-hotels',
+    title: 'Carizma Luxury Hotels',
+    tag: 'Hospitality & Direct Bookings',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
+  },
+  {
+    slug: 'alex-hydrate',
+    title: 'ALEX Hydrate',
+    tag: 'DTC E-Commerce',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
+  },
+  {
+    slug: 'scribe',
+    title: 'Scribe',
+    tag: 'EdTech & AI Platform',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790457424/Scribe-_-Smarter-lessons-Built-with-Scribe--09-26-2026_06_19_PM-front_hnr7yv.png',
+  },
+  {
+    slug: 'balance-wellness',
+    title: 'Balance Wellness',
+    tag: 'Health & High-Ticket Booking',
+    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790458343/Balance-Wellness-Coach-Brand-Identity-Design-System-09-26-2026_06_26_PM-front_qyubod.png',
+  },
+];
 
 // Client brands strip matching reference
 const CLIENT_LOGOS = [
@@ -87,10 +121,54 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       </section>
 
       {/* ============================================================ */}
-      {/* 2. EXACT HERO SECTION CAROUSEL (AngledCarousel)              */}
+      {/* 2. CARD SWAP 3D SHOWCASE (React Bits Integration)            */}
       {/* ============================================================ */}
-      <section className="w-full pb-14 relative z-10 overflow-hidden">
-        <AngledCarousel onSelectCaseStudy={onSelectCaseStudy} />
+      <section className="w-full relative z-10 overflow-hidden flex flex-col items-center justify-center pt-2 pb-16 sm:pb-24">
+        {/* Subtle warm background radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_center,rgba(255,102,31,0.07),transparent_70%)]"
+          aria-hidden="true"
+        />
+
+        {/* 3D Card Stack Container with Defined Height */}
+        <div className="relative w-full max-w-[1340px] px-4 sm:px-6 lg:px-12 h-[460px] sm:h-[520px] md:h-[580px] lg:h-[620px] flex items-center justify-end overflow-visible">
+          <CardSwap
+            width={580}
+            height={380}
+            cardDistance={60}
+            verticalDistance={68}
+            delay={5000}
+            pauseOnHover={true}
+            skewAmount={6}
+            easing="elastic"
+            onCardClick={(idx) => {
+              const item = SHOWCASE_CARDS[idx % SHOWCASE_CARDS.length];
+              if (item) onSelectCaseStudy(item.slug);
+            }}
+          >
+            {SHOWCASE_CARDS.map((item) => (
+              <Card
+                key={item.slug}
+                onClick={() => onSelectCaseStudy(item.slug)}
+                className="w-full h-full rounded-2xl overflow-hidden border border-white/12 shadow-[0_28px_65px_-12px_rgba(0,0,0,0.92)] bg-[#0e0f12] relative select-none"
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover object-top pointer-events-none select-none"
+                />
+              </Card>
+            ))}
+          </CardSwap>
+        </div>
+
+        {/* Seamless Bottom Gradient Fade into obsidian #0c0c0e background */}
+        <div
+          className="pointer-events-none absolute bottom-0 inset-x-0 h-36 sm:h-48 bg-gradient-to-t from-[#0c0c0e] via-[#0c0c0e]/85 to-transparent z-20"
+          aria-hidden="true"
+        />
       </section>
 
       {/* ============================================================ */}

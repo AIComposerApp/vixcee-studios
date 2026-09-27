@@ -7,6 +7,7 @@ interface FooterProps {
   onOpenBookCall?: () => void;
   onNavigateCaseStudies?: () => void;
   onNavigateHome?: () => void;
+  onNavigateWork?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -14,6 +15,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenBookCall,
   onNavigateCaseStudies,
   onNavigateHome,
+  onNavigateWork,
 }) => {
   const [email, setEmail] = useState('');
   const [agreed, setAgreed] = useState(false);
@@ -65,9 +67,13 @@ export const Footer: React.FC<FooterProps> = ({
 
   const scrollToWork = (e: React.MouseEvent) => {
     e.preventDefault();
-    const el = document.getElementById('work-showcase') || document.getElementById('work');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (onNavigateWork) {
+      onNavigateWork();
+    } else {
+      const el = document.getElementById('work-showcase') || document.getElementById('work');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 

@@ -18,9 +18,10 @@ import { BookingModal } from './components/BookingModal.tsx';
 import { LoadingScreen } from './components/LoadingScreen.tsx';
 import { CaseStudiesPage } from './pages/CaseStudiesPage.tsx';
 import { CaseStudyDetailPage } from './pages/CaseStudyDetailPage.tsx';
+import { WorkPage } from './pages/WorkPage.tsx';
 
 export type DockStage = 'initial' | 'docking' | 'docked';
-export type AppRoute = 'home' | 'case-studies' | 'case-study-detail';
+export type AppRoute = 'home' | 'case-studies' | 'case-study-detail' | 'work';
 
 export default function App() {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
@@ -48,6 +49,12 @@ export default function App() {
 
       if (pathname === '/case-studies') {
         setCurrentRoute('case-studies');
+        setSelectedCaseStudySlug(null);
+        return;
+      }
+
+      if (pathname === '/work') {
+        setCurrentRoute('work');
         setSelectedCaseStudySlug(null);
         return;
       }
@@ -102,6 +109,25 @@ export default function App() {
     setCurrentRoute('case-studies');
     setSelectedCaseStudySlug(null);
     window.scrollTo(0, 0);
+  };
+
+  const navigateToWork = () => {
+    if (window.location.pathname !== '/work') {
+      window.history.pushState({}, '', '/work');
+    }
+    // Trigger authentic loading screen progression to pre-warm work assets
+    setDockStage('initial');
+    setCurrentRoute('work');
+    setSelectedCaseStudySlug(null);
+    window.scrollTo(0, 0);
+
+    setTimeout(() => {
+      setDockStage('docking');
+    }, 1200);
+
+    setTimeout(() => {
+      setDockStage('docked');
+    }, 2050);
   };
 
   const navigateToCaseStudyDetail = (slug: string) => {
@@ -171,10 +197,22 @@ export default function App() {
         onOpenPrompts={() => handleOpenPrompts()}
         onNavigateCaseStudies={navigateToCaseStudies}
         onNavigateHome={navigateToHome}
+        onNavigateWork={navigateToWork}
+        isStaticPinned={currentRoute === 'work'}
       />
 
       {/* Route Views */}
       <main id="content" className="flex-1 flex flex-col">
+        {currentRoute === 'work' && (
+          <WorkPage
+            onSelectCaseStudy={navigateToCaseStudyDetail}
+            onOpenBookCall={handleScrollToBooking}
+            onNavigateHome={navigateToHome}
+            onNavigateCaseStudies={navigateToCaseStudies}
+            dockStage={dockStage}
+          />
+        )}
+
         {currentRoute === 'case-studies' && (
           <CaseStudiesPage
             onSelectCaseStudy={navigateToCaseStudyDetail}
@@ -217,13 +255,16 @@ export default function App() {
           </>
         )}
 
-        {/* Global Unified Footer */}
-        <Footer
-          onOpenPrompts={() => handleOpenPrompts()}
-          onOpenBookCall={handleScrollToBooking}
-          onNavigateCaseStudies={navigateToCaseStudies}
-          onNavigateHome={navigateToHome}
-        />
+        {/* Global Unified Footer (Hidden on Work page to maintain immersive fullscreen canvas) */}
+        {currentRoute !== 'work' && (
+          <Footer
+            onOpenPrompts={() => handleOpenPrompts()}
+            onOpenBookCall={handleScrollToBooking}
+            onNavigateCaseStudies={navigateToCaseStudies}
+            onNavigateHome={navigateToHome}
+            onNavigateWork={navigateToWork}
+          />
+        )}
       </main>
 
       {/* AI Coding Prompts Modal */}

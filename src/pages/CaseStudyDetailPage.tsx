@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { CloudinaryVideo } from '../components/CloudinaryVideo.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
+import { CaseStudiesPinnedNav } from '../components/CaseStudiesPinnedNav.tsx';
 import { ChevronLeft, ChevronRight, Copy, Check, Calendar } from 'lucide-react';
 
 interface CaseStudyDetailPageProps {
@@ -31,6 +32,7 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
   onBackToCaseStudies,
   onSelectCaseStudy,
   onOpenBookCall,
+  onNavigateHome,
 }) => {
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('challenge');
@@ -450,61 +452,19 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
       </section>
 
       {/* ============================================================ */}
-      {/* 6. UNIFIED MINIMALIST FLOATING COMMAND DOCK                  */}
+      {/* 6. UNIFIED MINIMALIST FLOATING COMMAND DOCK WITH GLASS UI    */}
       {/* ============================================================ */}
-      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[94vw] pointer-events-auto">
-        <nav
-          aria-label="Case study navigation dock"
-          className="inline-flex items-center gap-3.5 sm:gap-4 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-[#0c0c0e]/92 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black ring-1 ring-white/5 text-[12px] font-medium text-white/70 select-none"
-        >
-          {/* Back to Case Studies link */}
-          <button
-            onClick={onBackToCaseStudies}
-            className="group hover:text-white transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-          >
-            <ChevronLeft className="w-4 h-4 text-white/50 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
-            <span className="hidden sm:inline">Case Studies</span>
-          </button>
-
-          {/* Interactive In-Page Section Progress Rail (Clean Neutral Segments, No Dots) */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {SECTIONS.map((sec) => {
-              const isActive = activeSection === sec.id;
-              return (
-                <button
-                  key={sec.id}
-                  onClick={() => scrollToSection(sec.id)}
-                  title={`Jump to ${sec.label}`}
-                  className="group py-1 cursor-pointer focus:outline-none"
-                  aria-label={`Jump to ${sec.label}`}
-                >
-                  <div
-                    className={`h-[3px] rounded-full transition-all duration-300 ${
-                      isActive
-                        ? 'w-6 sm:w-8 bg-white'
-                        : 'w-3 sm:w-4 bg-white/20 group-hover:bg-white/45'
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active Section Label (Subtle, Clean) */}
-          <span className="text-[11px] font-mono text-white/80 shrink-0">
-            {currentSectionMeta.index} {currentSectionMeta.label}
-          </span>
-
-          {/* Compact Refined Action with clean arrow */}
-          <button
-            onClick={onOpenBookCall}
-            className="group hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 hover:bg-white text-white hover:text-black text-[11px] font-medium transition-all duration-200 cursor-pointer shrink-0"
-          >
-            <span>Book call</span>
-            <ChevronRight className="w-3.5 h-3.5 text-white/60 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-          </button>
-        </nav>
-      </div>
+      <CaseStudiesPinnedNav
+        currentPage="case-study-detail"
+        currentSlug={slug}
+        onNavigateHome={onNavigateHome}
+        onSelectCaseStudy={onSelectCaseStudy}
+        onOpenBookCall={onOpenBookCall}
+        onBackToCaseStudies={onBackToCaseStudies}
+        sections={SECTIONS}
+        activeSection={activeSection}
+        onSectionClick={scrollToSection}
+      />
 
     </article>
   );
