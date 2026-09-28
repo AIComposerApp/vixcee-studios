@@ -169,18 +169,34 @@ interface WorkPageProps {
   onNavigateHome: () => void;
   onNavigateCaseStudies?: () => void;
   dockStage?: 'initial' | 'docking' | 'docked';
+  initialFocusedItemId?: string | null;
 }
 
 export const WorkPage: React.FC<WorkPageProps> = ({
   onSelectCaseStudy,
   onOpenBookCall,
   dockStage = 'docked',
+  initialFocusedItemId,
 }) => {
   // Strict Device Separation: Only Mobile or Laptop
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('mobile');
 
   // Inspection focus state
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
+
+  // Auto-focus item if specified from direct showcase links
+  useEffect(() => {
+    if (initialFocusedItemId) {
+      const match = ALL_WORK_ITEMS.find((it) => it.id === initialFocusedItemId);
+      if (match) {
+        setDeviceMode(match.device);
+      }
+      setFocusedItemId(initialFocusedItemId);
+    }
+  }, [initialFocusedItemId]);
+
+  // Zoom State: false = far-off overview (State A with [+]), true = close-up (State B with [-])
+  const [isZoomed, setIsZoomed] = useState(false);
 
   // Fluid crossfade transition state when switching between Mobile & Desktop
   const [isSwitchingDevice, setIsSwitchingDevice] = useState(false);
@@ -315,12 +331,18 @@ export const WorkPage: React.FC<WorkPageProps> = ({
       if (e.key === 'Escape') {
         if (focusedItemId) {
           handleDismissFocus();
+        } else if (isZoomed) {
+          setIsZoomed(false);
+          panRef.current = { x: 0, y: 0 };
+          targetPanRef.current = { x: 0, y: 0 };
+          velocityRef.current = { vx: 0, vy: 0 };
+          applyStageTransform(0, 0, true);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedItemId]);
+  }, [focusedItemId, isZoomed, applyStageTransform]);
 
   // Butter-smooth dismiss handler that locks out conflicting loops
   const handleDismissFocus = () => {
@@ -415,8 +437,8 @@ export const WorkPage: React.FC<WorkPageProps> = ({
       const normY = (e.clientY - windowH / 2) / (windowH / 2);
 
       // Max range to explore with external mouse without dragging
-      const exploreRangeX = deviceMode === 'laptop' ? 260 : 340;
-      const exploreRangeY = deviceMode === 'laptop' ? 180 : 260;
+      const exploreRangeX = deviceMode === 'laptop' ? 280 : 420;
+      const exploreRangeY = deviceMode === 'laptop' ? 220 : 660;
 
       // Negative direction for natural parallax camera navigation
       targetPanRef.current = {
@@ -525,7 +547,7 @@ export const WorkPage: React.FC<WorkPageProps> = ({
       const col = index % cols;
       const totalRows = Math.ceil(total / cols);
 
-      // Responsive spacing: On desktop (≥1024px), scale up pitch to fill the display
+      // Responsive spacing: Reverted to previous generous distance
       const xPitch = isDesktopViewport ? (isMobile ? 240 : 580) : isMobile ? 185 : 450;
       const yPitch = isDesktopViewport ? (isMobile ? 440 : 380) : isMobile ? 360 : 310;
 
@@ -542,8 +564,9 @@ export const WorkPage: React.FC<WorkPageProps> = ({
         };
       }
 
-      // Overview scale: 0.88x on desktop, 0.72x on mobile
-      const clusterScale = isDesktopViewport ? 0.88 : 0.72;
+      // Overview scale: 0.88x on desktop, 0.72x on mobile vs Close-up Zoom (1.25x)
+      const baseOverviewScale = isDesktopViewport ? 0.88 : 0.72;
+      const clusterScale = isZoomed ? 1.25 : baseOverviewScale;
 
       return {
         transform: `translate3d(${xPos * clusterScale}px, ${yPos * clusterScale}px, 0px) scale(${clusterScale})`,
@@ -552,11 +575,24 @@ export const WorkPage: React.FC<WorkPageProps> = ({
         pointerEvents: 'auto' as const,
       };
     },
-    [deviceMode, isSwitchingDevice, isDesktopViewport, windowWidth]
+    [deviceMode, isZoomed, isSwitchingDevice, isDesktopViewport, windowWidth]
   );
 
+  // Toggle Zoom State: switches between State A (overview) and State B (close-up with [-])
+  const toggleZoom = () => {
+    setIsZoomed((prev) => !prev);
+    panRef.current = { x: 0, y: 0 };
+    targetPanRef.current = { x: 0, y: 0 };
+    velocityRef.current = { vx: 0, vy: 0 };
+    applyStageTransform(0, 0, true);
+  };
+
   // Determine Dock State
-  const currentDockState: DockState = focusedItemId ? 'focused' : 'overview';
+  const currentDockState: DockState = focusedItemId
+    ? 'focused'
+    : isZoomed
+    ? 'zoomed'
+    : 'overview';
 
   // Primary Action handler for State C (CTA)
   const handlePrimaryAction = () => {
@@ -664,46 +700,30 @@ export const WorkPage: React.FC<WorkPageProps> = ({
                   draggable={false}
                   className="w-full h-auto max-h-[52vh] object-contain pointer-events-none select-none"
                 />
-
-                {/* ============================================================ */}
-                {/* NON-INTRUSIVE FOCUS OVERLAYS (Only on Focused Item)          */}
-                {/* ============================================================ */}
-                {isCurrentFocused && (
-                  <>
-                    {/* 
-                      [✕] Dismiss Button: 
-                      - Hidden on desktop (clicking backdrop or dock dismisses focus naturally)
-                      - Positioned on MOBILE by the right side (clearly visible beside the phone)
-                    */}
-                    <div
-                      className="md:hidden absolute top-2 -right-4 sm:-right-6 pointer-events-auto z-50 animate-in fade-in zoom-in-95 duration-400"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        onClick={handleDismissFocus}
-                        className="w-8 h-8 rounded-full border border-white/40 text-white hover:border-white bg-black/60 backdrop-blur-md active:scale-90 transition-all flex items-center justify-center cursor-pointer shadow-xl"
-                        aria-label="Close focus"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Bottom: Minimal Project Title and Subtitle with smooth fade-in */}
-                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center text-center pointer-events-none z-50 whitespace-nowrap animate-in fade-in duration-400">
-                      <h3 className="text-[17px] font-semibold text-white tracking-tight">
-                        {item.title}
-                      </h3>
-                      <p className="text-[12.5px] text-white/60 font-light mt-0.5">
-                        {item.industryLabel}
-                      </p>
-                    </div>
-                  </>
-                )}
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* NON-INTRUSIVE MOBILE DISMISS [✕] BUTTON                      */}
+      {/* Placed below the header (top-[88px]) so it never blocks CTA */}
+      {/* ============================================================ */}
+      {focusedItemId && (
+        <div
+          className="md:hidden fixed top-[88px] right-4 z-40 pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={handleDismissFocus}
+            className="w-8 h-8 rounded-full border border-white/20 text-white bg-[#0c0c0e]/85 backdrop-blur-xl active:scale-90 transition-all flex items-center justify-center cursor-pointer shadow-2xl"
+            aria-label="Close focus"
+          >
+            <X className="w-3.5 h-3.5 text-white/80" />
+          </button>
+        </div>
+      )}
 
       {/* ============================================================ */}
       {/* 3. ELASTIC MORPHING BOTTOM CONTROLLER (SINGLE PERSISTENT DOM) */}
@@ -712,6 +732,7 @@ export const WorkPage: React.FC<WorkPageProps> = ({
         dockState={currentDockState}
         deviceMode={deviceMode}
         setDeviceMode={handleDeviceModeChange}
+        onToggleZoom={toggleZoom}
         onOpenAction={handlePrimaryAction}
         hasCaseStudy={Boolean(focusedItem?.caseStudySlug)}
       />

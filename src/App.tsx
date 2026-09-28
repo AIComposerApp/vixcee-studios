@@ -32,6 +32,7 @@ export default function App() {
   // Client-Side Routing State
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('home');
   const [selectedCaseStudySlug, setSelectedCaseStudySlug] = useState<string | null>(null);
+  const [initialWorkItemId, setInitialWorkItemId] = useState<string | null>(null);
 
   // Initialize Route from URL Pathname
   useEffect(() => {
@@ -106,15 +107,26 @@ export default function App() {
     if (window.location.pathname !== '/case-studies') {
       window.history.pushState({}, '', '/case-studies');
     }
+    // Trigger authentic loading screen progression matching the Work page transition
+    setDockStage('initial');
     setCurrentRoute('case-studies');
     setSelectedCaseStudySlug(null);
     window.scrollTo(0, 0);
+
+    setTimeout(() => {
+      setDockStage('docking');
+    }, 1200);
+
+    setTimeout(() => {
+      setDockStage('docked');
+    }, 2050);
   };
 
-  const navigateToWork = () => {
+  const navigateToWork = (targetItemId?: string) => {
     if (window.location.pathname !== '/work') {
       window.history.pushState({}, '', '/work');
     }
+    setInitialWorkItemId(targetItemId || null);
     // Trigger authentic loading screen progression to pre-warm work assets
     setDockStage('initial');
     setCurrentRoute('work');
@@ -210,6 +222,7 @@ export default function App() {
             onNavigateHome={navigateToHome}
             onNavigateCaseStudies={navigateToCaseStudies}
             dockStage={dockStage}
+            initialFocusedItemId={initialWorkItemId}
           />
         )}
 
@@ -248,6 +261,7 @@ export default function App() {
             <WorkShowcaseSection
               onOpenPrompts={handleOpenPrompts}
               onOpenBookCall={handleScrollToBooking}
+              onNavigateWork={navigateToWork}
             />
             <HomeTestimonials />
             <FaqSection />

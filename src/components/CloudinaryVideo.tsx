@@ -9,67 +9,59 @@ interface CloudinaryVideoProps {
   alwaysAutoplay?: boolean;
 }
 
+/**
+ * Extracts public_id from Cloudinary embed player URLs and builds a high-performance direct CDN MP4 stream.
+ * Parameters:
+ * - f_auto: automatic optimal format (AV1, VP9, or H.264 based on client support)
+ * - q_auto: optimal visual quality with minimal byte footprint
+ * - vc_h264: universally supported, ultra-fast GPU hardware decode
+ */
+export const getDirectVideoUrl = (videoUrl: string): string => {
+  if (!videoUrl) return '';
+  const match = videoUrl.match(/public_id=([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://res.cloudinary.com/divndlntm/video/upload/f_auto,q_auto,vc_h264/${match[1]}.mp4`;
+  }
+  if (videoUrl.includes('/video/upload/')) {
+    return videoUrl;
+  }
+  return videoUrl;
+};
+
 export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
   videoUrl,
   posterUrl,
   title,
   aspectRatio = 'video',
   className = '',
-  alwaysAutoplay = false,
+  alwaysAutoplay = true,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(alwaysAutoplay);
-  const [isNearViewport, setIsNearViewport] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isVideoReady, setIsVideoReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Lazy-mount observer: Only mount heavy iframe when scrolled near the container
+  const directMp4Url = getDirectVideoUrl(videoUrl);
+  const isEmbedFallback = hasError || !directMp4Url.includes('.mp4');
+
   useEffect(() => {
-    if (!containerRef.current) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setIsNearViewport(true);
-      return;
+    setIsVideoReady(false);
+    setHasError(false);
+
+    // Eagerly pre-buffer and trigger video playback with zero delay
+    if (videoRef.current) {
+      videoRef.current.load();
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsVideoReady(true);
+          })
+          .catch(() => {
+            // Autoplay policy handled silently
+          });
+      }
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsNearViewport(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const isEmbedPlayer = videoUrl.includes('player.cloudinary.com/embed') || videoUrl.includes('/embed');
-  const isDirectImage = !isEmbedPlayer && (videoUrl.endsWith('.png') || videoUrl.endsWith('.jpg') || videoUrl.endsWith('.webp') || videoUrl.includes('/image/upload/'));
-
-  // Parse embed URL to ensure seamless instant autoplay, mute, loop, and zero controls/overlays
-  const getEmbedUrl = () => {
-    try {
-      const url = new URL(videoUrl);
-      url.searchParams.set('autoplay', 'true');
-      url.searchParams.set('muted', 'true');
-      url.searchParams.set('loop', 'true');
-      url.searchParams.set('controls', 'false');
-      url.searchParams.set('playsinline', 'true');
-      url.searchParams.set('preload', 'auto');
-      url.searchParams.set('showLogo', 'false');
-      url.searchParams.set('hideContextMenu', 'true');
-      url.searchParams.set('bigPlayButton', 'false');
-      url.searchParams.set('showJumpControls', 'false');
-      url.searchParams.set('fluid', 'true');
-      url.searchParams.set('colors[accent]', 'transparent');
-      return url.toString();
-    } catch {
-      return `${videoUrl}&autoplay=true&muted=true&loop=true&controls=false&playsinline=true&preload=auto&showLogo=false&hideContextMenu=true&bigPlayButton=false`;
-    }
-  };
-
-  const shouldPlay = (alwaysAutoplay || isHovered || isPlaying) && isNearViewport;
+  }, [directMp4Url]);
 
   const aspectClass =
     aspectRatio === 'portrait'
@@ -82,24 +74,43 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
 
   return (
     <div
-      ref={containerRef}
-      className={`relative w-full ${aspectClass} overflow-hidden rounded-2xl bg-[#141519] group select-none pointer-events-none ${className}`}
+      className={`relative w-full ${aspectClass} overflow-hidden rounded-2xl bg-[#0c0c0e] group select-none pointer-events-none ${className}`}
     >
-      {/* Background Poster Image - Paints instantly with high priority */}
+      {/* 1. Fast High-Fidelity Poster Image - Paints immediately with high priority */}
       <img
         src={posterUrl}
         alt={title}
-        decoding="async"
+        decoding="sync"
         fetchPriority="high"
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 pointer-events-none ${
-          shouldPlay && !isDirectImage ? 'opacity-0' : 'opacity-100'
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
+          isVideoReady ? 'opacity-0' : 'opacity-100'
         }`}
       />
 
-      {/* Cloudinary Player Embed - Completely suppressed from user touches/taps */}
-      {shouldPlay && isEmbedPlayer && (
+      {/* 2. Direct GPU Accelerated Native HTML5 Video - Instant C++ decoding, zero iframe delay */}
+      {!isEmbedFallback && (
+        <video
+          ref={videoRef}
+          src={directMp4Url}
+          poster={posterUrl}
+          autoPlay={alwaysAutoplay}
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onCanPlay={() => setIsVideoReady(true)}
+          onPlaying={() => setIsVideoReady(true)}
+          onError={() => setHasError(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none select-none ${
+            isVideoReady ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      )}
+
+      {/* 3. Fallback Embed Player (Only if direct streaming fails) */}
+      {isEmbedFallback && (
         <iframe
-          src={getEmbedUrl()}
+          src={`${videoUrl}&autoplay=true&muted=true&loop=true&controls=false&playsinline=true&preload=auto&showLogo=false&hideContextMenu=true&bigPlayButton=false`}
           title={title}
           className="absolute inset-0 w-full h-full border-0 pointer-events-none select-none scale-[1.01]"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
@@ -107,17 +118,9 @@ export const CloudinaryVideo: React.FC<CloudinaryVideoProps> = ({
         />
       )}
 
-      {/* Direct Image or Video asset preview */}
-      {shouldPlay && isDirectImage && (
-        <img
-          src={videoUrl}
-          alt={`${title} Preview`}
-          className="absolute inset-0 w-full h-full object-cover animate-in fade-in duration-500 pointer-events-none"
-        />
-      )}
-
-      {/* Touch Shielding Overlay: absorbs all mobile taps so player controls are never triggered */}
+      {/* Touch Shielding Overlay: Prevents inadvertent player interruptions */}
       <div className="absolute inset-0 z-20 pointer-events-auto cursor-default" />
     </div>
   );
 };
+export default CloudinaryVideo;

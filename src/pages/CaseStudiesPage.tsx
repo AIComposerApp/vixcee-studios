@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
-import CardSwap, { Card } from '../components/CardSwap.tsx';
+import { AngledCarousel } from '../components/AngledCarousel.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
 import { VerticalTextRoller } from '../components/VerticalTextRoller.tsx';
+import { getDirectVideoUrl } from '../components/CloudinaryVideo.tsx';
 import { ChevronLeft, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
 
 interface CaseStudiesPageProps {
@@ -10,40 +11,6 @@ interface CaseStudiesPageProps {
   onOpenBookCall: () => void;
   onNavigateHome: () => void;
 }
-
-// Flagship showcase cards for 3D CardSwap stack
-const SHOWCASE_CARDS = [
-  {
-    slug: 'prince-of-web3',
-    title: 'Prince of Web3',
-    tag: 'Web3 & Growth Advisory',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
-  },
-  {
-    slug: 'carizma-hotels',
-    title: 'Carizma Luxury Hotels',
-    tag: 'Hospitality & Direct Bookings',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
-  },
-  {
-    slug: 'alex-hydrate',
-    title: 'ALEX Hydrate',
-    tag: 'DTC E-Commerce',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
-  },
-  {
-    slug: 'scribe',
-    title: 'Scribe',
-    tag: 'EdTech & AI Platform',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790457424/Scribe-_-Smarter-lessons-Built-with-Scribe--09-26-2026_06_19_PM-front_hnr7yv.png',
-  },
-  {
-    slug: 'balance-wellness',
-    title: 'Balance Wellness',
-    tag: 'Health & High-Ticket Booking',
-    image: 'https://res.cloudinary.com/divndlntm/image/upload/v1790458343/Balance-Wellness-Coach-Brand-Identity-Design-System-09-26-2026_06_26_PM-front_qyubod.png',
-  },
-];
 
 // Client brands strip matching reference
 const CLIENT_LOGOS = [
@@ -63,13 +30,29 @@ const MORE_CASE_STUDIES = CASE_STUDIES.map((cs) => ({
   slug: cs.slug,
   title: cs.subtitle || cs.title,
   image: cs.imageUrl,
+  videoUrl: cs.videoUrl,
 }));
 
-// Helper to pre-warm image assets in browser cache on hover
-const prewarmImage = (url: string) => {
-  if (typeof window === 'undefined' || !url) return;
-  const img = new Image();
-  img.src = url;
+// Helper to pre-warm image and video assets in browser cache on hover
+const prewarmCaseStudy = (imageUrl?: string, videoUrl?: string) => {
+  if (typeof window === 'undefined') return;
+  if (imageUrl) {
+    const img = new Image();
+    img.src = imageUrl;
+  }
+  if (videoUrl) {
+    const directUrl = getDirectVideoUrl(videoUrl);
+    if (directUrl) {
+      const existing = document.querySelector(`link[href="${directUrl}"]`);
+      if (!existing) {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'video';
+        link.href = directUrl;
+        document.head.appendChild(link);
+      }
+    }
+  }
 };
 
 export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
@@ -121,7 +104,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       </section>
 
       {/* ============================================================ */}
-      {/* 2. CARD SWAP 3D SHOWCASE (React Bits Integration)            */}
+      {/* 2. SHOWCASE CAROUSEL (Hero Style 3D Angled Carousel)         */}
       {/* ============================================================ */}
       <section className="w-full relative z-10 overflow-hidden flex flex-col items-center justify-center pt-2 pb-16 sm:pb-24">
         {/* Subtle warm background radial glow */}
@@ -130,38 +113,9 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           aria-hidden="true"
         />
 
-        {/* 3D Card Stack Container with Defined Height */}
-        <div className="relative w-full max-w-[1340px] px-4 sm:px-6 lg:px-12 h-[460px] sm:h-[520px] md:h-[580px] lg:h-[620px] flex items-center justify-end overflow-visible">
-          <CardSwap
-            width={580}
-            height={380}
-            cardDistance={60}
-            verticalDistance={68}
-            delay={5000}
-            pauseOnHover={true}
-            skewAmount={6}
-            easing="elastic"
-            onCardClick={(idx) => {
-              const item = SHOWCASE_CARDS[idx % SHOWCASE_CARDS.length];
-              if (item) onSelectCaseStudy(item.slug);
-            }}
-          >
-            {SHOWCASE_CARDS.map((item) => (
-              <Card
-                key={item.slug}
-                onClick={() => onSelectCaseStudy(item.slug)}
-                className="w-full h-full rounded-2xl overflow-hidden border border-white/12 shadow-[0_28px_65px_-12px_rgba(0,0,0,0.92)] bg-[#0e0f12] relative select-none"
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover object-top pointer-events-none select-none"
-                />
-              </Card>
-            ))}
-          </CardSwap>
+        {/* Angled Showcase Carousel matching Homepage Hero Section */}
+        <div className="w-full relative z-20 shrink-0 pb-3 sm:pb-5 md:pb-12 lg:pb-16">
+          <AngledCarousel onSelectCaseStudy={onSelectCaseStudy} />
         </div>
 
         {/* Seamless Bottom Gradient Fade into obsidian #0c0c0e background */}
@@ -199,7 +153,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           {/* Left: Large Image with Skeleton & High Priority */}
           <div
             onClick={() => onSelectCaseStudy(featured.slug)}
-            onMouseEnter={() => prewarmImage(featured.imageUrl)}
+            onMouseEnter={() => prewarmCaseStudy(featured.imageUrl, featured.videoUrl)}
             className="lg:col-span-6 cursor-pointer"
           >
             <ImageWithSkeleton
@@ -246,7 +200,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center text-left">
               <div
                 onClick={() => onSelectCaseStudy(secondary1.slug)}
-                onMouseEnter={() => prewarmImage(secondary1.imageUrl)}
+                onMouseEnter={() => prewarmCaseStudy(secondary1.imageUrl, secondary1.videoUrl)}
                 className="sm:col-span-5 cursor-pointer"
               >
                 <ImageWithSkeleton
@@ -274,7 +228,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center text-left pt-6 border-t border-white/[0.06]">
               <div
                 onClick={() => onSelectCaseStudy(secondary3.slug)}
-                onMouseEnter={() => prewarmImage(secondary3.imageUrl)}
+                onMouseEnter={() => prewarmCaseStudy(secondary3.imageUrl, secondary3.videoUrl)}
                 className="sm:col-span-5 cursor-pointer"
               >
                 <ImageWithSkeleton
@@ -304,7 +258,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             <div
               onClick={() => onSelectCaseStudy(secondary2.slug)}
-              onMouseEnter={() => prewarmImage(secondary2.imageUrl)}
+              onMouseEnter={() => prewarmCaseStudy(secondary2.imageUrl, secondary2.videoUrl)}
               className="w-full cursor-pointer mb-5"
             >
               <ImageWithSkeleton
@@ -363,7 +317,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
             <div
               key={index}
               onClick={() => onSelectCaseStudy(item.slug)}
-              onMouseEnter={() => prewarmImage(item.image)}
+              onMouseEnter={() => prewarmCaseStudy(item.image, item.videoUrl)}
               className="flex flex-col items-start cursor-pointer group"
             >
               {/* Image Frame with Shimmer Skeleton */}

@@ -6,6 +6,7 @@ import { ScrollReveal } from './motion/ScrollMotion.tsx';
 interface WorkShowcaseSectionProps {
   onOpenPrompts?: (promptId?: string) => void;
   onOpenBookCall?: () => void;
+  onNavigateWork?: (workId?: string) => void;
 }
 
 interface ShowcaseImage {
@@ -13,6 +14,12 @@ interface ShowcaseImage {
   title: string;
   src: string;
 }
+
+const getWorkPageId = (id: string): string => {
+  if (id === 'carizma-luxury') return 'm-carizma-hotels';
+  if (id === 'google-ai-studio') return 'm-google-ai';
+  return `m-${id}`;
+};
 
 // 13 High-Performance Optimized Mobile Portrait Screenshots across 3 balanced columns
 const COLUMN_1_IMAGES: ShowcaseImage[] = [
@@ -92,6 +99,7 @@ const COLUMN_3_IMAGES: ShowcaseImage[] = [
 export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
   onOpenPrompts,
   onOpenBookCall,
+  onNavigateWork,
 }) => {
   const col1Ref = useRef<HTMLDivElement>(null);
   const col2Ref = useRef<HTMLDivElement>(null);
@@ -531,7 +539,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 {tripleCol1.map((item, idx) => (
                   <div
                     key={`d-col1-${item.id}-${idx}`}
-                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                    onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985] cursor-pointer active:scale-95 transition-transform duration-300 group/phone"
                   >
                     <img
                       src={item.src}
@@ -540,7 +549,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                       loading={idx < 2 ? 'eager' : 'lazy'}
                       decoding="async"
                       fetchPriority={idx < 2 ? 'high' : 'low'}
-                      className="w-full h-auto object-contain select-none pointer-events-none block"
+                      className="w-full h-auto object-contain select-none pointer-events-none block group-hover/phone:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
                 ))}
@@ -554,7 +563,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 {tripleCol2.map((item, idx) => (
                   <div
                     key={`d-col2-${item.id}-${idx}`}
-                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                    onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985] cursor-pointer active:scale-95 transition-transform duration-300 group/phone"
                   >
                     <img
                       src={item.src}
@@ -563,7 +573,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                       loading={idx < 2 ? 'eager' : 'lazy'}
                       decoding="async"
                       fetchPriority={idx < 2 ? 'high' : 'low'}
-                      className="w-full h-auto object-contain select-none pointer-events-none block"
+                      className="w-full h-auto object-contain select-none pointer-events-none block group-hover/phone:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
                 ))}
@@ -577,7 +587,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                 {tripleCol3.map((item, idx) => (
                   <div
                     key={`d-col3-${item.id}-${idx}`}
-                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985]"
+                    onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                    className="w-full shrink-0 flex items-center justify-center aspect-[500/985] cursor-pointer active:scale-95 transition-transform duration-300 group/phone"
                   >
                     <img
                       src={item.src}
@@ -586,7 +597,7 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                       loading={idx < 2 ? 'eager' : 'lazy'}
                       decoding="async"
                       fetchPriority={idx < 2 ? 'high' : 'low'}
-                      className="w-full h-auto object-contain select-none pointer-events-none block"
+                      className="w-full h-auto object-contain select-none pointer-events-none block group-hover/phone:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
                 ))}
@@ -619,7 +630,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   {tripleCol1.map((item, idx) => (
                     <div
                       key={`m-col1-${item.id}-${idx}`}
-                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
+                      onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden cursor-pointer active:scale-95 transition-transform duration-300"
                     >
                       <img
                         src={item.src}
@@ -647,7 +659,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   {tripleCol2.map((item, idx) => (
                     <div
                       key={`m-col2-${item.id}-${idx}`}
-                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
+                      onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden cursor-pointer active:scale-95 transition-transform duration-300"
                     >
                       <img
                         src={item.src}
@@ -675,7 +688,8 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
                   {tripleCol3.map((item, idx) => (
                     <div
                       key={`m-col3-${item.id}-${idx}`}
-                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden"
+                      onClick={() => onNavigateWork && onNavigateWork(getWorkPageId(item.id))}
+                      className="w-full shrink-0 flex items-center justify-center aspect-[500/985] overflow-hidden cursor-pointer active:scale-95 transition-transform duration-300"
                     >
                       <img
                         src={item.src}

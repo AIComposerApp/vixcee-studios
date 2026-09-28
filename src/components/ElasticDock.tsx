@@ -1,4 +1,5 @@
 import React from 'react';
+import { Plus, Minus } from 'lucide-react';
 
 export type DeviceMode = 'mobile' | 'laptop';
 export type DockState = 'overview' | 'zoomed' | 'focused';
@@ -7,6 +8,7 @@ interface ElasticDockProps {
   dockState: DockState;
   deviceMode: DeviceMode;
   setDeviceMode: (mode: DeviceMode) => void;
+  onToggleZoom: () => void;
   onOpenAction: () => void;
   hasCaseStudy?: boolean;
 }
@@ -15,15 +17,18 @@ export const ElasticDock: React.FC<ElasticDockProps> = ({
   dockState,
   deviceMode,
   setDeviceMode,
+  onToggleZoom,
   onOpenAction,
   hasCaseStudy = false,
 }) => {
-  const isOverview = dockState === 'overview' || dockState === 'zoomed';
+  const isOverview = dockState === 'overview';
+  const isZoomed = dockState === 'zoomed';
   const isFocused = dockState === 'focused';
 
-  // State A (overview toggle): 196px
+  // State A (overview with [ + ] and toggle): 248px
+  // State B (zoomed close-up with [ - ] circle): 48px
   // State C (focused pill button): 212px or 176px
-  const containerWidth = isOverview ? 196 : hasCaseStudy ? 212 : 176;
+  const containerWidth = isOverview ? 248 : isZoomed ? 48 : hasCaseStudy ? 212 : 176;
 
   return (
     <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none">
@@ -52,19 +57,41 @@ export const ElasticDock: React.FC<ElasticDockProps> = ({
         onClick={() => {
           if (isFocused) {
             onOpenAction();
+          } else if (isZoomed) {
+            onToggleZoom();
           }
         }}
       >
         {/* ============================================================ */}
-        {/* STATE A CONTENT: [ Mobile | Desktop ] Segmented Toggle       */}
-        {/* Clean, no redundant zoom buttons                             */}
+        {/* STATE A CONTENT: [ + ] | [ Mobile | Desktop ]                */}
         {/* ============================================================ */}
         <div
-          className={`absolute inset-0 px-2 flex items-center justify-center transition-opacity duration-300 ${
+          className={`absolute inset-0 px-2 flex items-center justify-between transition-opacity duration-300 ${
             isOverview ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         >
-          {/* Segmented Track with Sliding Frosted Glass Active Pill */}
+          {/* [+] Zoom to Close-Up Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleZoom();
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-full text-black hover:bg-black/10 active:scale-90 transition-all cursor-pointer"
+            title="Zoom into cluster"
+            aria-label="Zoom in"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+
+          {/* Hairline Divider */}
+          <div
+            className="w-[1px] h-5 bg-black/[0.12] shrink-0 mx-1"
+            style={{
+              boxShadow: 'rgba(255, 255, 255, 0.4) 0px 0px 1px 0px',
+            }}
+          />
+
+          {/* Clean Segmented Track: Mobile | Desktop */}
           <div
             className="relative flex items-center p-0.5 select-none"
             style={{ width: '180px', height: '36px' }}
@@ -112,6 +139,29 @@ export const ElasticDock: React.FC<ElasticDockProps> = ({
               Desktop
             </button>
           </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* STATE B CONTENT: CIRCULAR [ - ] ZOOM OUT BUTTON              */}
+        {/* Restored: When in zoomed mode, dock shrinks to 48px circle    */}
+        {/* with [-] icon. Clicking it returns to overview!              */}
+        {/* ============================================================ */}
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+            isZoomed ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          title="Return to Overview (-)"
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleZoom();
+            }}
+            className="w-full h-full flex items-center justify-center cursor-pointer"
+            aria-label="Zoom out"
+          >
+            <Minus className="w-5 h-5 text-black" />
+          </button>
         </div>
 
         {/* ============================================================ */}
