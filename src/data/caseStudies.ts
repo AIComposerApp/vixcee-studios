@@ -65,7 +65,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=princeofweb3_case_studies_hgcunf',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
     shortSummary: 'A dark, immersive digital headquarters designed to communicate authority, expertise, and momentum for a high-profile Web3 marketing strategist and KOL.',
     clientQuote: {
       quote: "Vixcee Studios created a digital presence that feels as established and high-velocity as the network behind our name. The turnaround in days completely blew past our expectations.",
@@ -178,7 +178,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=carizma_hotels_case_studies_1_abfvo7',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_900/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
     shortSummary: 'A centralized Front Desk & Operations Terminal for a multi-location luxury hotel chain to manage inventory, walk-ins, and multi-channel bookings with zero friction.',
     clientQuote: {
       quote: "The operations terminal transformed our everyday front-desk speed. Checking in walk-ins and managing reservations went from minutes of confusion to under 60 seconds.",
@@ -289,7 +289,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=scribe_case_studies_1_hzceav',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/v1790457424/Scribe-_-Smarter-lessons-Built-with-Scribe--09-26-2026_06_19_PM-front_hnr7yv.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790457424/Scribe-_-Smarter-lessons-Built-with-Scribe--09-26-2026_06_19_PM-front_hnr7yv.png',
     shortSummary: 'A clean, editorial interface that combines structured learning modules, AI-powered generation, and effortless interactions to keep users focused on knowledge.',
     clientQuote: {
       quote: "By letting the content lead and hiding the technical complexity of AI, our learners stay completely immersed. The craft and speed from Vixcee was unmatched.",
@@ -397,7 +397,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=alex_bottles_case_studies_fdccrd',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
     shortSummary: 'A visually-led e-commerce experience where product, typography, imagery, and motion turn hydration into a desirable lifestyle destination.',
     clientQuote: {
       quote: "The site makes our bottles feel like design icons. Conversion rates on collection drops exceeded all targets within 48 hours of launch.",
@@ -506,7 +506,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=balance_wellness_case_studies_ewbntz',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/v1790458343/Balance-Wellness-Coach-Brand-Identity-Design-System-09-26-2026_06_26_PM-front_qyubod.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790458343/Balance-Wellness-Coach-Brand-Identity-Design-System-09-26-2026_06_26_PM-front_qyubod.png',
     shortSummary: 'A calm, restorative digital environment designed to translate holistic wellbeing into an intentional, human online experience.',
     clientQuote: {
       quote: "Balance needed an atmosphere that felt like a sanctuary. Vixcee built a digital presence that our community describes as an exhale.",
@@ -615,7 +615,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: 'Design & Development',
     year: '2025',
     videoUrl: 'https://player.cloudinary.com/embed/?cloud_name=divndlntm&public_id=netrovert_case_studies_zpqowh',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/v1790458991/My-Google-AI-Studio-App-09-26-2026_10_40_PM-front_ontekw.png',
+    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_800/v1790458991/My-Google-AI-Studio-App-09-26-2026_10_40_PM-front_ontekw.png',
     shortSummary: 'A bold editorial digital presence built around narrative as infrastructure, transforming Web3 writing expertise into a high-credibility brand.',
     clientQuote: {
       quote: "Founders don't have time to decipher fluff. The new site instantly commands respect and directly led to 3 tier-one protocol retainers within weeks.",

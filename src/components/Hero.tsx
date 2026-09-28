@@ -4,6 +4,7 @@ import { PromptIcon } from './PromptIcon.tsx';
 import { DotGridBackground } from './DotGridBackground.tsx';
 import { AngledCarousel } from './AngledCarousel.tsx';
 import { VerticalTextRoller } from './VerticalTextRoller.tsx';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 interface HeroProps {
   onOpenPrompts: () => void;
@@ -50,24 +51,41 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
           - On Desktop: Centered, spacious fold with ample breathing room. */}
       <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center pt-16 sm:pt-20 md:pt-28 pb-3 md:pb-8 px-4 sm:px-6 pointer-events-auto md:min-h-[calc(100vh-100px)]">
         <div className="homepage-hero__text-container flex flex-col items-center text-center max-w-4xl mx-auto">
-          {/* Headline */}
+          {/* Headline - Word-by-Word Rise with Soft Lens Blur */}
           <div className="homepage-hero__text-container-localized-hero-text max-w-4xl">
-            <h1 className="text-[28px] sm:text-4xl md:text-6xl lg:text-[74px] font-light tracking-[-0.015em] text-white leading-[1.18] md:leading-[1.08] text-balance select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] [word-spacing:0.08em]">
-              Your{' '}
-              <VerticalTextRoller words={['sites', 'tools', 'apps']} />{' '}
-              live in days, not weeks
-            </h1>
+            <WordLensReveal
+              as="h1"
+              immediate={true}
+              delay={80}
+              stagger={75}
+              className="text-[28px] sm:text-4xl md:text-6xl lg:text-[74px] font-light tracking-[-0.015em] text-white leading-[1.18] md:leading-[1.08] text-balance select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] [word-spacing:0.08em]"
+              words={[
+                'Your',
+                <VerticalTextRoller key="roller" words={['sites', 'tools', 'apps']} />,
+                'live',
+                'in',
+                'days,',
+                'not',
+                'weeks',
+              ]}
+            />
           </div>
 
-          {/* Subheading with clean breathing space */}
+          {/* Subheading with clean breathing space - Smooth single-block reveal */}
           <div className="mt-2.5 sm:mt-4 md:mt-7 max-w-2xl">
-            <p className="text-[13px] sm:text-base md:text-[19px] text-white/80 font-light leading-relaxed text-balance drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            <p
+              className="text-[13px] sm:text-base md:text-[19px] text-white/80 font-light leading-relaxed text-balance drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] animate-block-reveal"
+              style={{ animationDelay: '450ms' }}
+            >
               We build mobile-first websites that work for your business. Get free optimized prompts for your AI coding agent.
             </p>
           </div>
 
           {/* Action Buttons: "Get prompts" and "Book a call" */}
-          <div className="mt-3.5 sm:mt-6 md:mt-9 flex flex-row items-center justify-center gap-2.5 sm:gap-4 w-full sm:w-auto">
+          <div
+            className="mt-3.5 sm:mt-6 md:mt-9 flex flex-row items-center justify-center gap-2.5 sm:gap-4 w-full sm:w-auto animate-block-reveal"
+            style={{ animationDelay: '650ms' }}
+          >
             {/* Primary CTA: "Get prompts" */}
             <button
               onClick={onOpenPrompts}

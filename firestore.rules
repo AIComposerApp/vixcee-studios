@@ -20,5 +20,12 @@ service cloud.firestore {
       // Restrict read, update, delete to authenticated admins
       allow read, update, delete: if request.auth != null;
     }
+
+    match /prompt_waitlist/{waitlistId} {
+      // Allow developers to join the early access prompt waitlist
+      allow create: if request.resource.data.email is string;
+      // Restrict read, update, delete to authenticated admins
+      allow read, update, delete: if request.auth != null;
+    }
   }
 }

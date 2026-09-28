@@ -22,9 +22,38 @@
           "type": "string",
           "description": "Selected time of day slot (e.g. 11:00 AM)"
         },
+        "location": {
+          "type": "string",
+          "description": "Meeting platform/location (e.g. Google Meet)"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Client phone number for text notifications"
+        },
+        "guests": {
+          "type": "string",
+          "description": "Guest emails added to the calendar event"
+        },
+        "currentWebsite": {
+          "type": "string",
+          "description": "Current website URL if redesign"
+        },
         "projectNotes": {
           "type": "string",
-          "description": "Optional notes or project description"
+          "description": "Details about the project and meeting preparation"
+        },
+        "foreseenChallenges": {
+          "type": "string",
+          "description": "Any challenges or bottlenecks the client foresees"
+        },
+        "estimatedBudget": {
+          "type": "string",
+          "description": "Estimated budget tier for the web project"
+        },
+        "additionalInterests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional services interested in (Branding, Strategy, Communication)"
         },
         "createdAt": {
           "type": "string",
@@ -69,6 +98,28 @@
         }
       },
       "required": ["email", "agreedToTerms", "subscribedAt", "source", "status"]
+    },
+    "prompt_waitlist": {
+      "title": "Prompt Waitlist",
+      "description": "Early access developer waitlist for AI coding prompts",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Developer email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when waitlist was joined"
+        },
+        "source": {
+          "type": "string",
+          "description": "Origin of signup"
+        }
+      },
+      "required": ["email", "createdAt"]
     }
   },
   "firestore": {
@@ -79,6 +130,10 @@
     "/newsletter_subscribers/{subscriberId}": {
       "schema": "newsletter_subscribers",
       "description": "Newsletter email subscribers"
+    },
+    "/prompt_waitlist/{waitlistId}": {
+      "schema": "prompt_waitlist",
+      "description": "Developers who signed up for prompt early access"
     }
   }
 }

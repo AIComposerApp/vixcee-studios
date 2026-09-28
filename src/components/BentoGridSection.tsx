@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollReveal } from './motion/ScrollMotion.tsx';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 interface BentoGridSectionProps {
   onOpenPrompts: (promptId?: string) => void;
@@ -149,12 +150,13 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-14 sm:mb-16 lg:mb-20 px-4">
-          <ScrollReveal delay={0} clipMask={true}>
-            <h2 className="text-3xl sm:text-5xl lg:text-[56px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
-              Stop burning tokens
-            </h2>
-          </ScrollReveal>
-          <ScrollReveal delay={100}>
+          <WordLensReveal
+            as="h2"
+            text="Stop burning tokens"
+            stagger={75}
+            className="text-3xl sm:text-5xl lg:text-[56px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+          />
+          <ScrollReveal delay={120}>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-[19px] text-white/70 font-light leading-relaxed max-w-2xl text-balance">
               One-shot prompts for high-end animations and functionality.
             </p>
@@ -219,9 +221,12 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
                     </div>
 
                     {/* Headline */}
-                    <h3 className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-white tracking-[-0.025em] leading-[1.14] mb-4 text-balance">
-                      {row.heading}
-                    </h3>
+                    <WordLensReveal
+                      as="h3"
+                      text={row.heading}
+                      stagger={70}
+                      className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-white tracking-[-0.025em] leading-[1.14] mb-4 text-balance"
+                    />
 
                     {/* Description */}
                     <p className="text-sm sm:text-base lg:text-[17px] text-white/65 font-light leading-relaxed mb-7 max-w-lg">

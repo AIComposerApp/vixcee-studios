@@ -19,9 +19,10 @@ import { LoadingScreen } from './components/LoadingScreen.tsx';
 import { CaseStudiesPage } from './pages/CaseStudiesPage.tsx';
 import { CaseStudyDetailPage } from './pages/CaseStudyDetailPage.tsx';
 import { WorkPage } from './pages/WorkPage.tsx';
+import { AiCodingPromptsPage } from './pages/AiCodingPromptsPage.tsx';
 
 export type DockStage = 'initial' | 'docking' | 'docked';
-export type AppRoute = 'home' | 'case-studies' | 'case-study-detail' | 'work';
+export type AppRoute = 'home' | 'case-studies' | 'case-study-detail' | 'work' | 'ai-coding-prompts';
 
 export default function App() {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
@@ -56,6 +57,12 @@ export default function App() {
 
       if (pathname === '/work') {
         setCurrentRoute('work');
+        setSelectedCaseStudySlug(null);
+        return;
+      }
+
+      if (pathname === '/ai-coding-prompts' || pathname === '/prompts') {
+        setCurrentRoute('ai-coding-prompts');
         setSelectedCaseStudySlug(null);
         return;
       }
@@ -152,9 +159,17 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  const navigateToPrompts = () => {
+    if (window.location.pathname !== '/ai-coding-prompts') {
+      window.history.pushState({}, '', '/ai-coding-prompts');
+    }
+    setCurrentRoute('ai-coding-prompts');
+    setSelectedCaseStudySlug(null);
+    window.scrollTo(0, 0);
+  };
+
   const handleOpenPrompts = (promptId?: string) => {
-    setActivePromptId(promptId || null);
-    setIsPromptsOpen(true);
+    navigateToPrompts();
   };
 
   const handleScrollToBooking = () => {
@@ -205,8 +220,8 @@ export default function App() {
       {/* Header Navigation with Directional Scroll Hide/Show */}
       <Header
         dockStage={dockStage}
-        onOpenStart={handleScrollToBooking}
-        onOpenPrompts={() => handleOpenPrompts()}
+        onOpenStart={navigateToPrompts}
+        onOpenPrompts={navigateToPrompts}
         onNavigateCaseStudies={navigateToCaseStudies}
         onNavigateHome={navigateToHome}
         onNavigateWork={navigateToWork}
@@ -215,6 +230,15 @@ export default function App() {
 
       {/* Route Views */}
       <main id="content" className="flex-1 flex flex-col">
+        {currentRoute === 'ai-coding-prompts' && (
+          <AiCodingPromptsPage
+            onNavigateHome={navigateToHome}
+            onNavigateWork={navigateToWork}
+            onNavigateCaseStudies={navigateToCaseStudies}
+            dockStage={dockStage}
+          />
+        )}
+
         {currentRoute === 'work' && (
           <WorkPage
             onSelectCaseStudy={navigateToCaseStudyDetail}

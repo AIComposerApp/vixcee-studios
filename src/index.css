@@ -274,6 +274,40 @@
   animation: testimonialFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Ultra-optimized progressive text lens entrance: lightweight 4px blur, releases GPU shader on completion */
+@keyframes wordLensEntrance {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: none;
+  }
+}
+
+.animate-word-lens {
+  animation: wordLensEntrance 850ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Zero-blur single-block reveal for subheadlines and descriptions */
+@keyframes blockReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-block-reveal {
+  animation: blockReveal 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Atmospheric Bottom Ember Horizon Flow Animations (Ultra-Smooth Eased Motion) */
 @keyframes emberHorizonPulse {
   0%, 100% {

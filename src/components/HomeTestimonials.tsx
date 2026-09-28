@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 export interface TestimonialItem {
   id: string;
@@ -14,42 +15,42 @@ const TESTIMONIALS: TestimonialItem[] = [
     name: 'Princeofweb3',
     role: 'Web3 KOL',
     quote: '“One year since launch, and my website is still working for my business.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790409590/Prince-of-Web3-profile_pwk6qi.png',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790409590/Prince-of-Web3-profile_pwk6qi.png',
   },
   {
     id: 'alex-kim',
     name: 'Alex Kim',
     role: 'Front-end Developer',
     quote: '“The prompts saved me hours of back and forth with my coding agent.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790409916/Developer_wearing_hoodie_and_gla__2K_20260926090350_oowzsq.jpg',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790409916/Developer_wearing_hoodie_and_gla__2K_20260926090350_oowzsq.jpg',
   },
   {
     id: 'rachel-green',
     name: 'Rachel Green',
     role: 'Owner, Boutique Shop',
     quote: '“My website was live in five days. It looks better than anything I had before.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790409914/Man_wearing_suit_jacket_2K_20260926090349_rmtthz.jpg',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790409914/Man_wearing_suit_jacket_2K_20260926090349_rmtthz.jpg',
   },
   {
     id: 'sam-patel',
     name: 'Sam Patel',
     role: 'Vibe Coder',
     quote: '“I stopped burning tokens on bad generations. These prompts just work.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790410050/Black_male_software_developer_po__2K_20260926090718_gd2qir.jpg',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790410050/Black_male_software_developer_po__2K_20260926090718_gd2qir.jpg',
   },
   {
     id: 'laura-bennett',
     name: 'Laura Bennett',
     role: 'Founder, Consultancy',
     quote: '“The onboarding was painless. I knew exactly what I was getting.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790409920/Man_posing_for_headshot_2K_20260926090420_eyjjps.jpg',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790409920/Man_posing_for_headshot_2K_20260926090420_eyjjps.jpg',
   },
   {
     id: 'nina-alvarez',
     name: 'Nina Alvarez',
     role: 'Owner, Dental Clinic',
     quote: '“I got more leads in the first week than the previous month.”',
-    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/v1790410800/Male_developer_headshot_2K_20260926091944_kyoyna.jpg',
+    avatar: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_200/v1790410800/Male_developer_headshot_2K_20260926091944_kyoyna.jpg',
   },
 ];
 
@@ -57,6 +58,14 @@ export const HomeTestimonials: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
+
+  // Pre-warm all tiny avatar thumbnails into browser cache on mount
+  useEffect(() => {
+    TESTIMONIALS.forEach((t) => {
+      const img = new Image();
+      img.src = t.avatar;
+    });
+  }, []);
 
   // Auto-advance every 6.5 seconds when not hovered
   const nextSlide = useCallback(() => {
@@ -232,17 +241,12 @@ export const HomeTestimonials: React.FC = () => {
       <div className="relative z-10 max-w-[1080px] mx-auto px-4 sm:px-6 flex flex-col items-center">
         
         {/* Main Heading */}
-        <h2
+        <WordLensReveal
+          as="h2"
+          stagger={70}
           className="testimonials-heading text-center text-[#0C0C0E] font-bold text-2xl sm:text-3xl lg:text-[34px] leading-tight tracking-[-0.03em] max-w-[680px]"
-          aria-label="What clients and developers say about working with Vixcee Studios"
-        >
-          <div className="home-line-mask overflow-hidden py-0.5">
-            <div className="home-line">What clients and developers say</div>
-          </div>
-          <div className="home-line-mask overflow-hidden py-0.5">
-            <div className="home-line">about working with Vixcee Studios</div>
-          </div>
-        </h2>
+          text="What clients and developers say about working with Vixcee Studios"
+        />
 
         {/* Interactive Avatar Navigation Dots */}
         <div
@@ -275,7 +279,10 @@ export const HomeTestimonials: React.FC = () => {
                   <img
                     src={t.avatar}
                     alt={t.name}
-                    loading="lazy"
+                    loading="eager"
+                    decoding="async"
+                    width={52}
+                    height={52}
                     className="w-full h-full object-cover rounded-full select-none pointer-events-none bg-neutral-100"
                   />
                 </span>

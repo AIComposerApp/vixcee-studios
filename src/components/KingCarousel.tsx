@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 interface KingCarouselProps {
   onOpenPrompts?: (promptId?: string) => void;
@@ -73,9 +74,12 @@ export const KingCarousel: React.FC<KingCarouselProps> = ({
         {/* "Simple and fast" Section Header                             */}
         {/* ============================================================ */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-14 sm:mb-18 md:mb-20">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
-            Simple and fast
-          </h2>
+          <WordLensReveal
+            as="h2"
+            text="Simple and fast"
+            stagger={75}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+          />
           <p className="mt-3.5 sm:mt-4 text-base sm:text-lg md:text-xl text-white/70 font-light leading-relaxed max-w-xl text-balance">
             Three steps from first contact to a live website
           </p>

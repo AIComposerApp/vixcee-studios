@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 interface FaqItem {
   question: string;
@@ -50,9 +51,12 @@ export const FaqSection: React.FC = () => {
       <div className="w-full max-w-[1120px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Top Centered Header */}
         <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-[-0.025em] leading-tight">
-            FAQs
-          </h2>
+          <WordLensReveal
+            as="h2"
+            text="FAQs"
+            stagger={75}
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-[-0.025em] leading-tight"
+          />
           <p className="mt-3.5 sm:mt-4 text-base sm:text-lg text-white/70 font-light leading-relaxed text-balance">
             Answers to common questions about prompts, timelines, and the onboarding process
           </p>

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { PromptIcon } from './PromptIcon.tsx';
 import { ScrollReveal } from './motion/ScrollMotion.tsx';
+import { WordLensReveal } from './motion/WordLensReveal.tsx';
 
 interface WorkShowcaseSectionProps {
   onOpenPrompts?: (promptId?: string) => void;
@@ -424,11 +425,12 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
           {/* LEFT COLUMN: Expanded Editorial Stack & CTAs                 */}
           {/* ============================================================ */}
           <div className="flex flex-col items-start text-left z-10 max-w-xl">
-            <ScrollReveal delay={0} clipMask={true}>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance">
-                Work that performs.
-              </h2>
-            </ScrollReveal>
+            <WordLensReveal
+              as="h2"
+              text="Work that performs."
+              stagger={75}
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+            />
             
             <div className="mt-4 sm:mt-5 space-y-3 max-w-xl">
               <ScrollReveal delay={100}>

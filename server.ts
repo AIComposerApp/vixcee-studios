@@ -21,7 +21,20 @@ async function startServer() {
   // Email automation proxy endpoint
   app.post('/api/send-booking-confirmation', async (req: Request, res: Response) => {
     try {
-      const { name, email, date, timeSlot, projectNotes } = req.body;
+      const {
+        name,
+        email,
+        date,
+        timeSlot,
+        phone,
+        location,
+        guests,
+        currentWebsite,
+        projectNotes,
+        foreseenChallenges,
+        estimatedBudget,
+        additionalInterests,
+      } = req.body;
 
       if (!name || !email || !date || !timeSlot) {
         return res.status(400).json({ error: 'Missing required booking fields' });
@@ -44,7 +57,14 @@ async function startServer() {
                 <h2 style="color: #fc8000;">New Strategy Booking Received</h2>
                 <p><strong>Client:</strong> ${name} &lt;${email}&gt;</p>
                 <p><strong>Scheduled:</strong> ${date} at ${timeSlot}</p>
-                ${projectNotes ? `<p><strong>Notes:</strong><br/>${projectNotes}</p>` : ''}
+                ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+                ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
+                ${guests ? `<p><strong>Guests:</strong> ${guests}</p>` : ''}
+                ${currentWebsite ? `<p><strong>Current Website:</strong> <a href="${currentWebsite}" style="color:#fc8000;">${currentWebsite}</a></p>` : ''}
+                ${estimatedBudget ? `<p><strong>Estimated Budget:</strong> ${estimatedBudget}</p>` : ''}
+                ${additionalInterests && additionalInterests.length > 0 ? `<p><strong>Also Interested In:</strong> ${additionalInterests.join(', ')}</p>` : ''}
+                ${projectNotes ? `<p><strong>Project Details:</strong><br/>${projectNotes}</p>` : ''}
+                ${foreseenChallenges ? `<p><strong>Foreseen Challenges:</strong><br/>${foreseenChallenges}</p>` : ''}
               </div>
             `,
           });
@@ -95,6 +115,14 @@ async function startServer() {
                       <span class="slot-val">${timeSlot}</span>
                     </div>
                     <div class="slot-row">
+                      <span class="slot-label">Platform</span>
+                      <span class="slot-val">${location || 'Google Meet'}</span>
+                    </div>
+                    <div class="slot-row">
+                      <span class="slot-label">Meeting URL</span>
+                      <span class="slot-val"><a href="${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}" style="color: #ffffff; text-decoration: underline;">${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}</a></span>
+                    </div>
+                    <div class="slot-row">
                       <span class="slot-label">Host</span>
                       <span class="slot-val">Lead Engineer, Vixcee Studios</span>
                     </div>
@@ -104,8 +132,13 @@ async function startServer() {
                         : ''
                     }
                   </div>
-                  <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 24px;">
-                    Google Meet and calendar invite will appear in your inbox shortly. If you need to reschedule or prepare assets beforehand, simply reply to this email.
+                  <div style="text-align: center; margin: 24px 0 16px;">
+                    <a href="${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}" style="display: inline-block; padding: 12px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em;">
+                      Join Google Meet &rarr;
+                    </a>
+                  </div>
+                  <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 16px; text-align: center;">
+                    If you need to reschedule or prepare assets beforehand, simply reply to this email.
                   </p>
                   <div class="footer">
                     &copy; ${new Date().getFullYear()} Vixcee Studios &bull; Websites live in days, not weeks.

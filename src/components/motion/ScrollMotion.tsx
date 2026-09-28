@@ -11,6 +11,7 @@ interface ScrollRevealProps {
   duration?: number; // Duration in milliseconds (default: 850)
   threshold?: number; // Viewport intersection threshold (default: 0.15)
   yOffset?: number; // Initial translateY distance in px (default: 26)
+  yPercent?: number; // Initial translateY distance in % (e.g. 115 for full clip-mask reveal)
   clipMask?: boolean; // Wraps inside overflow-hidden for masked emergence
 }
 
@@ -22,6 +23,7 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   duration = 850,
   threshold = 0.15,
   yOffset = 26,
+  yPercent,
   clipMask = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -34,6 +36,14 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     // Honor prefers-reduced-motion
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setIsVisible(true);
+      return;
+    }
+
+    // Immediate check if element is already within viewport on mount
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      // Trigger animation smoothly
+      requestAnimationFrame(() => setIsVisible(true));
       return;
     }
 
@@ -50,8 +60,8 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
         }
       },
       {
-        threshold,
-        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.05,
+        rootMargin: '20px 0px 20px 0px',
       }
     );
 
@@ -59,8 +69,13 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     return () => observer.disconnect();
   }, [threshold]);
 
+  const initialTransform =
+    yPercent !== undefined
+      ? `translate3d(0, ${yPercent}%, 0)`
+      : `translate3d(0, ${yOffset}px, 0)`;
+
   const motionStyle: React.CSSProperties = {
-    transform: isVisible ? 'translate3d(0, 0, 0)' : `translate3d(0, ${yOffset}px, 0)`,
+    transform: isVisible ? 'translate3d(0, 0, 0)' : initialTransform,
     opacity: isVisible ? 1 : 0,
     transition: `transform ${duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, opacity ${duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
     willChange: 'transform, opacity',
@@ -68,15 +83,14 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
   if (clipMask) {
     return (
-      <div className="overflow-hidden">
+      <span ref={elementRef as any} className="block overflow-hidden py-1">
         <Component
-          ref={elementRef}
           className={className}
           style={motionStyle}
         >
           {children}
         </Component>
-      </div>
+      </span>
     );
   }
 
