@@ -78,9 +78,9 @@ export const KingCarousel: React.FC<KingCarouselProps> = ({
             as="h2"
             text="Simple and fast"
             stagger={75}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+            className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white text-balance"
           />
-          <p className="mt-3.5 sm:mt-4 text-base sm:text-lg md:text-xl text-white/70 font-light leading-relaxed max-w-xl text-balance">
+          <p className="mt-3.5 sm:mt-4 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed max-w-xl text-balance">
             Three steps from first contact to a live website
           </p>
         </div>

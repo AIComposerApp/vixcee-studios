@@ -154,10 +154,10 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
             as="h2"
             text="Stop burning tokens"
             stagger={75}
-            className="text-3xl sm:text-5xl lg:text-[56px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+            className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white text-balance"
           />
           <ScrollReveal delay={120}>
-            <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-[19px] text-white/70 font-light leading-relaxed max-w-2xl text-balance">
+            <p className="mt-3.5 sm:mt-4 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed max-w-2xl text-balance">
               One-shot prompts for high-end animations and functionality.
             </p>
           </ScrollReveal>
@@ -225,7 +225,7 @@ export const BentoGridSection: React.FC<BentoGridSectionProps> = ({
                       as="h3"
                       text={row.heading}
                       stagger={70}
-                      className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-white tracking-[-0.025em] leading-[1.14] mb-4 text-balance"
+                      className="text-2xl sm:text-3xl lg:text-[38px] font-light tracking-[-0.015em] leading-[1.16] mb-4 text-balance text-white"
                     />
 
                     {/* Description */}

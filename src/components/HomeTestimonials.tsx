@@ -244,7 +244,7 @@ export const HomeTestimonials: React.FC = () => {
         <WordLensReveal
           as="h2"
           stagger={70}
-          className="testimonials-heading text-center text-[#0C0C0E] font-bold text-2xl sm:text-3xl lg:text-[34px] leading-tight tracking-[-0.03em] max-w-[680px]"
+          className="testimonials-heading text-center text-[#0C0C0E] font-light tracking-[-0.015em] text-[24px] sm:text-3xl md:text-4xl lg:text-[44px] leading-[1.16] max-w-[720px]"
           text="What clients and developers say about working with Vixcee Studios"
         />
 

@@ -55,9 +55,9 @@ export const FaqSection: React.FC = () => {
             as="h2"
             text="FAQs"
             stagger={75}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-[-0.025em] leading-tight"
+            className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white"
           />
-          <p className="mt-3.5 sm:mt-4 text-base sm:text-lg text-white/70 font-light leading-relaxed text-balance">
+          <p className="mt-3.5 sm:mt-4 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed text-balance">
             Answers to common questions about prompts, timelines, and the onboarding process
           </p>
         </div>

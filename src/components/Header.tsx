@@ -223,10 +223,11 @@ export const Header: React.FC<HeaderProps> = ({
         Seamlessly blended background with incremental gradient fade:
         - Fades in smoothly only on scroll down
         - Extends down to 115px with a gradual mask-image gradient that fades from opaque to transparent
+        - Hidden when mobile menu is open so the logo and buttons float seamlessly on the full-screen blur
       */}
       <div
         className={`absolute top-0 left-0 right-0 h-[115px] pointer-events-none transition-opacity duration-500 ease-out ${
-          isStaticPinned || isScrolled ? 'opacity-100' : 'opacity-0'
+          !isMobileMenuOpen && (isStaticPinned || isScrolled) ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
           background:
@@ -544,10 +545,10 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer - Full-Fledged Extended Viewport Canvas */}
+      {/* Mobile Drawer - Full-Fledged Extended Viewport Canvas spanning entire screen */}
       {isMenuMounted && (
         <div
-          className={`md:hidden fixed inset-x-0 top-[80px] bottom-0 h-[calc(100dvh-80px)] pointer-events-auto bg-[#0c0c0e]/85 backdrop-blur-2xl border-t border-white/[0.08] px-6 pt-6 pb-8 flex flex-col justify-between overflow-y-auto transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`md:hidden fixed inset-0 h-[100dvh] w-full z-40 pointer-events-auto bg-[#0c0c0e]/85 backdrop-blur-2xl px-6 pt-24 pb-8 flex flex-col justify-between overflow-y-auto transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isMenuActive
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-4 pointer-events-none'

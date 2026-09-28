@@ -505,7 +505,7 @@ export const BookingSection: React.FC = () => {
               as="h2"
               delay={80}
               stagger={75}
-              className="font-light tracking-[-0.015em] text-white leading-[1.08] text-balance text-3xl sm:text-4xl md:text-5xl lg:text-[54px] select-none [word-spacing:0.08em]"
+              className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white text-balance [word-spacing:0.08em] select-none"
               words={[
                 'Your',
                 <VerticalTextRoller key="roller" words={['sites', 'tools', 'apps']} />,
@@ -519,7 +519,7 @@ export const BookingSection: React.FC = () => {
 
             {/* Clean Subtitle */}
             <ScrollReveal delay={180}>
-              <p className="mt-5 text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-lg">
+              <p className="mt-5 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed max-w-lg">
                 Direct engineer consultation. We map out your site architecture, mobile interactions, and timeline in 15 minutes.
               </p>
             </ScrollReveal>

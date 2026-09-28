@@ -429,12 +429,12 @@ export const WorkShowcaseSection: React.FC<WorkShowcaseSectionProps> = ({
               as="h2"
               text="Work that performs."
               stagger={75}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-white tracking-[-0.025em] leading-[1.08] text-balance"
+              className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white text-balance"
             />
             
             <div className="mt-4 sm:mt-5 space-y-3 max-w-xl">
               <ScrollReveal delay={100}>
-                <p className="text-base sm:text-lg md:text-xl text-white/80 font-light leading-relaxed text-balance">
+                <p className="text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed text-balance">
                   A curated showcase of mobile-first digital experiences engineered for high conversion, fluid 120fps motion, and uncompromising brand identity.
                 </p>
               </ScrollReveal>
