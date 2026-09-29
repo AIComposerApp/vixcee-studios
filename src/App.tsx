@@ -101,33 +101,44 @@ export default function App() {
     };
   }, []);
 
-  // Clean Navigation Handlers (Instant Scroll Reset)
+  // Unified Page Transition Sequence (1000ms centered reveal -> 800ms docking glide)
+  const runPageTransition = (updateRoute: () => void) => {
+    setDockStage('initial');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    updateRoute();
+
+    setTimeout(() => {
+      setDockStage('docking');
+    }, 1000);
+
+    setTimeout(() => {
+      setDockStage('docked');
+    }, 1800);
+  };
+
+  // Clean Navigation Handlers with Unified Cinematic Transition
   const navigateToHome = () => {
     if (window.location.pathname !== '/') {
       window.history.pushState({}, '', '/');
     }
-    setCurrentRoute('home');
-    setSelectedCaseStudySlug(null);
-    window.scrollTo(0, 0);
+    if (currentRoute === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    runPageTransition(() => {
+      setCurrentRoute('home');
+      setSelectedCaseStudySlug(null);
+    });
   };
 
   const navigateToCaseStudies = () => {
     if (window.location.pathname !== '/case-studies') {
       window.history.pushState({}, '', '/case-studies');
     }
-    // Trigger authentic loading screen progression matching the Work page transition
-    setDockStage('initial');
-    setCurrentRoute('case-studies');
-    setSelectedCaseStudySlug(null);
-    window.scrollTo(0, 0);
-
-    setTimeout(() => {
-      setDockStage('docking');
-    }, 1200);
-
-    setTimeout(() => {
-      setDockStage('docked');
-    }, 2050);
+    runPageTransition(() => {
+      setCurrentRoute('case-studies');
+      setSelectedCaseStudySlug(null);
+    });
   };
 
   const navigateToWork = (targetItemId?: string) => {
@@ -135,19 +146,10 @@ export default function App() {
       window.history.pushState({}, '', '/work');
     }
     setInitialWorkItemId(targetItemId || null);
-    // Trigger authentic loading screen progression to pre-warm work assets
-    setDockStage('initial');
-    setCurrentRoute('work');
-    setSelectedCaseStudySlug(null);
-    window.scrollTo(0, 0);
-
-    setTimeout(() => {
-      setDockStage('docking');
-    }, 1200);
-
-    setTimeout(() => {
-      setDockStage('docked');
-    }, 2050);
+    runPageTransition(() => {
+      setCurrentRoute('work');
+      setSelectedCaseStudySlug(null);
+    });
   };
 
   const navigateToCaseStudyDetail = (slug: string) => {
@@ -155,18 +157,20 @@ export default function App() {
     if (window.location.pathname !== targetUrl) {
       window.history.pushState({}, '', targetUrl);
     }
-    setCurrentRoute('case-study-detail');
-    setSelectedCaseStudySlug(slug);
-    window.scrollTo(0, 0);
+    runPageTransition(() => {
+      setCurrentRoute('case-study-detail');
+      setSelectedCaseStudySlug(slug);
+    });
   };
 
   const navigateToPrompts = () => {
     if (window.location.pathname !== '/ai-coding-prompts') {
       window.history.pushState({}, '', '/ai-coding-prompts');
     }
-    setCurrentRoute('ai-coding-prompts');
-    setSelectedCaseStudySlug(null);
-    window.scrollTo(0, 0);
+    runPageTransition(() => {
+      setCurrentRoute('ai-coding-prompts');
+      setSelectedCaseStudySlug(null);
+    });
   };
 
   const handleOpenPrompts = (promptId?: string) => {
