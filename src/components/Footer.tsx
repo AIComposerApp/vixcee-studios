@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Mail } from 'lucide-react';
 import { db } from '../firebase.ts';
 import { collection, addDoc } from 'firebase/firestore';
 
@@ -9,6 +10,24 @@ interface FooterProps {
   onNavigateHome?: () => void;
   onNavigateWork?: () => void;
 }
+
+const XIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const LinkedInIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+  </svg>
+);
+
+const TikTokIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.34 6.34 0 0 0 10.86 4.46A6.19 6.19 0 0 0 15.8 15.7V8.5a8.28 8.28 0 0 0 4.84 1.56V6.69h-.05z" />
+  </svg>
+);
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenPrompts,
@@ -46,6 +65,18 @@ export const Footer: React.FC<FooterProps> = ({
         source: 'footer_newsletter',
         status: 'active',
       });
+
+      // Dispatch automated welcome email via server SMTP
+      try {
+        await fetch('/api/send-newsletter-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim() }),
+        });
+      } catch (mailErr) {
+        console.warn('[Welcome email dispatch note]', mailErr);
+      }
+
       setIsSubscribed(true);
       setIsSubmitting(false);
     } catch (err) {
@@ -197,6 +228,49 @@ export const Footer: React.FC<FooterProps> = ({
                 Contact
               </a>
             </nav>
+
+            {/* Direct Email Inquiry */}
+            <div className="mt-7">
+              <a
+                href="mailto:hello@vixceestudios.com"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 text-xs font-mono text-white/70 hover:text-white transition-all group active:scale-[0.98] shadow-sm cursor-pointer"
+                aria-label="Send direct message to hello@vixceestudios.com"
+              >
+                <Mail className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors" />
+                <span>hello@vixceestudios.com</span>
+              </a>
+            </div>
+
+            {/* Official Social Links Dock */}
+            <div className="flex items-center gap-2.5 mt-3.5">
+              <a
+                href="https://www.tiktok.com/@vixcee_vibes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+                aria-label="Vixcee Studios on TikTok"
+              >
+                <TikTokIcon className="w-4 h-4" />
+              </a>
+              <a
+                href="https://x.com/vixceevibes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+                aria-label="Vixcee Studios on X"
+              >
+                <XIcon className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/mathew-victor-449a11388"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+                aria-label="Mathew Victor on LinkedIn"
+              >
+                <LinkedInIcon className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* RIGHT COLUMN: Newsletter Integration */}
@@ -265,12 +339,12 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* ============================================================ */}
-        {/* BOTTOM SECTION: Legal & Copyright (Divided by Horizontal Line) */}
+        {/* BOTTOM SECTION: Legal, Socials & Copyright                  */}
         {/* ============================================================ */}
-        <div className="mt-12 sm:mt-16 pt-7 sm:pt-8 border-t border-white/[0.10] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
+        <div className="mt-12 sm:mt-16 pt-7 sm:pt-8 border-t border-white/[0.10] flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-white/50">
           
           {/* Left Side: Legal Links */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 order-2 md:order-1">
             <a
               href="#terms"
               onClick={(e) => e.preventDefault()}
@@ -287,9 +361,47 @@ export const Footer: React.FC<FooterProps> = ({
             </a>
           </div>
 
+          {/* Center: Social Links & Direct Mail */}
+          <div className="flex items-center gap-3 order-1 md:order-2">
+            <a
+              href="mailto:hello@vixceestudios.com"
+              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+              aria-label="Send direct message to hello@vixceestudios.com"
+            >
+              <Mail className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://www.tiktok.com/@vixcee_vibes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+              aria-label="Vixcee Studios on TikTok"
+            >
+              <TikTokIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://x.com/vixceevibes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+              aria-label="Vixcee Studios on X"
+            >
+              <XIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/mathew-victor-449a11388"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+              aria-label="Mathew Victor on LinkedIn"
+            >
+              <LinkedInIcon className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
           {/* Right Side: Copyright */}
-          <div className="text-white/45 font-light text-center sm:text-right">
-            &copy; 2025 Vixcee Studios. All rights reserved.
+          <div className="text-white/45 font-light text-center md:text-right order-3">
+            &copy; 2026 Vixcee Studios. All rights reserved.
           </div>
 
         </div>

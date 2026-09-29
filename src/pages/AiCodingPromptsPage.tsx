@@ -56,10 +56,32 @@ export const AiCodingPromptsPage: React.FC<AiCodingPromptsPageProps> = ({
         createdAt: new Date().toISOString(),
         source: 'ai_coding_prompts_page',
       });
+
+      // Dispatch automated early access welcome email via server SMTP
+      try {
+        await fetch('/api/send-early-access-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: trimmed }),
+        });
+      } catch (mailErr) {
+        console.warn('[Early access email dispatch note]', mailErr);
+      }
+
       setStatus('success');
       setEmail('');
     } catch (err) {
       console.error('Failed to join prompt waitlist:', err);
+      // Still attempt email dispatch if user requested
+      try {
+        await fetch('/api/send-early-access-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: trimmed }),
+        });
+      } catch (mailErr) {
+        console.warn('[Early access fallback note]', mailErr);
+      }
       setStatus('success');
       setEmail('');
     }
