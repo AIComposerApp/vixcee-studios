@@ -723,24 +723,23 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Get AI Coding Prompts</span>
             </button>
 
-            {/* Direct Email Inquiry Card */}
-            <a
-              href="mailto:hello@vixceestudios.com"
-              className="w-full py-2.5 px-4 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 flex items-center justify-center gap-2 text-white/70 hover:text-white transition-all text-xs font-mono tracking-wide cursor-pointer active:scale-[0.99] group shadow-sm"
-              aria-label="Send direct message to hello@vixceestudios.com"
-            >
-              <Mail className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
-              <span>hello@vixceestudios.com</span>
-            </a>
-
-            {/* Official Social Links Dock */}
-            <div className="flex items-center justify-center gap-3 pt-1">
+            {/* Official Direct Contact & Social Links Dock */}
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <a
+                href="mailto:hello@vixceestudios.com"
+                className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
+                aria-label="Send direct message to hello@vixceestudios.com"
+                title="hello@vixceestudios.com"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
               <a
                 href="https://www.tiktok.com/@vixcee_vibes"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Vixcee Studios on TikTok"
+                title="TikTok"
               >
                 <TikTokIcon className="w-4 h-4" />
               </a>
@@ -750,6 +749,7 @@ export const Header: React.FC<HeaderProps> = ({
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Vixcee Studios on X"
+                title="X"
               >
                 <XIcon className="w-4 h-4" />
               </a>
@@ -759,6 +759,7 @@ export const Header: React.FC<HeaderProps> = ({
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Mathew Victor on LinkedIn"
+                title="LinkedIn"
               >
                 <LinkedInIcon className="w-4 h-4" />
               </a>

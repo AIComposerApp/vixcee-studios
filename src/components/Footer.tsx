@@ -229,26 +229,23 @@ export const Footer: React.FC<FooterProps> = ({
               </a>
             </nav>
 
-            {/* Direct Email Inquiry */}
-            <div className="mt-7">
+            {/* Official Direct Contact & Social Links Dock */}
+            <div className="flex items-center gap-2.5 mt-7">
               <a
                 href="mailto:hello@vixceestudios.com"
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 text-xs font-mono text-white/70 hover:text-white transition-all group active:scale-[0.98] shadow-sm cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Send direct message to hello@vixceestudios.com"
+                title="hello@vixceestudios.com"
               >
-                <Mail className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors" />
-                <span>hello@vixceestudios.com</span>
+                <Mail className="w-4 h-4" />
               </a>
-            </div>
-
-            {/* Official Social Links Dock */}
-            <div className="flex items-center gap-2.5 mt-3.5">
               <a
                 href="https://www.tiktok.com/@vixcee_vibes"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Vixcee Studios on TikTok"
+                title="TikTok"
               >
                 <TikTokIcon className="w-4 h-4" />
               </a>
@@ -258,6 +255,7 @@ export const Footer: React.FC<FooterProps> = ({
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Vixcee Studios on X"
+                title="X"
               >
                 <XIcon className="w-4 h-4" />
               </a>
@@ -267,6 +265,7 @@ export const Footer: React.FC<FooterProps> = ({
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
                 aria-label="Mathew Victor on LinkedIn"
+                title="LinkedIn"
               >
                 <LinkedInIcon className="w-4 h-4" />
               </a>
