@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -14,9 +15,195 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+// Dynamically resolves an active Google OAuth2 access token
+// Supports:
+// 1. Raw Service Account JSON (GOOGLE_SERVICE_ACCOUNT_JSON)
+// 2. Service Account Email + Private Key (GOOGLE_SERVICE_ACCOUNT_EMAIL + GOOGLE_SERVICE_ACCOUNT_KEY / GOOGLE_CALENDAR_ACCESS_TOKEN)
+// 3. Direct OAuth2 Access Token (ya29....)
+async function resolveGoogleAccessToken(): Promise<string | null> {
+  let saJsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  let clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_CALENDAR_ACCESS_TOKEN;
+
+  if (saJsonStr) {
+    try {
+      const sa = JSON.parse(saJsonStr);
+      if (sa.client_email) clientEmail = sa.client_email;
+      if (sa.private_key) privateKey = sa.private_key;
+    } catch {
+      // not JSON
+    }
+  }
+
+  if (privateKey && privateKey.startsWith('ya29.')) {
+    return privateKey.trim();
+  }
+
+  if (clientEmail && privateKey && privateKey.includes('BEGIN PRIVATE KEY')) {
+    try {
+      const keyFormatted = privateKey.replace(/\\n/g, '\n');
+      const now = Math.floor(Date.now() / 1000);
+      const header = { alg: 'RS256', typ: 'JWT' };
+      const claimSet = {
+        iss: clientEmail.trim(),
+        scope: 'https://www.googleapis.com/auth/calendar.events',
+        aud: 'https://oauth2.googleapis.com/token',
+        exp: now + 3600,
+        iat: now,
+      };
+
+      const b64 = (obj: any) =>
+        Buffer.from(JSON.stringify(obj))
+          .toString('base64')
+          .replace(/=/g, '')
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_');
+
+      const unsigned = `${b64(header)}.${b64(claimSet)}`;
+      const signer = crypto.createSign('RSA-SHA256');
+      signer.update(unsigned);
+      const signature = signer
+        .sign(keyFormatted, 'base64')
+        .replace(/=/g, '')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
+
+      const jwt = `${unsigned}.${signature}`;
+
+      const res = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          assertion: jwt,
+        }),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        return data.access_token;
+      } else {
+        const errText = await res.text();
+        console.warn('[Google JWT Token Exchange Error]', errText);
+      }
+    } catch (jwtErr) {
+      console.warn('[JWT Sign Exception]', jwtErr);
+    }
+  }
+
+  return null;
+}
+
 async function startServer() {
   const app = express();
   app.use(express.json());
+
+  // Backend Calendar & Google Meet Creation Endpoint (Zero client friction)
+  app.post('/api/create-calendar-meeting', async (req: Request, res: Response) => {
+    try {
+      const {
+        name,
+        email,
+        phone,
+        dateString,
+        timeSlot,
+        projectNotes,
+        foreseenChallenges,
+        estimatedBudget,
+        additionalInterests,
+        currentWebsite,
+      } = req.body;
+
+      if (!name || !email || !dateString || !timeSlot) {
+        return res.status(400).json({ error: 'Missing required booking fields' });
+      }
+
+      // Compute start and end times (15-min sprint call)
+      const [year, month, day] = dateString.split('-').map(Number);
+      const isPM = timeSlot.includes('PM');
+      const [timePart] = timeSlot.split(' ');
+      const [rawH, rawM] = timePart.split(':').map(Number);
+      let hours = rawH;
+      if (isPM && hours < 12) hours += 12;
+      if (!isPM && hours === 12) hours = 0;
+
+      const startDate = new Date(year, month - 1, day, hours, rawM);
+      const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+
+      const hostAccessToken = await resolveGoogleAccessToken();
+      const hostCalendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+
+      let meetUrl = 'https://meet.google.com/vdd-fxch-jcm';
+      let calendarEventId = '';
+      let calendarHtmlLink = '';
+
+      if (hostAccessToken) {
+        try {
+          const calendarPayload = {
+            summary: `Vixcee Studios Consultation with ${name}`,
+            description: `15-Minute Sprint Architecture Consultation.\n\nClient: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nWebsite: ${currentWebsite || 'N/A'}\nBudget: ${estimatedBudget || 'Not specified'}\nInterests: ${additionalInterests?.join(', ') || 'None'}\nProject Details: ${projectNotes || 'None'}\nChallenges: ${foreseenChallenges || 'None'}`,
+            start: {
+              dateTime: startDate.toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+            },
+            end: {
+              dateTime: endDate.toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+            },
+            attendees: [
+              { email, displayName: name },
+            ],
+            conferenceData: {
+              createRequest: {
+                requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                conferenceSolutionKey: {
+                  type: 'hangoutsMeet',
+                },
+              },
+            },
+          };
+
+          const calRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(hostCalendarId)}/events?conferenceDataVersion=1&sendUpdates=all`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${hostAccessToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(calendarPayload),
+            }
+          );
+
+          if (calRes.ok) {
+            const calData = (await calRes.json()) as any;
+            calendarEventId = calData.id || '';
+            calendarHtmlLink = calData.htmlLink || '';
+            meetUrl =
+              calData.hangoutLink ||
+              calData.conferenceData?.entryPoints?.find((ep: any) => ep.entryPointType === 'video')?.uri ||
+              meetUrl;
+            console.log(`[Google Calendar Created] Event ID: ${calendarEventId}, Meet: ${meetUrl}`);
+          } else {
+            const errBody = await calRes.text();
+            console.warn('[Google Calendar Server Error Response]', calRes.status, errBody);
+          }
+        } catch (calErr) {
+          console.warn('[Google Calendar Server Error]', calErr);
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        meetUrl,
+        calendarEventId,
+        calendarHtmlLink,
+      });
+    } catch (err: any) {
+      console.error('[Create Calendar Meeting Error]', err);
+      return res.status(500).json({ error: err.message || 'Internal server error' });
+    }
+  });
 
   // Email automation proxy endpoint
   app.post('/api/send-booking-confirmation', async (req: Request, res: Response) => {
@@ -120,7 +307,7 @@ async function startServer() {
                     </div>
                     <div class="slot-row">
                       <span class="slot-label">Meeting URL</span>
-                      <span class="slot-val"><a href="${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}" style="color: #ffffff; text-decoration: underline;">${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}</a></span>
+                      <span class="slot-val"><a href="${req.body.meetUrl || 'https://meet.google.com/vdd-fxch-jcm'}" style="color: #ffffff; text-decoration: underline;">${req.body.meetUrl || 'https://meet.google.com/vdd-fxch-jcm'}</a></span>
                     </div>
                     <div class="slot-row">
                       <span class="slot-label">Host</span>
@@ -133,7 +320,7 @@ async function startServer() {
                     }
                   </div>
                   <div style="text-align: center; margin: 24px 0 16px;">
-                    <a href="${req.body.meetUrl || 'https://meet.google.com/vix-cees-tud'}" style="display: inline-block; padding: 12px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em;">
+                    <a href="${req.body.meetUrl || 'https://meet.google.com/vdd-fxch-jcm'}" style="display: inline-block; padding: 12px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em;">
                       Join Google Meet &rarr;
                     </a>
                   </div>

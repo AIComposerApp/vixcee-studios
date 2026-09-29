@@ -152,14 +152,14 @@ export const AiCodingPromptsPage: React.FC<AiCodingPromptsPageProps> = ({
           </div>
 
           {status === 'success' ? (
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-[#141418]/95 backdrop-blur-2xl shadow-2xl animate-in fade-in duration-300">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
-                <Check className="w-6 h-6" />
+            <div className="flex flex-col items-center justify-center p-6 sm:p-7 rounded-2xl bg-[#141418]/95 backdrop-blur-2xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#F04E23]/20 via-[#FF661F]/15 to-[#FFAA00]/20 border border-[#F04E23]/40 flex items-center justify-center text-white mb-3.5 shadow-[0_0_24px_rgba(240,78,35,0.30)]">
+                <Check className="w-6 h-6 stroke-[2]" />
               </div>
               <p className="text-base sm:text-lg font-semibold text-white tracking-tight">
                 You're on the early access list!
               </p>
-              <p className="text-xs sm:text-sm text-white/60 font-light mt-1">
+              <p className="text-xs sm:text-sm text-white/60 font-light mt-1.5 text-center max-w-sm">
                 Watch your inbox this Friday for the first batch of prompt recipes.
               </p>
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { AngledCarousel } from '../components/AngledCarousel.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
@@ -10,6 +10,7 @@ interface CaseStudiesPageProps {
   onSelectCaseStudy: (slug: string) => void;
   onOpenBookCall: () => void;
   onNavigateHome: () => void;
+  dockStage?: 'initial' | 'docking' | 'docked';
 }
 
 // Client brands strip matching reference
@@ -22,6 +23,17 @@ const CLIENT_LOGOS = [
   'Hasbro',
   'nuro',
   'ALSO.',
+];
+
+const HEADLINE_TOKENS: (string | React.ReactNode)[] = [
+  'Custom',
+  <VerticalTextRoller key="roller" words={['sites', 'tools', 'apps']} />,
+  'that',
+  'turn',
+  'visitors',
+  'into',
+  'paying',
+  'clients.',
 ];
 
 // Dynamic minimal case study grid items from CASE_STUDIES
@@ -59,7 +71,10 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
   onSelectCaseStudy,
   onOpenBookCall,
   onNavigateHome,
+  dockStage = 'docked',
 }) => {
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
   const featured = CASE_STUDIES[0]; // Prince of Web3
   const secondary1 = CASE_STUDIES[1]; // Carizma Hotels
   const secondary2 = CASE_STUDIES[2]; // Scribe
@@ -67,6 +82,12 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // Guaranteed 60ms paint buffer before firing animation state
+    const timer = setTimeout(() => {
+      setShouldAnimate(true);
+    }, 60);
+
     // Pre-warm all optimized case study images into memory immediately
     CASE_STUDIES.forEach((cs) => {
       if (cs.imageUrl) {
@@ -74,11 +95,12 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
         img.src = cs.imageUrl;
       }
     });
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="w-full min-h-screen bg-[#0c0c0e] text-white selection:bg-white selection:text-black relative pb-28">
-      
       {/* ============================================================ */}
       {/* 1. TOP HERO HEADER (Matching Reference)                      */}
       {/* ============================================================ */}
@@ -118,20 +140,54 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
         {/* Content Container (Elevated above gradient) */}
         <div className="relative z-10">
           {/* Eyebrow */}
-          <p className="text-[12px] sm:text-[13px] uppercase tracking-[0.25em] text-white/45 font-medium mb-5">
+          <p
+            className={`text-[12px] sm:text-[13px] uppercase tracking-[0.25em] text-white/45 font-medium mb-5 ${
+              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
+            }`}
+            style={{
+              animationDelay: '80ms',
+            }}
+          >
             PROVEN OUTCOMES
           </p>
 
-          {/* Large Headline with Vertical Roller Transition */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.03em] text-white max-w-4xl mx-auto leading-[1.15] mb-4">
-            Custom <VerticalTextRoller words={['sites', 'tools', 'apps']} /> that turn visitors into paying clients.
+          {/* Large Headline with Vertical Roller Transition & Word-by-Word Lens Reveal */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-light tracking-[-0.015em] text-white max-w-4xl mx-auto leading-[1.14] md:leading-[1.08] mb-4 text-balance [word-spacing:0.08em]">
+            {HEADLINE_TOKENS.map((token, idx) => (
+              <span
+                key={idx}
+                className={`inline-block mr-[0.24em] last:mr-0 ${
+                  shouldAnimate ? 'animate-word-lens' : 'opacity-0'
+                }`}
+                style={{
+                  animationDelay: `${120 + idx * 75}ms`,
+                }}
+              >
+                {token}
+              </span>
+            ))}
           </h1>
-          <p className="text-base sm:text-lg text-white/60 font-light max-w-lg mx-auto leading-relaxed mb-8">
+
+          <p
+            className={`mt-5 sm:mt-6 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light max-w-lg mx-auto leading-relaxed mb-8 text-balance ${
+              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
+            }`}
+            style={{
+              animationDelay: '520ms',
+            }}
+          >
             High-converting digital products built to scale your business — delivered in days.
           </p>
 
           {/* Studio Signature Gradient Button */}
-          <div>
+          <div
+            className={`transition-all duration-300 ${
+              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
+            }`}
+            style={{
+              animationDelay: '680ms',
+            }}
+          >
             <button
               onClick={onOpenBookCall}
               className="inline-flex items-center gap-2 px-6 sm:px-7 py-3 rounded-lg bg-gradient-to-r from-[#F04E23] via-[#FF661F] to-[#FFAA00] text-white font-semibold text-[13px] sm:text-[14px] uppercase tracking-[0.06em] hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#F04E23]/25 cursor-pointer"
@@ -420,7 +476,13 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       {/* ============================================================ */}
       {/* 9. FLOATING BOTTOM-PINNED BREADCRUMB PILL                    */}
       {/* ============================================================ */}
-      <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] pointer-events-auto">
+      <div
+        className={`fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] pointer-events-auto transition-all duration-500 ease-out ${
+          dockStage === 'docked'
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
         <nav
           aria-label="Floating breadcrumb"
           className="inline-flex items-center gap-3 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-[#0c0c0e]/92 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black ring-1 ring-white/5 text-[12px] sm:text-[13px] text-white/60 font-medium select-none"

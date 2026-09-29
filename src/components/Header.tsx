@@ -102,7 +102,6 @@ export const Header: React.FC<HeaderProps> = ({
     let timer2: NodeJS.Timeout;
 
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
       setIsMenuMounted(true);
       const frame = requestAnimationFrame(() => {
         setIsMenuActive(true);
@@ -118,7 +117,6 @@ export const Header: React.FC<HeaderProps> = ({
         clearTimeout(timer2);
       };
     } else {
-      document.body.style.overflow = '';
       setAreItemsVisible(false);
       timer1 = setTimeout(() => {
         setIsMenuActive(false);
@@ -133,13 +131,6 @@ export const Header: React.FC<HeaderProps> = ({
       };
     }
   }, [isMobileMenuOpen]);
-
-  // Clean up body overflow lock on unmount
-  useEffect(() => {
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
 
   // Directional scroll detection: hide on scroll down, smooth reveal on scroll up
   useEffect(() => {
@@ -242,7 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
       />
 
       {/* Header Content Row */}
-      <div className="relative z-10 max-w-[1466px] mx-auto px-6 lg:px-12 h-[80px] flex items-center justify-between pointer-events-auto">
+      <div className="relative z-50 max-w-[1466px] mx-auto px-6 lg:px-12 h-[80px] flex items-center justify-between pointer-events-auto">
         {/* Left Side: Work, Case studies, Resources (dissolves in synchronously as logo flies) */}
         <div
           className={`flex-1 flex items-center justify-start transition-opacity duration-700 ease-out ${
@@ -518,7 +509,7 @@ export const Header: React.FC<HeaderProps> = ({
                 willChange: 'opacity, transform',
               }}
               className={`absolute top-[calc(100%-2px)] left-1/2 -translate-x-1/2 pointer-events-none whitespace-nowrap ${
-                !isWordmarkVisible || isScrolled
+                !isWordmarkVisible || isScrolled || isMobileMenuOpen
                   ? 'opacity-0 -translate-y-1 pointer-events-none'
                   : 'opacity-100 translate-y-0'
               }`}
@@ -548,7 +539,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Drawer - Full-Fledged Extended Viewport Canvas spanning entire screen */}
       {isMenuMounted && (
         <div
-          className={`md:hidden fixed inset-0 h-[100dvh] w-full z-40 pointer-events-auto bg-[#0c0c0e]/85 backdrop-blur-2xl px-6 pt-24 pb-8 flex flex-col justify-between overflow-y-auto transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`md:hidden fixed inset-0 h-[100dvh] w-full max-w-[100vw] z-40 pointer-events-auto bg-[#0c0c0e]/85 backdrop-blur-2xl px-6 pt-24 pb-8 flex flex-col justify-between overflow-x-hidden overflow-y-auto overscroll-contain transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isMenuActive
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-4 pointer-events-none'

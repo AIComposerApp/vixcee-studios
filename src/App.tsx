@@ -20,6 +20,7 @@ import { CaseStudiesPage } from './pages/CaseStudiesPage.tsx';
 import { CaseStudyDetailPage } from './pages/CaseStudyDetailPage.tsx';
 import { WorkPage } from './pages/WorkPage.tsx';
 import { AiCodingPromptsPage } from './pages/AiCodingPromptsPage.tsx';
+import { Analytics } from '@vercel/analytics/react';
 
 export type DockStage = 'initial' | 'docking' | 'docked';
 export type AppRoute = 'home' | 'case-studies' | 'case-study-detail' | 'work' | 'ai-coding-prompts';
@@ -255,6 +256,7 @@ export default function App() {
             onSelectCaseStudy={navigateToCaseStudyDetail}
             onOpenBookCall={handleScrollToBooking}
             onNavigateHome={navigateToHome}
+            dockStage={dockStage}
           />
         )}
 
@@ -317,6 +319,9 @@ export default function App() {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
       />
+
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }

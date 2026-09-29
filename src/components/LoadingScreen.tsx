@@ -9,7 +9,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ stage = 'docked' }
 
   return (
     <div
-      className={`fixed inset-0 z-40 pointer-events-none select-none overflow-hidden transition-opacity duration-700 ease-out ${
+      className={`fixed inset-0 z-[60] pointer-events-none select-none overflow-hidden transition-opacity duration-700 ease-out ${
         stage === 'docking' ? 'opacity-0' : 'opacity-100'
       }`}
       aria-hidden="true"
