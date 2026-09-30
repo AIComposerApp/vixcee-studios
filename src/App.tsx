@@ -271,6 +271,7 @@ export default function App() {
             onSelectCaseStudy={navigateToCaseStudyDetail}
             onOpenBookCall={handleScrollToBooking}
             onNavigateHome={navigateToHome}
+            dockStage={dockStage}
           />
         )}
 
@@ -279,6 +280,7 @@ export default function App() {
             <Hero
               onOpenPrompts={() => handleOpenPrompts()}
               onOpenBookCall={handleScrollToBooking}
+              dockStage={dockStage}
             />
             <BentoGridSection
               onOpenPrompts={handleOpenPrompts}

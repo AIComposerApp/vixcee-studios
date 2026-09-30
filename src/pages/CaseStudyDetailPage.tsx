@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { CloudinaryVideo, getDirectVideoUrl } from '../components/CloudinaryVideo.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
@@ -10,7 +11,18 @@ interface CaseStudyDetailPageProps {
   onSelectCaseStudy: (slug: string) => void;
   onOpenBookCall: () => void;
   onNavigateHome: () => void;
+  dockStage?: 'initial' | 'docking' | 'docked';
 }
+
+const heroEditorialTransition = {
+  duration: 3.2,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
+
+const deepDiveTransition = {
+  duration: 2.8,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
 
 const SECTIONS = [
   { id: 'challenge', label: 'Challenge', index: '01' },
@@ -32,7 +44,9 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
   onSelectCaseStudy,
   onOpenBookCall,
   onNavigateHome,
+  dockStage = 'docked',
 }) => {
+  const isRevealed = dockStage !== 'initial';
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('challenge');
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -129,7 +143,15 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
       {/* ============================================================ */}
       {/* 1. TOP HERO HEADER & OVERVIEW                                */}
       {/* ============================================================ */}
-      <div className="pt-28 sm:pt-36 max-w-[1240px] mx-auto px-6 lg:px-12 text-left">
+      <motion.div
+        className="pt-28 sm:pt-36 max-w-[1240px] mx-auto px-6 lg:px-12 text-left"
+        initial={{ opacity: 0, y: 64 }}
+        animate={{
+          opacity: isRevealed ? 1 : 0,
+          y: isRevealed ? 0 : 64,
+        }}
+        transition={heroEditorialTransition}
+      >
         
         {/* Top Static Title Header */}
         <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-normal tracking-[-0.03em] text-white max-w-4xl leading-[1.12] mb-12">
@@ -181,7 +203,19 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
 
         </div>
 
-      </div>
+      </motion.div>
+
+      {/* ============================================================ */}
+      {/* 2. CASE STUDY VIDEO SHOWCASE, ARTICLE BODY & NEXT PROJECTS   */}
+      {/* ============================================================ */}
+      <motion.div
+        initial={{ opacity: 0, y: 72 }}
+        animate={{
+          opacity: isRevealed ? 1 : 0,
+          y: isRevealed ? 0 : 72,
+        }}
+        transition={deepDiveTransition}
+      >
 
       {/* ============================================================ */}
       {/* 2. DEDICATED PROMINENT VIDEO SHOWCASE (Exclusive to this page) */}
@@ -468,11 +502,18 @@ export const CaseStudyDetailPage: React.FC<CaseStudyDetailPageProps> = ({
           ))}
         </div>
       </section>
+      </motion.div>
 
       {/* ============================================================ */}
       {/* 6. FIXED FLOATING COMMAND DOCK (EXACT SCREENSHOT RESTORATION) */}
       {/* ============================================================ */}
-      <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] pointer-events-auto">
+      <div
+        className={`fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] pointer-events-auto transition-all duration-500 ease-out ${
+          dockStage === 'docked'
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
         <nav
           aria-label="Case study navigation dock"
           className="inline-flex items-center gap-1.5 sm:gap-3.5 px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-full bg-[#141416]/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black ring-1 ring-white/5 text-[11px] sm:text-[13px] text-white/70 select-none max-w-full"

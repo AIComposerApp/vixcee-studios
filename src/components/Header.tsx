@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { ChevronDown, ArrowRight, LayoutTemplate, BookOpen, Mail } from 'lucide-react';
 import { PromptIcon } from './PromptIcon.tsx';
 
@@ -255,11 +256,17 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Header Content Row */}
       <div className="relative z-50 max-w-[1466px] mx-auto px-6 lg:px-12 h-[80px] flex items-center justify-between pointer-events-auto">
-        {/* Left Side: Work, Case studies, Resources (dissolves in synchronously as logo flies) */}
-        <div
-          className={`flex-1 flex items-center justify-start transition-opacity duration-700 ease-out ${
-            isNavVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        {/* Left Side: Work, Case studies, Resources (Synchronous cinematic slide-and-fade) */}
+        <motion.div
+          className={`flex-1 flex items-center justify-start ${
+            isNavVisible ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
+          initial={{ opacity: 0, y: -36 }}
+          animate={{
+            opacity: isNavVisible ? 1 : 0,
+            y: isNavVisible ? 0 : -36,
+          }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <nav className="hidden md:flex items-center space-x-7 text-[14px] font-medium tracking-tight text-white/80">
             <a
@@ -412,7 +419,7 @@ export const Header: React.FC<HeaderProps> = ({
               />
             </div>
           </button>
-        </div>
+        </motion.div>
 
         {/* 
           Center: Stable Brand Identity Hosting Unified Continuous Single-Element Logo
@@ -542,11 +549,17 @@ export const Header: React.FC<HeaderProps> = ({
           </a>
         </div>
 
-        {/* Right Side: Sign up (Orange-to-Yellow Gradient CTA Button) */}
-        <div
-          className={`flex-1 flex items-center justify-end transition-opacity duration-700 ease-out ${
-            isNavVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        {/* Right Side: Sign up (Synchronous cinematic slide-and-fade) */}
+        <motion.div
+          className={`flex-1 flex items-center justify-end ${
+            isNavVisible ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
+          initial={{ opacity: 0, y: -36 }}
+          animate={{
+            opacity: isNavVisible ? 1 : 0,
+            y: isNavVisible ? 0 : -36,
+          }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <button
             onClick={onOpenStart}
@@ -554,7 +567,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             Prompts
           </button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Mobile Drawer - Full-Fledged Extended Viewport Canvas spanning entire screen */}

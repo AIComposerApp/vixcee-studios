@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { AngledCarousel } from '../components/AngledCarousel.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
@@ -12,6 +13,16 @@ interface CaseStudiesPageProps {
   onNavigateHome: () => void;
   dockStage?: 'initial' | 'docking' | 'docked';
 }
+
+const heroHeaderTransition = {
+  duration: 3.2,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
+
+const projectGridTransition = {
+  duration: 2.8,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
 
 // Client brands strip matching reference
 const CLIENT_LOGOS = [
@@ -73,7 +84,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
   onNavigateHome,
   dockStage = 'docked',
 }) => {
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const isRevealed = dockStage !== 'initial';
 
   const featured = CASE_STUDIES[0]; // Prince of Web3
   const secondary1 = CASE_STUDIES[1]; // Carizma Hotels
@@ -83,11 +94,6 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // Guaranteed 60ms paint buffer before firing animation state
-    const timer = setTimeout(() => {
-      setShouldAnimate(true);
-    }, 60);
-
     // Pre-warm all optimized case study images into memory immediately
     CASE_STUDIES.forEach((cs) => {
       if (cs.imageUrl) {
@@ -95,8 +101,6 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
         img.src = cs.imageUrl;
       }
     });
-
-    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -104,7 +108,15 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
       {/* ============================================================ */}
       {/* 1. TOP HERO HEADER (Matching Reference)                      */}
       {/* ============================================================ */}
-      <section className="relative isolate pt-32 sm:pt-40 pb-10 px-6 lg:px-12 max-w-[1340px] mx-auto text-center overflow-visible">
+      <motion.section
+        className="relative isolate pt-32 sm:pt-40 pb-10 px-6 lg:px-12 max-w-[1340px] mx-auto text-center overflow-visible"
+        initial={{ opacity: 0, y: 64 }}
+        animate={{
+          opacity: isRevealed ? 1 : 0,
+          y: isRevealed ? 0 : 64,
+        }}
+        transition={heroHeaderTransition}
+      >
         
         {/* Animated Ember Horizon Flow Gradient Shader Behind Hero */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] sm:w-[130%] h-[380px] sm:h-[480px] pointer-events-none overflow-visible z-0">
@@ -140,54 +152,25 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
         {/* Content Container (Elevated above gradient) */}
         <div className="relative z-10">
           {/* Eyebrow */}
-          <p
-            className={`text-[12px] sm:text-[13px] uppercase tracking-[0.25em] text-white/45 font-medium mb-5 ${
-              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
-            }`}
-            style={{
-              animationDelay: '80ms',
-            }}
-          >
+          <p className="text-[12px] sm:text-[13px] uppercase tracking-[0.25em] text-white/45 font-medium mb-5">
             PROVEN OUTCOMES
           </p>
 
-          {/* Large Headline with Vertical Roller Transition & Word-by-Word Lens Reveal */}
+          {/* Large Headline with Vertical Roller Transition */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-light tracking-[-0.015em] text-white max-w-4xl mx-auto leading-[1.14] md:leading-[1.08] mb-4 text-balance [word-spacing:0.08em]">
             {HEADLINE_TOKENS.map((token, idx) => (
-              <span
-                key={idx}
-                className={`inline-block mr-[0.24em] last:mr-0 ${
-                  shouldAnimate ? 'animate-word-lens' : 'opacity-0'
-                }`}
-                style={{
-                  animationDelay: `${120 + idx * 75}ms`,
-                }}
-              >
+              <span key={idx} className="inline-block mr-[0.24em] last:mr-0">
                 {token}
               </span>
             ))}
           </h1>
 
-          <p
-            className={`mt-5 sm:mt-6 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light max-w-lg mx-auto leading-relaxed mb-8 text-balance ${
-              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
-            }`}
-            style={{
-              animationDelay: '520ms',
-            }}
-          >
+          <p className="mt-5 sm:mt-6 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light max-w-lg mx-auto leading-relaxed mb-8 text-balance">
             High-converting digital products built to scale your business — delivered in days.
           </p>
 
           {/* Studio Signature Gradient Button */}
-          <div
-            className={`transition-all duration-300 ${
-              shouldAnimate ? 'animate-block-reveal' : 'opacity-0'
-            }`}
-            style={{
-              animationDelay: '680ms',
-            }}
-          >
+          <div>
             <button
               onClick={onOpenBookCall}
               className="inline-flex items-center gap-2 px-6 sm:px-7 py-3 rounded-lg bg-gradient-to-r from-[#F04E23] via-[#FF661F] to-[#FFAA00] text-white font-semibold text-[13px] sm:text-[14px] uppercase tracking-[0.06em] hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#F04E23]/25 cursor-pointer"
@@ -198,7 +181,19 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           </div>
         </div>
 
-      </section>
+      </motion.section>
+
+      {/* ============================================================ */}
+      {/* 2. CASE STUDIES PROJECT GRID & CARDS (Motion Glide Zone)      */}
+      {/* ============================================================ */}
+      <motion.div
+        initial={{ opacity: 0, y: 72 }}
+        animate={{
+          opacity: isRevealed ? 1 : 0,
+          y: isRevealed ? 0 : 72,
+        }}
+        transition={projectGridTransition}
+      >
 
       {/* ============================================================ */}
       {/* 2. SHOWCASE CAROUSEL (Hero Style 3D Angled Carousel)         */}
@@ -472,6 +467,7 @@ export const CaseStudiesPage: React.FC<CaseStudiesPageProps> = ({
           <span>Book a call</span>
         </button>
       </section>
+      </motion.div>
 
       {/* ============================================================ */}
       {/* 9. FLOATING BOTTOM-PINNED BREADCRUMB PILL                    */}

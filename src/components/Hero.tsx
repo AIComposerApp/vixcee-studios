@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { PromptIcon } from './PromptIcon.tsx';
 import { DotGridBackground } from './DotGridBackground.tsx';
@@ -9,9 +10,22 @@ import { WordLensReveal } from './motion/WordLensReveal.tsx';
 interface HeroProps {
   onOpenPrompts: () => void;
   onOpenBookCall: () => void;
+  dockStage?: 'initial' | 'docking' | 'docked';
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => {
+const heroBodyTransition = {
+  duration: 3.2,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
+
+const bottomTransition = {
+  duration: 2.8,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
+
+export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall, dockStage = 'docked' }) => {
+  const isRevealed = dockStage !== 'initial';
+
   return (
     <section
       id="homepage-hero"
@@ -50,14 +64,22 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
           - On Mobile: Compact, elegant vertical spacing fitting alongside the carousel inside viewport upfront.
           - On Desktop: Centered, spacious fold with ample breathing room. */}
       <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center pt-16 sm:pt-20 md:pt-28 pb-3 md:pb-8 px-4 sm:px-6 pointer-events-auto md:min-h-[calc(100vh-100px)]">
-        <div className="homepage-hero__text-container flex flex-col items-center text-center max-w-4xl mx-auto">
+        <motion.div
+          className="homepage-hero__text-container flex flex-col items-center text-center max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 64 }}
+          animate={{
+            opacity: isRevealed ? 1 : 0,
+            y: isRevealed ? 0 : 64,
+          }}
+          transition={heroBodyTransition}
+        >
           {/* Headline - Word-by-Word Rise with Soft Lens Blur */}
           <div className="homepage-hero__text-container-localized-hero-text max-w-4xl">
             <WordLensReveal
               as="h1"
               immediate={true}
-              delay={80}
-              stagger={75}
+              delay={0}
+              stagger={60}
               className="text-[28px] sm:text-4xl md:text-6xl lg:text-[74px] font-light tracking-[-0.015em] text-white leading-[1.18] md:leading-[1.08] text-balance select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] [word-spacing:0.08em]"
               words={[
                 'Your',
@@ -71,21 +93,15 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
             />
           </div>
 
-          {/* Subheading with clean breathing space - Smooth single-block reveal */}
+          {/* Subheading with clean breathing space - Smooth concurrent reveal */}
           <div className="mt-2.5 sm:mt-4 md:mt-7 max-w-2xl">
-            <p
-              className="text-[13px] sm:text-base md:text-[19px] text-white/80 font-light leading-relaxed text-balance drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] animate-block-reveal"
-              style={{ animationDelay: '450ms' }}
-            >
+            <p className="text-[13px] sm:text-base md:text-[19px] text-white/80 font-light leading-relaxed text-balance drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               We build mobile-first websites that work for your business. Get free optimized prompts for your AI coding agent.
             </p>
           </div>
 
           {/* Action Buttons: "Get prompts" and "Book a call" */}
-          <div
-            className="mt-3.5 sm:mt-6 md:mt-9 flex flex-row items-center justify-center gap-2.5 sm:gap-4 w-full sm:w-auto animate-block-reveal"
-            style={{ animationDelay: '650ms' }}
-          >
+          <div className="mt-3.5 sm:mt-6 md:mt-9 flex flex-row items-center justify-center gap-2.5 sm:gap-4 w-full sm:w-auto">
             {/* Primary CTA: "Get prompts" */}
             <button
               onClick={onOpenPrompts}
@@ -108,16 +124,24 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPrompts, onOpenBookCall }) => 
               <span>Book a call</span>
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 5. Angled Showcase Carousel:
           - On Mobile: Sits directly in the lower portion of the screen, with both its top and bottom edges 100% visible upfront without scrolling.
           - On Desktop: Peaks slightly above the bottom fold; scrolling brings the full carousel into view.
           - Seamless Dark Transition: The dot grid and background dissolve into pure solid #0c0c0e starting from the vertical center of the carousel cards. */}
-      <div className="w-full relative z-20 shrink-0 pb-3 sm:pb-5 md:pb-12 lg:pb-16">
+      <motion.div
+        className="w-full relative z-20 shrink-0 pb-3 sm:pb-5 md:pb-12 lg:pb-16"
+        initial={{ opacity: 0, y: 72 }}
+        animate={{
+          opacity: isRevealed ? 1 : 0,
+          y: isRevealed ? 0 : 72,
+        }}
+        transition={bottomTransition}
+      >
         <AngledCarousel />
-      </div>
+      </motion.div>
 
       {/* Underneath the carousel: Solid obsidian black floor guarantee */}
       <div className="pointer-events-none absolute bottom-0 inset-x-0 h-28 bg-[#0c0c0e] z-[1]" />
