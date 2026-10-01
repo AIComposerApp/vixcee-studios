@@ -572,6 +572,28 @@ async function startServer() {
     }
   });
 
+  // Serve static assets from public/ folder (favicons, manifests, robots.txt, sitemaps)
+  app.use(
+    express.static(path.resolve(__dirname, 'public'), {
+      maxAge: '7d',
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.ico')) {
+          res.setHeader('Content-Type', 'image/x-icon');
+          res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        } else if (filePath.endsWith('.png')) {
+          res.setHeader('Content-Type', 'image/png');
+          res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        } else if (filePath.endsWith('.svg')) {
+          res.setHeader('Content-Type', 'image/svg+xml');
+          res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        } else if (filePath.endsWith('.webmanifest')) {
+          res.setHeader('Content-Type', 'application/manifest+json');
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+      },
+    })
+  );
+
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true, hmr: process.env.DISABLE_HMR !== 'true' },

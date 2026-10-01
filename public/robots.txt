@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+User-agent: Googlebot-Favicon
+Allow: /
+
 Sitemap: https://vixceestudios.com/sitemap.xml
