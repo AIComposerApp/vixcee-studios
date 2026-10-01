@@ -240,7 +240,7 @@ export const Footer: React.FC<FooterProps> = ({
                 <Mail className="w-4 h-4" />
               </a>
               <a
-                href="https://www.tiktok.com/@vixcee_vibes"
+                href="https://www.tiktok.com/@vixcee.design"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
@@ -370,7 +370,7 @@ export const Footer: React.FC<FooterProps> = ({
               <Mail className="w-3.5 h-3.5" />
             </a>
             <a
-              href="https://www.tiktok.com/@vixcee_vibes"
+              href="https://www.tiktok.com/@vixcee.design"
               target="_blank"
               rel="noopener noreferrer"
               className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95 cursor-pointer shadow-sm"
