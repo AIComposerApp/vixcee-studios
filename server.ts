@@ -3,9 +3,9 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { Resend } from 'resend';
-import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import { BookingRequestSchema, EarlyAccessRequestSchema } from './src/server/schemas.ts';
+import { logger } from './src/server/logger.ts';
+import { getEmailTransporter, resolveGoogleAccessToken, resend } from './src/server/integrations.ts';
 
 dotenv.config();
 
@@ -13,113 +13,31 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-// Namecheap Private Email / SMTP Mailer
-function getEmailTransporter() {
-  const host = process.env.SMTP_HOST || 'mail.privateemail.com';
-  const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const user = process.env.SMTP_USER || 'hello@vixceestudios.com';
-  const pass = process.env.SMTP_PASS;
-
-  if (!pass) return null;
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-    tls: { rejectUnauthorized: false },
-  });
-}
-
-// Dynamically resolves an active Google OAuth2 access token
-// Supports:
-// 1. Raw Service Account JSON (GOOGLE_SERVICE_ACCOUNT_JSON)
-// 2. Service Account Email + Private Key (GOOGLE_SERVICE_ACCOUNT_EMAIL + GOOGLE_SERVICE_ACCOUNT_KEY / GOOGLE_CALENDAR_ACCESS_TOKEN)
-// 3. Direct OAuth2 Access Token (ya29....)
-async function resolveGoogleAccessToken(): Promise<string | null> {
-  let saJsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  let clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_CALENDAR_ACCESS_TOKEN;
-
-  if (saJsonStr) {
-    try {
-      const sa = JSON.parse(saJsonStr);
-      if (sa.client_email) clientEmail = sa.client_email;
-      if (sa.private_key) privateKey = sa.private_key;
-    } catch {
-      // not JSON
-    }
-  }
-
-  if (privateKey && privateKey.startsWith('ya29.')) {
-    return privateKey.trim();
-  }
-
-  if (clientEmail && privateKey && privateKey.includes('BEGIN PRIVATE KEY')) {
-    try {
-      const keyFormatted = privateKey.replace(/\\n/g, '\n');
-      const now = Math.floor(Date.now() / 1000);
-      const header = { alg: 'RS256', typ: 'JWT' };
-      const claimSet = {
-        iss: clientEmail.trim(),
-        scope: 'https://www.googleapis.com/auth/calendar.events',
-        aud: 'https://oauth2.googleapis.com/token',
-        exp: now + 3600,
-        iat: now,
-      };
-
-      const b64 = (obj: any) =>
-        Buffer.from(JSON.stringify(obj))
-          .toString('base64')
-          .replace(/=/g, '')
-          .replace(/\+/g, '-')
-          .replace(/\//g, '_');
-
-      const unsigned = `${b64(header)}.${b64(claimSet)}`;
-      const signer = crypto.createSign('RSA-SHA256');
-      signer.update(unsigned);
-      const signature = signer
-        .sign(keyFormatted, 'base64')
-        .replace(/=/g, '')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
-
-      const jwt = `${unsigned}.${signature}`;
-
-      const res = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-          assertion: jwt,
-        }),
-      });
-
-      if (res.ok) {
-        const data = (await res.json()) as any;
-        return data.access_token;
-      } else {
-        const errText = await res.text();
-        console.warn('[Google JWT Token Exchange Error]', errText);
-      }
-    } catch (jwtErr) {
-      console.warn('[JWT Sign Exception]', jwtErr);
-    }
-  }
-
-  return null;
-}
-
-async function startServer() {
+export function createApp() {
   const app = express();
   app.use(express.json());
+
+  // Health check endpoint for uptime and container health monitors
+  app.get('/healthz', (_req: Request, res: Response) => {
+    return res.status(200).json({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: Date.now(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  });
 
   // Backend Calendar & Google Meet Creation Endpoint (Zero client friction)
   app.post('/api/create-calendar-meeting', async (req: Request, res: Response) => {
     try {
+      const parseResult = BookingRequestSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          issues: parseResult.error.format(),
+        });
+      }
+
       const {
         name,
         email,
@@ -131,11 +49,7 @@ async function startServer() {
         estimatedBudget,
         additionalInterests,
         currentWebsite,
-      } = req.body;
-
-      if (!name || !email || !dateString || !timeSlot) {
-        return res.status(400).json({ error: 'Missing required booking fields' });
-      }
+      } = parseResult.data;
 
       // Compute start and end times (15-min sprint call)
       const [year, month, day] = dateString.split('-').map(Number);
@@ -492,10 +406,11 @@ async function startServer() {
   // Early Access / Prompts Waitlist Welcome Email Endpoint
   app.post('/api/send-early-access-welcome', async (req: Request, res: Response) => {
     try {
-      const { email } = req.body;
-      if (!email || !email.includes('@')) {
-        return res.status(400).json({ error: 'Valid email required' });
+      const parseResult = EarlyAccessRequestSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: 'Valid email required', issues: parseResult.error.format() });
       }
+      const { email } = parseResult.data;
 
       const transporter = getEmailTransporter();
       const fromEmail = process.env.EMAIL_FROM || '"Vixcee Studios" <hello@vixceestudios.com>';
@@ -572,6 +487,12 @@ async function startServer() {
     }
   });
 
+  return app;
+}
+
+export async function startServer() {
+  const app = createApp();
+
   // Serve static assets from public/ folder (favicons, manifests, robots.txt, sitemaps)
   app.use(
     express.static(path.resolve(__dirname, 'public'), {
@@ -607,9 +528,15 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running at http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Server running at http://0.0.0.0:${PORT}`);
   });
+
+  return { app, server };
 }
 
-startServer();
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  startServer().catch((err) => {
+    logger.error('Failed to start server', { error: String(err) });
+  });
+}
