@@ -101,87 +101,65 @@ export default function App() {
     };
   }, []);
 
-  // Unified Page Transition Sequence (1000ms centered reveal -> 800ms docking glide)
-  const runPageTransition = (updateRoute: () => void) => {
-    setDockStage('initial');
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    updateRoute();
-
-    setTimeout(() => {
-      setDockStage('docking');
-    }, 1000);
-
-    setTimeout(() => {
-      setDockStage('docked');
-    }, 1800);
+  // Safe URL pushState helper resilient to sandboxed iframe and webview environments
+  const pushStateSafe = (url: string) => {
+    try {
+      if (window.location.pathname !== url) {
+        window.history.pushState({}, '', url);
+      }
+    } catch {
+      // Graceful fallback if pushState is restricted by iframe/browser security
+    }
   };
 
-  // Clean Navigation Handlers with Unified Cinematic Transition
+  // Clean, instantaneous Navigation Handlers with scroll reset
   const navigateToHome = () => {
-    if (window.location.pathname !== '/') {
-      window.history.pushState({}, '', '/');
-    }
+    pushStateSafe('/');
     if (currentRoute === 'home') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    runPageTransition(() => {
-      setCurrentRoute('home');
-      setSelectedCaseStudySlug(null);
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setCurrentRoute('home');
+    setSelectedCaseStudySlug(null);
   };
 
   const navigateToCaseStudies = () => {
-    if (window.location.pathname !== '/case-studies') {
-      window.history.pushState({}, '', '/case-studies');
-    }
-    runPageTransition(() => {
-      setCurrentRoute('case-studies');
-      setSelectedCaseStudySlug(null);
-    });
+    pushStateSafe('/case-studies');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setCurrentRoute('case-studies');
+    setSelectedCaseStudySlug(null);
   };
 
   const navigateToWork = (targetItemId?: string) => {
-    if (window.location.pathname !== '/work') {
-      window.history.pushState({}, '', '/work');
-    }
+    pushStateSafe('/work');
     setInitialWorkItemId(targetItemId || null);
-    runPageTransition(() => {
-      setCurrentRoute('work');
-      setSelectedCaseStudySlug(null);
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setCurrentRoute('work');
+    setSelectedCaseStudySlug(null);
   };
 
   const navigateToCaseStudyDetail = (slug: string) => {
-    const targetUrl = `/case-studies/${slug}`;
-    if (window.location.pathname !== targetUrl) {
-      window.history.pushState({}, '', targetUrl);
-    }
-    runPageTransition(() => {
-      setCurrentRoute('case-study-detail');
-      setSelectedCaseStudySlug(slug);
-    });
+    pushStateSafe(`/case-studies/${slug}`);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setCurrentRoute('case-study-detail');
+    setSelectedCaseStudySlug(slug);
   };
 
   const navigateToPrompts = () => {
-    if (window.location.pathname !== '/ai-coding-prompts') {
-      window.history.pushState({}, '', '/ai-coding-prompts');
-    }
-    runPageTransition(() => {
-      setCurrentRoute('ai-coding-prompts');
-      setSelectedCaseStudySlug(null);
-    });
+    pushStateSafe('/ai-coding-prompts');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setCurrentRoute('ai-coding-prompts');
+    setSelectedCaseStudySlug(null);
   };
 
-  const handleOpenPrompts = (promptId?: string) => {
+  const handleOpenPrompts = (_promptId?: string) => {
     navigateToPrompts();
   };
 
   const handleScrollToBooking = () => {
     if (currentRoute !== 'home') {
-      if (window.location.pathname !== '/') {
-        window.history.pushState({}, '', '/');
-      }
+      pushStateSafe('/');
       setCurrentRoute('home');
       setSelectedCaseStudySlug(null);
 
@@ -225,6 +203,7 @@ export default function App() {
       {/* Header Navigation with Directional Scroll Hide/Show */}
       <Header
         dockStage={dockStage}
+        currentRoute={currentRoute}
         onOpenStart={navigateToPrompts}
         onOpenPrompts={navigateToPrompts}
         onNavigateCaseStudies={navigateToCaseStudies}

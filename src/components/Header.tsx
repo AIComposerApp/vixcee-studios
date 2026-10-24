@@ -229,8 +229,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[70] h-[80px] pointer-events-none select-none transition-transform duration-300 ease-out ${
-        dockStage !== 'docked' || isStaticPinned || isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      className={`fixed top-0 left-0 right-0 z-[70] h-[80px] select-none transition-transform duration-300 ease-out ${
+        isMobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
+      } ${
+        dockStage !== 'docked' || isStaticPinned || isHeaderVisible || isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
       {/* 

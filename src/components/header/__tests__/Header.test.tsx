@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { Header } from '../../Header.tsx';
 
@@ -34,7 +34,7 @@ describe('Header Component', () => {
     expect(handleOpenStart).toHaveBeenCalledTimes(1);
   });
 
-  it('triggers onNavigateCaseStudies when Case studies link is clicked', () => {
+  it('triggers onNavigateCaseStudies when Case studies link is clicked on desktop', () => {
     const handleCaseStudies = vi.fn();
     render(
       <Header
@@ -45,8 +45,50 @@ describe('Header Component', () => {
       />
     );
 
-    const caseStudiesLink = screen.getByRole('link', { name: /^case studies$/i });
-    fireEvent.click(caseStudiesLink);
+    const caseStudiesLinks = screen.getAllByRole('link', { name: /case studies/i });
+    fireEvent.click(caseStudiesLinks[0]);
     expect(handleCaseStudies).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens mobile drawer and triggers navigation when Work, Case studies, and Prompts are clicked', () => {
+    const handleWork = vi.fn();
+    const handleCaseStudies = vi.fn();
+    const handlePrompts = vi.fn();
+
+    render(
+      <Header
+        onOpenStart={vi.fn()}
+        onOpenPrompts={handlePrompts}
+        onNavigateWork={handleWork}
+        onNavigateCaseStudies={handleCaseStudies}
+        dockStage="docked"
+      />
+    );
+
+    // Open mobile menu
+    const hamburgerBtn = screen.getByRole('button', { name: /open navigation menu/i });
+    fireEvent.click(hamburgerBtn);
+
+    // Verify mobile drawer dialog is in the DOM
+    const mobilePanel = screen.getByRole('dialog', { name: /mobile navigation menu/i });
+    expect(mobilePanel).toBeInTheDocument();
+
+    // Click Work link in mobile menu
+    const workLinks = screen.getAllByRole('link', { name: /^work/i });
+    const mobileWorkLink = workLinks[workLinks.length - 1];
+    fireEvent.click(mobileWorkLink);
+    expect(handleWork).toHaveBeenCalledTimes(1);
+
+    // Click Case studies link in mobile menu
+    const caseStudiesLinks = screen.getAllByRole('link', { name: /case studies/i });
+    const mobileCaseStudiesLink = caseStudiesLinks[caseStudiesLinks.length - 1];
+    fireEvent.click(mobileCaseStudiesLink);
+    expect(handleCaseStudies).toHaveBeenCalledTimes(1);
+
+    // Click AI Coding Prompts link in mobile menu
+    const promptsLinks = screen.getAllByRole('link', { name: /ai coding prompts/i });
+    const mobilePromptsLink = promptsLinks[promptsLinks.length - 1];
+    fireEvent.click(mobilePromptsLink);
+    expect(handlePrompts).toHaveBeenCalledTimes(1);
   });
 });
