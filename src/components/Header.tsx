@@ -8,6 +8,7 @@ interface HeaderProps {
   onOpenStart: () => void;
   onOpenPrompts: () => void;
   dockStage?: 'initial' | 'docking' | 'docked';
+  currentRoute?: string;
   onNavigateCaseStudies?: () => void;
   onNavigateHome?: () => void;
   onNavigateWork?: () => void;
@@ -36,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenStart,
   onOpenPrompts,
   dockStage = 'docked',
+  currentRoute,
   onNavigateCaseStudies,
   onNavigateHome,
   onNavigateWork,
@@ -583,6 +585,7 @@ export const Header: React.FC<HeaderProps> = ({
         onOpenPrompts={onOpenPrompts}
         onNavigateWork={onNavigateWork}
         onNavigateCaseStudies={onNavigateCaseStudies}
+        currentRoute={currentRoute}
       />
     </header>
   );

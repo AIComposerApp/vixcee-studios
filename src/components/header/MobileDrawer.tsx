@@ -11,6 +11,7 @@ interface MobileDrawerProps {
   onOpenPrompts: () => void;
   onNavigateWork?: () => void;
   onNavigateCaseStudies?: () => void;
+  currentRoute?: string;
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
@@ -22,6 +23,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onOpenPrompts,
   onNavigateWork,
   onNavigateCaseStudies,
+  currentRoute,
 }) => {
   if (!isMenuMounted) return null;
 
