@@ -18,7 +18,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
+    "@google/genai": "^2.30.0",
     "@tailwindcss/vite": "^4.3.3",
     "@vercel/analytics": "^2.0.1",
     "@vitejs/plugin-react": "^6.1.1",
