@@ -1,25 +1,20 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { VerticalTextRoller } from './VerticalTextRoller.tsx';
-import { WordLensReveal } from './motion/WordLensReveal.tsx';
 import { db, auth } from '../firebase.ts';
 import { collection, addDoc, onSnapshot, query } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import {
-  DayItem,
   CountryCode,
   COUNTRY_CODES,
   GOOGLE_MEET_URL,
 } from './booking/types.ts';
 import { BookingConfirmation } from './booking/BookingConfirmation.tsx';
+import { BookingHeroInfo } from './booking/BookingHeroInfo.tsx';
+import { StepWizardNav } from './booking/StepWizardNav.tsx';
 import { StepContact } from './booking/StepContact.tsx';
 import { StepProject } from './booking/StepProject.tsx';
 import { StepSchedule } from './booking/StepSchedule.tsx';
-
-const bookingLeftTransition = {
-  duration: 3.2,
-  ease: [0.16, 1, 0.3, 1] as const,
-};
+import { useBookingSchedule } from './booking/useBookingSchedule.ts';
 
 const bookingRightTransition = {
   duration: 2.8,
@@ -51,8 +46,17 @@ export const BookingSection: React.FC = () => {
   // Meeting resolution states
   const [confirmedMeetUrl, setConfirmedMeetUrl] = useState(GOOGLE_MEET_URL);
 
-  // Cal.com / Linear style active week offset (0 = current upcoming week, 1 = next week, etc.)
-  const [weekOffset, setWeekOffset] = useState(0);
+  const {
+    weekOffset,
+    setWeekOffset,
+    weekDays,
+    displayedMonthYear,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    daysDrag,
+  } = useBookingSchedule();
 
   // Firestore real-time booked appointments lookup: { "YYYY-MM-DD": ["11:30 AM", "03:00 PM"] }
   const [bookedMap, setBookedMap] = useState<Record<string, string[]>>({});
@@ -95,137 +99,6 @@ export const BookingSection: React.FC = () => {
       console.warn('[Firestore Init Error]', err);
     }
   }, []);
-
-  // Generate 6-day week strip (Monday through Saturday) for the active weekOffset
-  const weekDays: DayItem[] = useMemo(() => {
-    const list: DayItem[] = [];
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    // Compute starting Monday for the week
-    const dayOfWeek = now.getDay();
-    const diffToMon = dayOfWeek === 0 ? 1 : 1 - dayOfWeek;
-
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + diffToMon + weekOffset * 7);
-
-    // Build 6 days: Monday through Saturday
-    for (let i = 0; i < 6; i++) {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-
-      const dateString = d.toISOString().split('T')[0];
-      const dayShort = d.toLocaleDateString('en-US', { weekday: 'short' });
-      const dayFull = d.toLocaleDateString('en-US', { weekday: 'long' });
-      const monthName = d.toLocaleDateString('en-US', { month: 'long' });
-      const monthShort = d.toLocaleDateString('en-US', { month: 'short' });
-      const year = d.getFullYear();
-      const dayNum = d.getDate();
-      const isPast = d < now;
-
-      list.push({
-        id: `${dateString}`,
-        dateString,
-        dayShort,
-        dayFull,
-        dayNum,
-        monthName,
-        monthShort,
-        year,
-        formattedDate: `${monthShort} ${dayNum}, ${year}`,
-        isPast,
-      });
-    }
-
-    return list;
-  }, [weekOffset]);
-
-  // Unified Month & Year Display
-  const displayedMonthYear = useMemo(() => {
-    if (weekDays.length === 0) return 'September 2026';
-    const first = weekDays[0];
-    const last = weekDays[weekDays.length - 1];
-    if (first.monthName === last.monthName) {
-      return `${first.monthName} ${first.year}`;
-    }
-    return `${first.monthShort} – ${last.monthShort} ${last.year}`;
-  }, [weekDays]);
-
-  const [selectedDate, setSelectedDate] = useState<DayItem | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string>('');
-
-  // Synchronize selected date when switching weeks or mounting
-  useEffect(() => {
-    if (weekDays.length > 0) {
-      const match = weekDays.find((d) => d.dateString === selectedDate?.dateString);
-      if (!match) {
-        const firstAvailable = weekDays.find((d) => !d.isPast) || weekDays[0];
-        setSelectedDate(firstAvailable);
-      }
-    }
-  }, [weekDays, selectedDate]);
-
-  // Springy Physics Drag Hook for Days Strip
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isDown = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-  const velocity = useRef(0);
-  const lastX = useRef(0);
-  const lastTime = useRef(0);
-  const animId = useRef<number | null>(null);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    isDown.current = true;
-    startX.current = e.pageX - containerRef.current.offsetLeft;
-    scrollLeft.current = containerRef.current.scrollLeft;
-    velocity.current = 0;
-    lastX.current = e.pageX;
-    lastTime.current = performance.now();
-    if (animId.current) cancelAnimationFrame(animId.current);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown.current || !containerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - containerRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.2;
-    containerRef.current.scrollLeft = scrollLeft.current - walk;
-
-    const now = performance.now();
-    const dt = now - lastTime.current;
-    if (dt > 0) {
-      velocity.current = (e.pageX - lastX.current) / dt;
-    }
-    lastX.current = e.pageX;
-    lastTime.current = now;
-  };
-
-  const handleMouseUp = () => {
-    if (!isDown.current || !containerRef.current) return;
-    isDown.current = false;
-
-    let v = velocity.current * 14;
-    const friction = 0.92;
-    const step = () => {
-      if (!containerRef.current || Math.abs(v) < 0.25) return;
-      containerRef.current.scrollLeft -= v;
-      v *= friction;
-      animId.current = requestAnimationFrame(step);
-    };
-    animId.current = requestAnimationFrame(step);
-  };
-
-  const daysDrag = {
-    ref: containerRef,
-    props: {
-      onMouseDown: handleMouseDown,
-      onMouseMove: handleMouseMove,
-      onMouseUp: handleMouseUp,
-      onMouseLeave: handleMouseUp,
-    },
-  };
 
   // 3-Step Wizard Navigation State
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -421,58 +294,7 @@ export const BookingSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
           {/* LEFT COLUMN: Clean Unboxed Text with Animated Symbol & Hero H2 */}
-          <motion.div
-            className="lg:col-span-5 flex flex-col justify-start text-left py-2 sm:py-6"
-            initial={{ opacity: 0, y: 64 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={bookingLeftTransition}
-          >
-            {/* Animated SVG Symbol */}
-            <div className="mb-6 sm:mb-8 flex items-center">
-              <img
-                src="https://res.cloudinary.com/divndlntm/image/upload/v1790414220/vixceestudios_symbol_reveal_01a0cf05-642a-74af-b172-cc2054f40851_u7e4sz.svg"
-                alt="Vixcee Studios Symbol"
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain select-none pointer-events-none"
-                loading="eager"
-              />
-            </div>
-
-            {/* Exact Hero H2 Headline with Interchanging VerticalTextRoller */}
-            <WordLensReveal
-              as="h2"
-              delay={0}
-              stagger={60}
-              immediate={true}
-              className="text-[28px] sm:text-4xl md:text-5xl lg:text-[56px] font-light tracking-[-0.015em] leading-[1.14] md:leading-[1.08] text-white text-balance [word-spacing:0.08em] select-none"
-              words={[
-                'Your',
-                <VerticalTextRoller key="roller" words={['sites', 'tools', 'apps']} />,
-                'live',
-                'in',
-                'days,',
-                'not',
-                'weeks',
-              ]}
-            />
-
-            {/* Clean Subtitle */}
-            <p className="mt-5 text-[13px] sm:text-base md:text-[18px] text-white/70 font-light leading-relaxed max-w-lg">
-              Direct engineer consultation. We map out your site architecture, mobile interactions, and timeline in 15 minutes.
-            </p>
-
-            {/* Quick Meeting Overview */}
-            <div className="mt-8 flex flex-col gap-2.5 text-xs text-white/50">
-              <div className="flex items-center gap-2">
-                <span className="text-white/40">&bull;</span>
-                <span>15-Minute High-Velocity Sprint Architecture</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-white/40">&bull;</span>
-                <span>Google Meet video link provided immediately</span>
-              </div>
-            </div>
-          </motion.div>
+          <BookingHeroInfo />
 
           {/* RIGHT COLUMN: Linear Double-Wall Obsidian Glass Form */}
           <motion.div
@@ -494,87 +316,11 @@ export const BookingSection: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col text-left">
                 {/* 3-Step Wizard Navigation Header with Linear Segmented Track */}
-                <div className="pb-4 mb-4 border-b border-white/[0.08] flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-2.5 text-xs font-mono">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        className={`transition-colors cursor-pointer tracking-wider ${
-                          currentStep === 1
-                            ? 'text-white font-semibold'
-                            : currentStep > 1
-                            ? 'text-white/70 hover:text-white'
-                            : 'text-white/30'
-                        }`}
-                      >
-                        Contact
-                      </button>
-
-                      <span className="text-white/20 text-[10px] select-none">/</span>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (validateStep1()) setCurrentStep(2);
-                        }}
-                        className={`transition-colors cursor-pointer tracking-wider ${
-                          currentStep === 2
-                            ? 'text-white font-semibold'
-                            : currentStep > 2
-                            ? 'text-white/70 hover:text-white'
-                            : 'text-white/30'
-                        }`}
-                      >
-                        Project
-                      </button>
-
-                      <span className="text-white/20 text-[10px] select-none">/</span>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (validateStep1()) setCurrentStep(3);
-                        }}
-                        className={`transition-colors cursor-pointer tracking-wider ${
-                          currentStep === 3
-                            ? 'text-white font-semibold'
-                            : 'text-white/30'
-                        }`}
-                      >
-                        Schedule
-                      </button>
-                    </div>
-
-                    <span className="hidden sm:inline-block text-[11px] text-white/40 font-mono tracking-wider">
-                      Step {currentStep} of 3
-                    </span>
-                  </div>
-
-                  {/* 3-Segment Linear Pill Progress Track */}
-                  <div className="grid grid-cols-3 gap-1.5 w-full">
-                    {[1, 2, 3].map((step) => {
-                      const isComplete = currentStep > step;
-                      const isActive = currentStep === step;
-                      return (
-                        <div
-                          key={step}
-                          className="h-1 rounded-full overflow-hidden bg-white/[0.08] transition-all duration-300"
-                        >
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isComplete
-                                ? 'w-full bg-white/70'
-                                : isActive
-                                ? 'w-full bg-gradient-to-r from-[#F04E23] via-[#FF661F] to-[#FFAA00]'
-                                : 'w-0 bg-transparent'
-                            }`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <StepWizardNav
+                  currentStep={currentStep}
+                  onSelectStep={(step) => setCurrentStep(step as 1 | 2 | 3)}
+                  canAdvanceToStep={() => validateStep1()}
+                />
 
                 {/* STEP 1: CONTACT */}
                 {currentStep === 1 && (

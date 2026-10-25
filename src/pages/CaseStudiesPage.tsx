@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CASE_STUDIES } from '../data/caseStudies.ts';
 import { AngledCarousel } from '../components/AngledCarousel.tsx';
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton.tsx';
 import { VerticalTextRoller } from '../components/VerticalTextRoller.tsx';
 import { getDirectVideoUrl } from '../components/CloudinaryVideo.tsx';
-import { ChevronLeft, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
+import { ChevronLeft, Calendar, ArrowRight } from 'lucide-react';
 
 interface CaseStudiesPageProps {
   onSelectCaseStudy: (slug: string) => void;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;

@@ -54,7 +54,7 @@ interface TestimonialsSectionProps {
 }
 
 export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
-  onOpenPrompts,
+  onOpenPrompts: _onOpenPrompts,
   onOpenBookCall,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -37,7 +37,7 @@ export async function resolveGoogleAccessToken(): Promise<string | null> {
     return 'mock-test-access-token';
   }
 
-  let saJsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  const saJsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   let clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_CALENDAR_ACCESS_TOKEN;
 

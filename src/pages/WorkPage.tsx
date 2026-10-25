@@ -1,167 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { StaticDotGrid } from '../components/StaticDotGrid.tsx';
 import { ElasticDock, DeviceMode, DockState } from '../components/ElasticDock.tsx';
+import { ALL_WORK_ITEMS } from './work/workData.ts';
+import { EmberHorizonBackground } from './work/EmberHorizonBackground.tsx';
+import { WorkGridItem } from './work/WorkGridItem.tsx';
+import { computeItemTransform } from './work/workTransforms.ts';
 import { X } from 'lucide-react';
-
-interface WorkItem {
-  id: string;
-  title: string;
-  device: 'mobile' | 'laptop';
-  industryLabel: string;
-  imageUrl: string;
-  caseStudySlug?: string;
-}
-
-// 19 unique device mockups: exactly 13 mobile portraits + 6 laptops, zero duplicates
-const ALL_WORK_ITEMS: WorkItem[] = [
-  // --- MOBILES (13 Unique Items, Front Face Silhouettes) ---
-  {
-    id: 'm-alex-hydrate',
-    title: 'ALEX Hydrate',
-    device: 'mobile',
-    industryLabel: 'E-commerce & Lifestyle',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355853/ALEX-hydrate-mobile-portrait_apcmge.png',
-    caseStudySlug: 'alex-hydrate',
-  },
-  {
-    id: 'm-allbirds',
-    title: 'Allbirds Mens Dasher NZ',
-    device: 'mobile',
-    industryLabel: 'E-commerce & Footwear',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355853/Allbirds-Mens-Dasher-NZ-09-25-2026_05_30_PM-portrait_zkp8ls.png',
-  },
-  {
-    id: 'm-balance-wellness',
-    title: 'Balance Wellness',
-    device: 'mobile',
-    industryLabel: 'Wellness & Sanctuary',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355853/Balance-Wellness-mobile-portrait_vgprfk.png',
-    caseStudySlug: 'balance-wellness',
-  },
-  {
-    id: 'm-ijaw-massage',
-    title: 'IJAW Massage Plus',
-    device: 'mobile',
-    industryLabel: 'Wellness & Healing',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355855/IJAWMASSAGEPLUS-_-Traditional-Healing-Modern-Comfort-09-25-2026_05_18_PM-portrait_orh8ey.png',
-  },
-  {
-    id: 'm-aurelia-hotels',
-    title: 'Aurelia Hotels',
-    device: 'mobile',
-    industryLabel: 'Luxury Hospitality',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355860/Aurelia-Hotels-mobile-portrait_yagbgb.png',
-  },
-  {
-    id: 'm-chesney-hotel',
-    title: 'Chesney Hotel',
-    device: 'mobile',
-    industryLabel: 'Boutique Hospitality',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355855/Chesney-Hotel-mobile-portrait_cjpsj2.png',
-  },
-  {
-    id: 'm-carizma-hotels',
-    title: 'Carizma Luxury Hotels',
-    device: 'mobile',
-    industryLabel: 'Hotel Front-Desk',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355858/Carizma-Luxury-Hotels-mobile-portrait_emb4pi.png',
-    caseStudySlug: 'carizma-hotels',
-  },
-  {
-    id: 'm-prince-of-web3',
-    title: 'Prince of Web3',
-    device: 'mobile',
-    industryLabel: 'Web3 Strategy',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355856/Prince-of-Web3-mobile-portrait_mqpqeh.png',
-    caseStudySlug: 'prince-of-web3',
-  },
-  {
-    id: 'm-flowstate',
-    title: 'FlowState Intelligent Plumbing',
-    device: 'mobile',
-    industryLabel: 'SaaS & Field Services',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355856/FlowState-Intelligent-Plumbing-09-25-2026_05_04_PM-portrait_vvlepq.png',
-  },
-  {
-    id: 'm-scribe',
-    title: 'Scribe Mobile Platform',
-    device: 'mobile',
-    industryLabel: 'AI & EdTech',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355857/Scribe-_-Smarter-lessons-Built-with-Scribe--09-25-2026_05_23_PM-portrait_tixcfp.png',
-    caseStudySlug: 'scribe',
-  },
-  {
-    id: 'm-google-ai',
-    title: 'Google AI Studio App',
-    device: 'mobile',
-    industryLabel: 'AI & Developer Tools',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355857/My-Google-AI-Studio-App-09-25-2026_05_58_PM-portrait_d8ruby.png',
-  },
-  {
-    id: 'm-sandra',
-    title: 'Sandra Osaigbovo',
-    device: 'mobile',
-    industryLabel: 'Brand & Personal Flagship',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355858/Sandra-Osaigbovo_mobile-portrait_gy9r4g.png',
-  },
-  {
-    id: 'm-shoe-finder',
-    title: 'Shoe Finder',
-    device: 'mobile',
-    industryLabel: 'E-commerce & App',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_500/v1790355858/Shoe-Finder-09-25-2026_05_31_PM-portrait_yajud6.png',
-  },
-
-  // --- LAPTOPS (6 Unique Flagships, Front Face Silhouettes) ---
-  {
-    id: 'l-prince-of-web3',
-    title: 'Prince of Web3',
-    device: 'laptop',
-    industryLabel: 'Web3 & Blockchain Strategy',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790358838/Prince-of-Web3-bg-front_cg3ig1.png',
-    caseStudySlug: 'prince-of-web3',
-  },
-  {
-    id: 'l-alex-hydrate',
-    title: 'ALEX Hydrate',
-    device: 'laptop',
-    industryLabel: 'E-commerce & Wellness',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790358976/ALEX-_-Form-Follows-Hydration-bg-front_aunbom.png',
-    caseStudySlug: 'alex-hydrate',
-  },
-  {
-    id: 'l-carizma-hotels',
-    title: 'Carizma Luxury Hotels',
-    device: 'laptop',
-    industryLabel: 'Hospitality & Operations',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790358728/Carizma-Luxury-Hotels-_-bg-front_xemluu.png',
-    caseStudySlug: 'carizma-hotels',
-  },
-  {
-    id: 'l-scribe',
-    title: 'Scribe AI Lessons',
-    device: 'laptop',
-    industryLabel: 'EdTech & AI',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790457424/Scribe-_-Smarter-lessons-Built-with-Scribe--09-26-2026_06_19_PM-front_hnr7yv.png',
-    caseStudySlug: 'scribe',
-  },
-  {
-    id: 'l-balance-wellness',
-    title: 'Balance Wellness',
-    device: 'laptop',
-    industryLabel: 'Wellness & Lifestyle',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790458343/Balance-Wellness-Coach-Brand-Identity-Design-System-09-26-2026_06_26_PM-front_qyubod.png',
-    caseStudySlug: 'balance-wellness',
-  },
-  {
-    id: 'l-netrovert',
-    title: 'Netrovert Protocol',
-    device: 'laptop',
-    industryLabel: 'Web3 & Narrative',
-    imageUrl: 'https://res.cloudinary.com/divndlntm/image/upload/f_auto,q_auto,w_1000/v1790458991/My-Google-AI-Studio-App-09-26-2026_10_40_PM-front_ontekw.png',
-    caseStudySlug: 'netrovert',
-  },
-];
 
 interface WorkPageProps {
   onSelectCaseStudy: (slug: string) => void;
@@ -178,13 +22,9 @@ export const WorkPage: React.FC<WorkPageProps> = ({
   dockStage = 'docked',
   initialFocusedItemId,
 }) => {
-  // Strict Device Separation: Only Mobile or Laptop
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('mobile');
-
-  // Inspection focus state
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
 
-  // Auto-focus item if specified from direct showcase links
   useEffect(() => {
     if (initialFocusedItemId) {
       const match = ALL_WORK_ITEMS.find((it) => it.id === initialFocusedItemId);
@@ -195,19 +35,15 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     }
   }, [initialFocusedItemId]);
 
-  // Zoom State: false = far-off overview (State A with [+]), true = close-up (State B with [-])
   const [isZoomed, setIsZoomed] = useState(false);
-
-  // Fluid crossfade transition state when switching between Mobile & Desktop
   const [isSwitchingDevice, setIsSwitchingDevice] = useState(false);
 
-  // Direct DOM ref for buttery 60fps pan updates (ZERO React state re-rendering while moving!)
   const stageRef = useRef<HTMLDivElement | null>(null);
   const panRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const targetPanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // Smooth cursor follow target on desktop
+  const targetPanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const velocityRef = useRef<{ vx: number; vy: number }>({ vx: 0, vy: 0 });
   const isDraggingRef = useRef(false);
-  const isReturningRef = useRef(false); // Lock to prevent inertia loop from interfering with return transition
+  const isReturningRef = useRef(false);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number }>({
     mouseX: 0,
     mouseY: 0,
@@ -217,7 +53,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
   const hasMovedRef = useRef(false);
   const animFrameRef = useRef<number | null>(null);
 
-  // Viewport width tracker for responsive desktop scaling
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
@@ -230,7 +65,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
 
   const isDesktopViewport = windowWidth >= 1024;
 
-  // Filter items based on active device
   const filteredItems = useMemo(() => {
     return ALL_WORK_ITEMS.filter((item) => item.device === deviceMode);
   }, [deviceMode]);
@@ -240,7 +74,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     return ALL_WORK_ITEMS.find((item) => item.id === focusedItemId) || null;
   }, [focusedItemId]);
 
-  // Pre-load all assets
   useEffect(() => {
     ALL_WORK_ITEMS.forEach((item) => {
       const img = new Image();
@@ -248,11 +81,9 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     });
   }, []);
 
-  // Apple standard ease-out curve
   const EASE_CURVE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   const DURATION_MS = 600;
 
-  // Update DOM transform helper with unified easing
   const applyStageTransform = useCallback((x: number, y: number, transition = false) => {
     if (!stageRef.current) return;
     if (transition) {
@@ -263,16 +94,10 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     stageRef.current.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
   }, []);
 
-  // ============================================================
-  // DESKTOP NATURAL CURSOR MOVEMENT & TOUCH MOMENTUM GLIDE
-  // On desktop: Moving external mouse smoothly navigates around canvas
-  // On mobile: Touch drag with weighted inertia & rubber-band boundaries
-  // ============================================================
   useEffect(() => {
     const loop = () => {
       if (!focusedItemId && !isReturningRef.current) {
         if (isDesktopViewport && !isDraggingRef.current) {
-          // Desktop Smooth Mouse Follow: Lerp smoothly towards targetPanRef with weighted damping
           const dx = targetPanRef.current.x - panRef.current.x;
           const dy = targetPanRef.current.y - panRef.current.y;
 
@@ -282,7 +107,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
             applyStageTransform(panRef.current.x, panRef.current.y, false);
           }
         } else if (!isDraggingRef.current) {
-          // Mobile Touch Drag Inertia & Boundary spring
           velocityRef.current.vx *= 0.85;
           velocityRef.current.vy *= 0.85;
 
@@ -325,7 +149,17 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     };
   }, [focusedItemId, isDesktopViewport, applyStageTransform]);
 
-  // Escape key handler
+  const handleDismissFocus = useCallback(() => {
+    isReturningRef.current = true;
+    velocityRef.current = { vx: 0, vy: 0 };
+    setFocusedItemId(null);
+    applyStageTransform(panRef.current.x, panRef.current.y, true);
+
+    setTimeout(() => {
+      isReturningRef.current = false;
+    }, DURATION_MS + 50);
+  }, [applyStageTransform]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -342,22 +176,8 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedItemId, isZoomed, applyStageTransform]);
+  }, [focusedItemId, isZoomed, applyStageTransform, handleDismissFocus]);
 
-  // Butter-smooth dismiss handler that locks out conflicting loops
-  const handleDismissFocus = () => {
-    isReturningRef.current = true;
-    velocityRef.current = { vx: 0, vy: 0 };
-    setFocusedItemId(null);
-    applyStageTransform(panRef.current.x, panRef.current.y, true);
-
-    // Reset returning lock after the transition completes smoothly
-    setTimeout(() => {
-      isReturningRef.current = false;
-    }, DURATION_MS + 50);
-  };
-
-  // When focused item changes, center stage smoothly
   useEffect(() => {
     if (focusedItemId) {
       velocityRef.current = { vx: 0, vy: 0 };
@@ -365,7 +185,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     }
   }, [focusedItemId, applyStageTransform]);
 
-  // RESTORED FLUID MODE TRANSITION (Subtle Spring Crossfade)
   const handleDeviceModeChange = (mode: DeviceMode) => {
     if (mode === deviceMode) return;
     setFocusedItemId(null);
@@ -384,10 +203,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     }, 220);
   };
 
-  // ============================================================
-  // DESKTOP MOUSE HANDLERS (NATURAL MOUSE MOVE AROUND CANVAS)
-  // Also supports click-to-drag if user chooses to grab
-  // ============================================================
   const handleMouseDown = (e: React.MouseEvent) => {
     if (focusedItemId) return;
     isDraggingRef.current = true;
@@ -408,7 +223,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     if (focusedItemId) return;
 
     if (isDraggingRef.current) {
-      // Active Mouse Drag
       const deltaX = (e.clientX - dragStartRef.current.mouseX) * 0.65;
       const deltaY = (e.clientY - dragStartRef.current.mouseY) * 0.65;
 
@@ -428,19 +242,15 @@ export const WorkPage: React.FC<WorkPageProps> = ({
       targetPanRef.current = { x: nextX, y: nextY };
       applyStageTransform(nextX, nextY, false);
     } else if (isDesktopViewport) {
-      // Desktop External Mouse Move (Free, fluid exploration without needing to hold down)
       const windowW = window.innerWidth || 1200;
       const windowH = window.innerHeight || 800;
 
-      // Map cursor coordinates from center of screen (-1 to +1)
       const normX = (e.clientX - windowW / 2) / (windowW / 2);
       const normY = (e.clientY - windowH / 2) / (windowH / 2);
 
-      // Max range to explore with external mouse without dragging
       const exploreRangeX = deviceMode === 'laptop' ? 280 : 420;
       const exploreRangeY = deviceMode === 'laptop' ? 220 : 660;
 
-      // Negative direction for natural parallax camera navigation
       targetPanRef.current = {
         x: -normX * exploreRangeX,
         y: -normY * exploreRangeY,
@@ -452,7 +262,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     isDraggingRef.current = false;
   };
 
-  // TOUCH DRAG HANDLERS (WEIGHTED WITH RUBBER-BAND TENSION FOR MOBILE)
   const handleTouchStart = (e: React.TouchEvent) => {
     if (focusedItemId || e.touches.length !== 1) return;
     isDraggingRef.current = true;
@@ -511,74 +320,23 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     isDraggingRef.current = false;
   };
 
-  // ============================================================
-  // BALANCED DESKTOP & MOBILE VIEWPORT GEOMETRY CALCULATOR
-  // Pure front-view orthogonal coordinates with zero overlaps
-  // ============================================================
   const getItemTransform = useCallback(
     (index: number, total: number, isCurrentFocused: boolean, anyFocused: boolean) => {
-      const isMobile = deviceMode === 'mobile';
-
-      // 1. Focused Item: centered at (0,0), scale computed dynamically to never clip
-      if (isCurrentFocused) {
-        const baseWidth = isMobile
-          ? isDesktopViewport
-            ? 180
-            : 135
-          : isDesktopViewport
-          ? 480
-          : 380;
-        const maxAllowedW = isMobile
-          ? Math.min(windowWidth * 0.58, 260)
-          : Math.min(windowWidth * 0.86, 780);
-        const targetScale = maxAllowedW / baseWidth;
-
-        return {
-          transform: `translate3d(0px, 0px, 0px) scale(${targetScale})`,
-          opacity: 1,
-          zIndex: 60,
-          pointerEvents: 'auto' as const,
-        };
-      }
-
-      // Background Grid Coordinates:
-      const cols = isMobile ? 4 : 3;
-      const row = Math.floor(index / cols);
-      const col = index % cols;
-      const totalRows = Math.ceil(total / cols);
-
-      // Responsive spacing: Reverted to previous generous distance
-      const xPitch = isDesktopViewport ? (isMobile ? 240 : 580) : isMobile ? 185 : 450;
-      const yPitch = isDesktopViewport ? (isMobile ? 440 : 380) : isMobile ? 360 : 310;
-
-      const xPos = (col - (cols - 1) / 2) * xPitch;
-      const yPos = (row - (totalRows - 1) / 2) * yPitch;
-
-      // When another item is focused: surrounding items stay at their position, dim to 0.15 and scale down
-      if (anyFocused) {
-        return {
-          transform: `translate3d(${xPos * 0.72}px, ${yPos * 0.72}px, 0px) scale(0.48)`,
-          opacity: 0.15,
-          zIndex: 5,
-          pointerEvents: 'none' as const,
-        };
-      }
-
-      // Overview scale: 0.88x on desktop, 0.72x on mobile vs Close-up Zoom (1.25x)
-      const baseOverviewScale = isDesktopViewport ? 0.88 : 0.72;
-      const clusterScale = isZoomed ? 1.25 : baseOverviewScale;
-
-      return {
-        transform: `translate3d(${xPos * clusterScale}px, ${yPos * clusterScale}px, 0px) scale(${clusterScale})`,
-        opacity: isSwitchingDevice ? 0 : 1,
-        zIndex: 10 + index,
-        pointerEvents: 'auto' as const,
-      };
+      return computeItemTransform({
+        index,
+        total,
+        deviceMode,
+        isDesktopViewport,
+        windowWidth,
+        isCurrentFocused,
+        anyFocused,
+        isZoomed,
+        isSwitchingDevice,
+      });
     },
     [deviceMode, isZoomed, isSwitchingDevice, isDesktopViewport, windowWidth]
   );
 
-  // Toggle Zoom State: switches between State A (overview) and State B (close-up with [-])
   const toggleZoom = () => {
     setIsZoomed((prev) => !prev);
     panRef.current = { x: 0, y: 0 };
@@ -587,14 +345,12 @@ export const WorkPage: React.FC<WorkPageProps> = ({
     applyStageTransform(0, 0, true);
   };
 
-  // Determine Dock State
   const currentDockState: DockState = focusedItemId
     ? 'focused'
     : isZoomed
     ? 'zoomed'
     : 'overview';
 
-  // Primary Action handler for State C (CTA)
   const handlePrimaryAction = () => {
     if (!focusedItem) return;
     if (focusedItem.caseStudySlug) {
@@ -619,56 +375,18 @@ export const WorkPage: React.FC<WorkPageProps> = ({
         cursor: focusedItemId ? 'default' : isDesktopViewport ? 'default' : isDraggingRef.current ? 'grabbing' : 'grab',
       }}
     >
-      {/* ============================================================ */}
-      {/* 1. STATIC DOT GRID BACKGROUND (SILKY-SMOOTH 60FPS)           */}
-      {/* ============================================================ */}
       <StaticDotGrid
         dotColor="rgba(240, 78, 35, 0.35)"
         dotSize={2.5}
         dotSpacing={30}
       />
 
-      {/* Animated Ember Horizon Flow Gradient Shader */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] sm:w-[130%] h-[380px] sm:h-[480px] pointer-events-none overflow-visible z-[1]">
-        {/* Primary warm amber/orange horizon pulse */}
-        <div
-          className="absolute inset-0 w-full h-full pointer-events-none animate-ember-flow opacity-85"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 55% at 50% 50%, rgba(252, 128, 0, 0.70) 0%, rgba(240, 78, 35, 0.45) 35%, rgba(180, 35, 10, 0.18) 65%, transparent 85%)',
-            filter: 'blur(45px)',
-          }}
-        />
-        {/* Secondary intense deep coral core */}
-        <div
-          className="absolute inset-0 w-[85%] h-[80%] top-[10%] left-[7.5%] pointer-events-none animate-ember-drift-1 opacity-80"
-          style={{
-            background:
-              'radial-gradient(ellipse 65% 50% at 50% 50%, rgba(255, 60, 20, 0.65) 0%, rgba(254, 94, 80, 0.35) 35%, transparent 75%)',
-            filter: 'blur(35px)',
-          }}
-        />
-        {/* Ambient wide horizon wash */}
-        <div
-          className="absolute inset-0 w-[120%] h-[120%] -top-[10%] -left-[10%] pointer-events-none animate-ember-drift-2 opacity-55"
-          style={{
-            background:
-              'radial-gradient(ellipse 85% 65% at 50% 50%, rgba(252, 128, 0, 0.50) 0%, rgba(240, 78, 35, 0.30) 35%, transparent 85%)',
-            filter: 'blur(60px)',
-          }}
-        />
-      </div>
+      <EmberHorizonBackground />
 
-      {/* Subtle top vignette for clean header blending */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-[#0c0c0e] via-[#0c0c0e]/80 to-transparent z-[2]" />
-
-      {/* ============================================================ */}
-      {/* 2. ORTHOGONAL 2D CLUSTER STAGE (DIRECT DOM PANNING, NO LAG)  */}
-      {/* ============================================================ */}
+      {/* ORTHOGONAL 2D CLUSTER STAGE */}
       <div
         className="relative z-10 w-full h-full flex items-center justify-center"
         onClick={(e) => {
-          // If in focus mode and clicking the backdrop, dismiss focus
           if (
             focusedItemId &&
             (e.target as HTMLElement).tagName !== 'BUTTON' &&
@@ -678,7 +396,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
           }
         }}
       >
-        {/* Directly Controlled Pan Stage (No State Re-render Delay) */}
         <div
           ref={stageRef}
           className="relative flex items-center justify-center will-change-transform"
@@ -695,20 +412,15 @@ export const WorkPage: React.FC<WorkPageProps> = ({
               isCurrentFocused,
               anyFocused
             );
-            const isLaptop = item.device === 'laptop';
-
-            // Item width responsive to viewport: larger on desktop, compact on mobile
-            const itemWidth = isDesktopViewport
-              ? isLaptop
-                ? '480px'
-                : '180px'
-              : isLaptop
-              ? '380px'
-              : '135px';
 
             return (
-              <div
+              <WorkGridItem
                 key={item.id}
+                item={item}
+                itemStyle={itemStyle}
+                isDesktopViewport={isDesktopViewport}
+                durationMs={DURATION_MS}
+                easeCurve={EASE_CURVE}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!hasMovedRef.current) {
@@ -717,30 +429,12 @@ export const WorkPage: React.FC<WorkPageProps> = ({
                     }
                   }
                 }}
-                className="absolute flex flex-col items-center select-none cursor-pointer"
-                style={{
-                  ...itemStyle,
-                  width: itemWidth,
-                  transition: `transform ${DURATION_MS}ms ${EASE_CURVE}, opacity ${DURATION_MS}ms ease-out`,
-                }}
-              >
-                {/* RAW TRANSPARENT PNG SILHOUETTES */}
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  draggable={false}
-                  className="w-full h-auto max-h-[52vh] object-contain pointer-events-none select-none"
-                />
-              </div>
+              />
             );
           })}
         </div>
       </div>
 
-      {/* ============================================================ */}
-      {/* NON-INTRUSIVE MOBILE DISMISS [✕] BUTTON                      */}
-      {/* Placed below the header (top-[88px]) so it never blocks CTA */}
-      {/* ============================================================ */}
       {focusedItemId && (
         <div
           className="md:hidden fixed top-[88px] right-4 z-40 pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
@@ -756,9 +450,6 @@ export const WorkPage: React.FC<WorkPageProps> = ({
         </div>
       )}
 
-      {/* ============================================================ */}
-      {/* 3. ELASTIC MORPHING BOTTOM CONTROLLER (SINGLE PERSISTENT DOM) */}
-      {/* ============================================================ */}
       <ElasticDock
         dockState={currentDockState}
         deviceMode={deviceMode}

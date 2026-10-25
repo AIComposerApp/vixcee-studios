@@ -1,11 +1,18 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { BookingRequestSchema, EarlyAccessRequestSchema } from './src/server/schemas.ts';
 import { logger } from './src/server/logger.ts';
+import { AppError, ValidationError } from './src/server/errors.ts';
 import { getEmailTransporter, resolveGoogleAccessToken, resend } from './src/server/integrations.ts';
+import {
+  generateBookingClientHtml,
+  generateBookingOwnerHtml,
+  generateNewsletterWelcomeHtml,
+  generateEarlyAccessWelcomeHtml,
+} from './src/server/emailTemplates.ts';
 
 dotenv.config();
 
@@ -27,13 +34,15 @@ export function createApp() {
     });
   });
 
-  // Backend Calendar & Google Meet Creation Endpoint (Zero client friction)
-  app.post('/api/create-calendar-meeting', async (req: Request, res: Response) => {
+  // Backend Calendar & Google Meet Creation Endpoint
+  app.post('/api/create-calendar-meeting', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parseResult = BookingRequestSchema.safeParse(req.body);
       if (!parseResult.success) {
         return res.status(400).json({
+          success: false,
           error: 'Validation failed',
+          code: 'VALIDATION_ERROR',
           issues: parseResult.error.format(),
         });
       }
@@ -83,9 +92,7 @@ export function createApp() {
               dateTime: endDate.toISOString(),
               timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
             },
-            attendees: [
-              { email, displayName: name },
-            ],
+            attendees: [{ email, displayName: name }],
             conferenceData: {
               createRequest: {
                 requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -109,20 +116,25 @@ export function createApp() {
           );
 
           if (calRes.ok) {
-            const calData = (await calRes.json()) as any;
+            const calData = (await calRes.json()) as {
+              id?: string;
+              htmlLink?: string;
+              hangoutLink?: string;
+              conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> };
+            };
             calendarEventId = calData.id || '';
             calendarHtmlLink = calData.htmlLink || '';
             meetUrl =
               calData.hangoutLink ||
-              calData.conferenceData?.entryPoints?.find((ep: any) => ep.entryPointType === 'video')?.uri ||
+              calData.conferenceData?.entryPoints?.find((ep) => ep.entryPointType === 'video')?.uri ||
               meetUrl;
-            console.log(`[Google Calendar Created] Event ID: ${calendarEventId}, Meet: ${meetUrl}`);
+            logger.info('Google Calendar event created', { calendarEventId, meetUrl });
           } else {
             const errBody = await calRes.text();
-            console.warn('[Google Calendar Server Error Response]', calRes.status, errBody);
+            logger.warn('Google Calendar server error response', { status: calRes.status, errBody });
           }
         } catch (calErr) {
-          console.warn('[Google Calendar Server Error]', calErr);
+          logger.warn('Google Calendar creation exception', { error: String(calErr) });
         }
       }
 
@@ -132,14 +144,14 @@ export function createApp() {
         calendarEventId,
         calendarHtmlLink,
       });
-    } catch (err: any) {
-      console.error('[Create Calendar Meeting Error]', err);
-      return res.status(500).json({ error: err.message || 'Internal server error' });
+    } catch (err: unknown) {
+      logger.error('Failed to create calendar meeting', { error: String(err) });
+      return next(err);
     }
   });
 
   // Email automation proxy endpoint
-  app.post('/api/send-booking-confirmation', async (req: Request, res: Response) => {
+  app.post('/api/send-booking-confirmation', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
         name,
@@ -157,109 +169,38 @@ export function createApp() {
       } = req.body;
 
       if (!name || !email || !date || !timeSlot) {
-        return res.status(400).json({ error: 'Missing required booking fields' });
+        throw new ValidationError('Missing required booking fields');
       }
 
-      console.log(`[Booking Confirmation] Processing for: ${name} <${email}> on ${date} at ${timeSlot}`);
+      logger.info('Processing booking confirmation email', { name, email, date, timeSlot });
 
       const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
       const fromEmail = process.env.EMAIL_FROM || '"Vixcee Studios" <hello@vixceestudios.com>';
       const finalMeetUrl = req.body.meetUrl || 'https://meet.google.com/vdd-fxch-jcm';
 
-      const emailHtml = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0c0c0e; color: #ffffff; padding: 40px 20px; margin: 0; }
-              .container { max-width: 560px; margin: 0 auto; background: #141418; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px; }
-              .header { margin-bottom: 24px; }
-              .title { font-size: 24px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff; margin: 0 0 8px; }
-              .badge { display: inline-block; font-size: 11px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.1em; color: #ffffff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 999px; margin-bottom: 16px; }
-              .slot-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; margin: 20px 0; }
-              .slot-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-              .slot-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; }
-              .slot-val { font-size: 14px; color: #ffffff; font-weight: 500; }
-              .notes { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
-              .footer { margin-top: 32px; font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <div class="badge">VIXCEE STUDIOS &bull; CONFIRMATION</div>
-                <h1 class="title">You're on our calendar, ${name}.</h1>
-                <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; margin: 0;">
-                  We've reserved your 15-minute high-velocity sprint consultation. We'll map out your mobile architecture, interaction dynamics, and 5-day delivery roadmap.
-                </p>
-              </div>
-              <div class="slot-card">
-                <div class="slot-row">
-                  <span class="slot-label">Date</span>
-                  <span class="slot-val">${date}</span>
-                </div>
-                <div class="slot-row">
-                  <span class="slot-label">Time</span>
-                  <span class="slot-val">${timeSlot}</span>
-                </div>
-                <div class="slot-row">
-                  <span class="slot-label">Platform</span>
-                  <span class="slot-val">${location || 'Google Meet'}</span>
-                </div>
-                <div class="slot-row">
-                  <span class="slot-label">Meeting URL</span>
-                  <span class="slot-val"><a href="${finalMeetUrl}" style="color: #ffffff; text-decoration: underline;">${finalMeetUrl}</a></span>
-                </div>
-                <div class="slot-row">
-                  <span class="slot-label">Host</span>
-                  <span class="slot-val">Lead Engineer, Vixcee Studios</span>
-                </div>
-                ${
-                  projectNotes
-                    ? `<div class="notes"><span class="slot-label">Project Scope:</span><br/>${projectNotes}</div>`
-                    : ''
-                }
-              </div>
-              <div style="text-align: center; margin: 24px 0 16px;">
-                <a href="${finalMeetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #ffffff; color: #000000; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em;">
-                  Join Google Meet &rarr;
-                </a>
-              </div>
-              <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 16px; text-align: center;">
-                If you need to reschedule or prepare assets beforehand, simply reply to this email.
-              </p>
-              <div class="footer">
-                &copy; ${new Date().getFullYear()} Vixcee Studios &bull; Websites live in days, not weeks.
-              </div>
-            </div>
-          </body>
-        </html>
-      `;
+      const emailData = {
+        name,
+        email,
+        date,
+        timeSlot,
+        phone,
+        location,
+        guests,
+        currentWebsite,
+        projectNotes,
+        foreseenChallenges,
+        estimatedBudget,
+        additionalInterests,
+        meetUrl: finalMeetUrl,
+      };
 
-      const ownerAlertHtml = `
-        <div style="font-family: sans-serif; background: #0c0c0e; color: #fff; padding: 24px;">
-          <h2 style="color: #fc8000;">New Strategy Booking Received</h2>
-          <p><strong>Client:</strong> ${name} &lt;${email}&gt;</p>
-          <p><strong>Scheduled:</strong> ${date} at ${timeSlot}</p>
-          <p><strong>Meeting Room:</strong> <a href="${finalMeetUrl}" style="color:#fc8000;">${finalMeetUrl}</a></p>
-          ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
-          ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
-          ${guests ? `<p><strong>Guests:</strong> ${guests}</p>` : ''}
-          ${currentWebsite ? `<p><strong>Current Website:</strong> <a href="${currentWebsite}" style="color:#fc8000;">${currentWebsite}</a></p>` : ''}
-          ${estimatedBudget ? `<p><strong>Estimated Budget:</strong> ${estimatedBudget}</p>` : ''}
-          ${additionalInterests && additionalInterests.length > 0 ? `<p><strong>Also Interested In:</strong> ${additionalInterests.join(', ')}</p>` : ''}
-          ${projectNotes ? `<p><strong>Project Details:</strong><br/>${projectNotes}</p>` : ''}
-          ${foreseenChallenges ? `<p><strong>Foreseen Challenges:</strong><br/>${foreseenChallenges}</p>` : ''}
-        </div>
-      `;
+      const emailHtml = generateBookingClientHtml(emailData);
+      const ownerAlertHtml = generateBookingOwnerHtml(emailData);
 
       const transporter = getEmailTransporter();
 
       if (transporter) {
-        // Primary: Dispatch via Namecheap Private Email (SMTP)
         try {
-          // 1. Notify Client
           await transporter.sendMail({
             from: fromEmail,
             to: email,
@@ -267,7 +208,6 @@ export function createApp() {
             html: emailHtml,
           });
 
-          // 2. Notify Studio Owner
           await transporter.sendMail({
             from: fromEmail,
             to: studioOwnerEmail,
@@ -275,16 +215,14 @@ export function createApp() {
             html: ownerAlertHtml,
           });
 
-          console.log(`[SMTP Sent] Confirmation delivered to ${email} and alert to ${studioOwnerEmail}`);
+          logger.info('Booking confirmation sent via SMTP', { email, studioOwnerEmail });
           return res.status(200).json({ success: true, provider: 'smtp' });
         } catch (smtpErr) {
-          console.error('[SMTP Sending Error]', smtpErr);
-          // fall through to Resend fallback if available
+          logger.error('SMTP sending error, attempting fallback', { error: String(smtpErr) });
         }
       }
 
       if (resend) {
-        // Fallback: Resend API
         try {
           await resend.emails.send({
             from: fromEmail,
@@ -293,7 +231,7 @@ export function createApp() {
             html: ownerAlertHtml,
           });
         } catch (ownerErr) {
-          console.warn('[Resend Owner Alert Warning]', ownerErr);
+          logger.warn('Resend owner alert warning', { error: String(ownerErr) });
         }
 
         const { data, error } = await resend.emails.send({
@@ -304,7 +242,7 @@ export function createApp() {
         });
 
         if (error) {
-          console.warn('[Resend API Error]', error);
+          logger.warn('Resend API returned warning', { error });
           return res.status(200).json({
             success: true,
             warning: 'Booking saved in Firestore, Resend returned error',
@@ -320,18 +258,18 @@ export function createApp() {
         mock: true,
         message: 'Booking saved. Configure SMTP or RESEND_API_KEY for live dispatch.',
       });
-    } catch (err: any) {
-      console.error('[Booking Confirmation Server Error]', err);
-      return res.status(500).json({ error: err.message || 'Internal server error' });
+    } catch (err: unknown) {
+      logger.error('Booking confirmation server error', { error: String(err) });
+      return next(err);
     }
   });
 
   // Newsletter / Waitlist welcome email endpoint
-  app.post('/api/send-newsletter-welcome', async (req: Request, res: Response) => {
+  app.post('/api/send-newsletter-welcome', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
-      if (!email || !email.includes('@')) {
-        return res.status(400).json({ error: 'Valid email required' });
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        throw new ValidationError('Valid email required');
       }
 
       const transporter = getEmailTransporter();
@@ -339,49 +277,13 @@ export function createApp() {
       const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
 
       if (transporter) {
-        // 1. Send subscriber welcome email
         await transporter.sendMail({
           from: fromEmail,
           to: email.trim(),
           subject: 'Welcome to Vixcee Studios — You are in the loop',
-          html: `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0c0c0e; color: #ffffff; padding: 40px 20px; margin: 0; }
-                  .container { max-width: 560px; margin: 0 auto; background: #141418; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px; }
-                  .badge { display: inline-block; font-size: 11px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.1em; color: #ffffff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 999px; margin-bottom: 16px; }
-                  .title { font-size: 24px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff; margin: 0 0 12px; }
-                  p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0 0 16px; }
-                  .btn { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #F04E23, #FF661F, #FFAA00); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em; margin-top: 8px; }
-                  .footer { margin-top: 32px; font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="badge">VIXCEE STUDIOS &bull; DISPATCH</div>
-                  <h1 class="title">You're in the loop.</h1>
-                  <p>
-                    Thank you for subscribing to Vixcee Studios. Whenever we drop new AI coding agent prompts, high-velocity case studies, or production templates, you'll get them directly in your inbox.
-                  </p>
-                  <p>
-                    No noise, no spam. Just engineering blueprints, UI interaction patterns, and production-tested agent prompts.
-                  </p>
-                  <div style="text-align: center; margin: 24px 0 16px;">
-                    <a href="https://vixceestudios.com" class="btn" style="color: #ffffff;">Explore Case Studies &rarr;</a>
-                  </div>
-                  <div class="footer">
-                    &copy; ${new Date().getFullYear()} Vixcee Studios &bull; Websites live in days, not weeks.
-                  </div>
-                </div>
-              </body>
-            </html>
-          `,
+          html: generateNewsletterWelcomeHtml(),
         });
 
-        // 2. Alert studio owner
         try {
           await transporter.sendMail({
             from: fromEmail,
@@ -390,25 +292,30 @@ export function createApp() {
             text: `A new user joined the Vixcee Studios dispatch list: ${email.trim()}`,
           });
         } catch (e) {
-          console.warn('[Owner subscriber alert note]', e);
+          logger.warn('Owner subscriber alert note', { error: String(e) });
         }
 
         return res.status(200).json({ success: true, message: 'Welcome email dispatched via Namecheap SMTP' });
       }
 
       return res.status(200).json({ success: true, message: 'Subscriber saved' });
-    } catch (err: any) {
-      console.error('[Newsletter Welcome Email Error]', err);
-      return res.status(500).json({ error: err.message || 'Internal server error' });
+    } catch (err: unknown) {
+      logger.error('Newsletter welcome email error', { error: String(err) });
+      return next(err);
     }
   });
 
   // Early Access / Prompts Waitlist Welcome Email Endpoint
-  app.post('/api/send-early-access-welcome', async (req: Request, res: Response) => {
+  app.post('/api/send-early-access-welcome', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parseResult = EarlyAccessRequestSchema.safeParse(req.body);
       if (!parseResult.success) {
-        return res.status(400).json({ error: 'Valid email required', issues: parseResult.error.format() });
+        return res.status(400).json({
+          success: false,
+          error: 'Valid email required',
+          code: 'VALIDATION_ERROR',
+          issues: parseResult.error.format(),
+        });
       }
       const { email } = parseResult.data;
 
@@ -417,55 +324,13 @@ export function createApp() {
       const studioOwnerEmail = process.env.STUDIO_OWNER_EMAIL || 'mathewudochukwu656@gmail.com';
 
       if (transporter) {
-        // 1. Send subscriber early access welcome email
         await transporter.sendMail({
           from: fromEmail,
           to: email.trim(),
           subject: "You're on the early access list — Vixcee Studios",
-          html: `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0c0c0e; color: #ffffff; padding: 40px 20px; margin: 0; }
-                  .container { max-width: 560px; margin: 0 auto; background: #141418; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 32px; }
-                  .badge { display: inline-block; font-size: 11px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.1em; color: #ffffff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 999px; margin-bottom: 16px; }
-                  .title { font-size: 24px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff; margin: 0 0 12px; }
-                  p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0 0 16px; }
-                  .highlight-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 20px; margin: 20px 0; }
-                  .btn { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #F04E23, #FF661F, #FFAA00); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; letter-spacing: 0.04em; margin-top: 8px; }
-                  .footer { margin-top: 32px; font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="badge">VIXCEE STUDIOS &bull; EARLY ACCESS</div>
-                  <h1 class="title">You're on the early access list.</h1>
-                  <p>
-                    Thank you for joining the VIP waitlist for Vixcee Studios' AI Coding Prompts engine.
-                  </p>
-                  <div class="highlight-box">
-                    <p style="margin: 0; color: #ffffff; font-weight: 500; font-size: 13px;">
-                      What to expect:
-                    </p>
-                    <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.65);">
-                      Watch your inbox this Friday for our first drop of production-ready agent blueprints, including Linear-style scroll dynamics, zero-pill UI constitutions, and mobile-first micro-interactions.
-                    </p>
-                  </div>
-                  <div style="text-align: center; margin: 24px 0 16px;">
-                    <a href="https://vixceestudios.com" class="btn" style="color: #ffffff;">Visit Vixcee Studios &rarr;</a>
-                  </div>
-                  <div class="footer">
-                    &copy; ${new Date().getFullYear()} Vixcee Studios &bull; Websites live in days, not weeks.
-                  </div>
-                </div>
-              </body>
-            </html>
-          `,
+          html: generateEarlyAccessWelcomeHtml(),
         });
 
-        // 2. Alert studio owner
         try {
           await transporter.sendMail({
             from: fromEmail,
@@ -474,17 +339,30 @@ export function createApp() {
             text: `A new user joined the AI Coding Prompts early access waitlist: ${email.trim()}`,
           });
         } catch (e) {
-          console.warn('[Owner early access alert note]', e);
+          logger.warn('Owner early access alert note', { error: String(e) });
         }
 
         return res.status(200).json({ success: true, message: 'Early access welcome email dispatched' });
       }
 
       return res.status(200).json({ success: true, message: 'Lead saved' });
-    } catch (err: any) {
-      console.error('[Early Access Email Error]', err);
-      return res.status(500).json({ error: err.message || 'Internal server error' });
+    } catch (err: unknown) {
+      logger.error('Early access email error', { error: String(err) });
+      return next(err);
     }
+  });
+
+  // Centralized Error Handling Middleware for typed AppErrors
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json(err.toJSON());
+    }
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    return res.status(500).json({
+      success: false,
+      error: message,
+      code: 'INTERNAL_ERROR',
+    });
   });
 
   return app;
@@ -493,7 +371,7 @@ export function createApp() {
 export async function startServer() {
   const app = createApp();
 
-  // Serve static assets from public/ folder (favicons, manifests, robots.txt, sitemaps)
+  // Serve static assets from public/ folder
   app.use(
     express.static(path.resolve(__dirname, 'public'), {
       maxAge: '7d',

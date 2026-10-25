@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { ChevronDown, ArrowRight, LayoutTemplate, BookOpen, Mail } from 'lucide-react';
-import { PromptIcon } from './PromptIcon.tsx';
 import { MobileDrawer } from './header/MobileDrawer.tsx';
+import { HeaderLogo } from './header/HeaderLogo.tsx';
+import { ResourcesDropdown } from './header/ResourcesDropdown.tsx';
 
 interface HeaderProps {
   onOpenStart: () => void;
@@ -14,24 +14,6 @@ interface HeaderProps {
   onNavigateWork?: () => void;
   isStaticPinned?: boolean;
 }
-
-const XIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
-
-const LinkedInIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-  </svg>
-);
-
-const TikTokIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.34 6.34 0 0 0 10.86 4.46A6.19 6.19 0 0 0 15.8 15.7V8.5a8.28 8.28 0 0 0 4.84 1.56V6.69h-.05z" />
-  </svg>
-);
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenStart,
@@ -55,7 +37,6 @@ export const Header: React.FC<HeaderProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
 
-  // Synchronous initial coordinates to ensure zero-flash, frame-0 centering
   const [logoCoords, setLogoCoords] = useState<{
     deltaX: number;
     deltaY: number;
@@ -75,7 +56,6 @@ export const Header: React.FC<HeaderProps> = ({
     };
   });
 
-  // Mathematically precise FLIP measurement before first paint
   useLayoutEffect(() => {
     if (dockStage === 'docked') return;
 
@@ -105,8 +85,6 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', measure);
   }, [dockStage]);
 
-  // Dedicated post-docking delay:
-  // Wordmark only begins its gentle dissolve AFTER the SVG mark has completely docked into place
   useEffect(() => {
     if (dockStage === 'docked') {
       const timer = setTimeout(() => {
@@ -121,7 +99,6 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, [dockStage]);
 
-  // Non-instantaneous mobile menu lifecycle with intentional delayed text entrance
   useEffect(() => {
     let timer1: NodeJS.Timeout;
     let timer2: NodeJS.Timeout;
@@ -131,7 +108,6 @@ export const Header: React.FC<HeaderProps> = ({
       const frame = requestAnimationFrame(() => {
         setIsMenuActive(true);
       });
-      // Intentional delay before text elements begin their staggered entrance
       timer1 = setTimeout(() => {
         setAreItemsVisible(true);
       }, 220);
@@ -157,27 +133,22 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, [isMobileMenuOpen]);
 
-  // Directional scroll detection: hide on scroll down, smooth reveal on scroll up
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
       setIsScrolled(currentY > 20);
 
-      // Keep header visible if mobile menu or dropdown is active
       if (isMobileMenuOpen || isResourcesOpen) {
         setIsHeaderVisible(true);
         lastScrollY.current = currentY;
         return;
       }
 
-      // At top of page: always visible
       if (currentY <= 40) {
         setIsHeaderVisible(true);
       } else if (currentY > lastScrollY.current + 8) {
-        // Scrolled down by more than 8px: hide smoothly
         setIsHeaderVisible(false);
       } else if (currentY < lastScrollY.current - 6) {
-        // Scrolled up by more than 6px: reveal smoothly
         setIsHeaderVisible(true);
       }
 
@@ -188,7 +159,6 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMobileMenuOpen, isResourcesOpen]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -199,7 +169,6 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Continuous unified single-element transform style
   const logoStyle: React.CSSProperties = useMemo(() => {
     if (dockStage === 'docked') {
       return {
@@ -219,7 +188,6 @@ export const Header: React.FC<HeaderProps> = ({
       };
     }
 
-    // dockStage === 'initial'
     return {
       transform: `translate3d(${logoCoords.deltaX}px, ${logoCoords.deltaY}px, 0) scale(${logoCoords.scale})`,
       transformOrigin: 'center center',
@@ -234,15 +202,11 @@ export const Header: React.FC<HeaderProps> = ({
       className={`fixed top-0 left-0 right-0 z-[70] h-[80px] select-none transition-transform duration-300 ease-out ${
         isMobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
       } ${
-        dockStage !== 'docked' || isStaticPinned || isHeaderVisible || isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
+        dockStage !== 'docked' || isStaticPinned || isHeaderVisible || isMobileMenuOpen
+          ? 'translate-y-0'
+          : '-translate-y-full'
       }`}
     >
-      {/* 
-        Seamlessly blended background with incremental gradient fade:
-        - Fades in smoothly only on scroll down
-        - Extends down to 115px with a gradual mask-image gradient that fades from opaque to transparent
-        - Hidden when mobile menu is open so the logo and buttons float seamlessly on the full-screen blur
-      */}
       <div
         className={`absolute top-0 left-0 right-0 h-[115px] pointer-events-none transition-opacity duration-500 ease-out ${
           !isMobileMenuOpen && (isStaticPinned || isScrolled) ? 'opacity-100' : 'opacity-0'
@@ -259,9 +223,7 @@ export const Header: React.FC<HeaderProps> = ({
         }}
       />
 
-      {/* Header Content Row */}
       <div className="relative z-50 max-w-[1466px] mx-auto px-6 lg:px-12 h-[80px] flex items-center justify-between pointer-events-auto">
-        {/* Left Side: Work, Case studies, Resources (Synchronous cinematic slide-and-fade) */}
         <motion.div
           className={`flex-1 flex items-center justify-start ${
             isNavVisible ? 'pointer-events-auto' : 'pointer-events-none'
@@ -284,7 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onOpenStart();
                 }
               }}
-              className="hover:text-white transition-colors"
+              className={`transition-colors ${currentRoute === 'work' ? 'text-white' : 'hover:text-white'}`}
             >
               Work
             </a>
@@ -299,108 +261,19 @@ export const Header: React.FC<HeaderProps> = ({
                   onOpenStart();
                 }
               }}
-              className="hover:text-white transition-colors"
+              className={`transition-colors ${currentRoute === 'case-studies' ? 'text-white' : 'hover:text-white'}`}
             >
               Case studies
             </a>
 
-            {/* Resources with dropdown indicator */}
-            <div
-              className="relative"
-              ref={dropdownRef}
-              onMouseEnter={() => setIsResourcesOpen(true)}
-              onMouseLeave={() => setIsResourcesOpen(false)}
-            >
-              <button
-                onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-                className={`flex items-center gap-1.5 py-2 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded ${
-                  isResourcesOpen ? 'text-white' : 'text-white/80'
-                }`}
-                aria-expanded={isResourcesOpen}
-                aria-haspopup="true"
-              >
-                <span>Resources</span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    isResourcesOpen ? 'rotate-180 text-white' : 'text-white/60'
-                  }`}
-                />
-              </button>
-
-              {isResourcesOpen && (
-                <div
-                  className="absolute top-full left-0 pt-2 w-[340px] animate-in fade-in slide-in-from-top-2 duration-200"
-                  role="menu"
-                >
-                  <div className="bg-[#0c0c0e]/95 border border-white/10 rounded-xl p-2.5 shadow-2xl shadow-black/80 backdrop-blur-2xl space-y-1 ring-1 ring-white/5">
-                    {/* AI Coding Prompts */}
-                    <button
-                      onClick={() => {
-                        setIsResourcesOpen(false);
-                        onOpenPrompts();
-                      }}
-                      className="w-full text-left p-2.5 rounded-lg hover:bg-white/[0.06] transition-all duration-150 group flex items-start gap-3 cursor-pointer"
-                    >
-                      <PromptIcon variant="white" className="w-5 h-5 mt-0.5 shrink-0 drop-shadow-[0_2px_8px_rgba(255,255,255,0.25)]" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-white flex items-center justify-between">
-                          <span>AI Coding Prompts</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white/90 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-                        </div>
-                        <p className="text-xs text-white/50 mt-0.5 leading-relaxed">
-                          Free optimized prompts for your AI coding agents.
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* Templates */}
-                    <div
-                      className="w-full text-left p-2.5 rounded-lg hover:bg-white/[0.06] transition-all duration-150 group flex items-start gap-3 cursor-default"
-                    >
-                      <LayoutTemplate className="w-4 h-4 text-white/70 mt-1 shrink-0 group-hover:text-white transition-colors" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-white flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span>Templates</span>
-                            <span className="inline-flex items-center px-1.5 py-[2px] rounded-full border border-[#F04E23]/40 bg-[#F04E23]/5 text-[#F04E23]/90 text-[8px] font-medium leading-none select-none">
-                              Coming soon
-                            </span>
-                          </div>
-                          <ArrowRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-                        </div>
-                        <p className="text-xs text-white/50 mt-0.5 leading-relaxed">
-                          Production-ready website & app starter templates.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Tutorials */}
-                    <div
-                      className="w-full text-left p-2.5 rounded-lg hover:bg-white/[0.06] transition-all duration-150 group flex items-start gap-3 cursor-default"
-                    >
-                      <BookOpen className="w-4 h-4 text-white/70 mt-1 shrink-0 group-hover:text-white transition-colors" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-white flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span>Tutorials</span>
-                            <span className="inline-flex items-center px-1.5 py-[2px] rounded-full border border-[#F04E23]/40 bg-[#F04E23]/5 text-[#F04E23]/90 text-[8px] font-medium leading-none select-none">
-                              Coming soon
-                            </span>
-                          </div>
-                          <ArrowRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-                        </div>
-                        <p className="text-xs text-white/50 mt-0.5 leading-relaxed">
-                          Step-by-step guides for AI-driven development.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <ResourcesDropdown
+              isOpen={isResourcesOpen}
+              setIsOpen={setIsResourcesOpen}
+              dropdownRef={dropdownRef}
+              onOpenPrompts={onOpenPrompts}
+            />
           </nav>
 
-          {/* Asymmetric Two-Line Hamburger Morph */}
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             className="md:hidden relative w-10 h-10 -ml-2 flex items-center justify-center text-white/90 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 rounded cursor-pointer group"
@@ -426,135 +299,15 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </motion.div>
 
-        {/* 
-          Center: Stable Brand Identity Hosting Unified Continuous Single-Element Logo
-          - EXACT same SVG element from frame 0
-          - Zero DOM unmount, zero swap, zero element replacement
-          - Moves directly from centered reveal into resting header slot
-        */}
-        <div className="flex-shrink-0 flex items-center justify-center">
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onNavigateHome) {
-                onNavigateHome();
-              } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-            }}
-            className="relative flex flex-col items-center justify-center group focus-visible:outline-none cursor-pointer py-1"
-            aria-label="Vixcee Studios Home"
-          >
-            {/* Stable Target Slot */}
-            <div
-              id="header-logo-target"
-              ref={targetRef}
-              className="w-[36px] sm:w-[38px] aspect-[225/166] relative flex items-center justify-center"
-            >
-              {/* 
-                Unified Continuous Single SVG Element:
-                - Renders on frame 0 in the viewport center, scaled up, playing its initial drawing & color transition
-                - At 4400ms, smoothly glides and scales directly into translate3d(0, 0, 0) scale(1)
-                - Remains permanently locked in the DOM as the interactive header logo with zero replacement artifacts
-              */}
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={logoStyle}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="88.17903919219971 100.88997669219971 225.1209789276123 166.12005577087402"
-                  fill="none"
-                  className="w-full h-full pointer-events-none group-hover:brightness-110 transition-[filter] duration-200"
-                >
-                  <defs>
-                    <style type="text/css">{`
-                      @keyframes logoReveal { 
-                        0% { transform: scale(0.94); transform-origin: 200px 185px; opacity: 0; } 
-                        15% { opacity: 1; } 
-                        100% { transform: scale(1); transform-origin: 200px 185px; opacity: 1; } 
-                      }
-                      .anim-logo { 
-                        animation: logoReveal 3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-                      }
-                    `}</style>
-                  </defs>
-                  <path
-                    d="M 248.22,193.18 C 268.71,162.59 288.78,130.59 307.94,106.25 H 263.27 C 251.59,106.25 239.39,115.32 233.59,125.71 L 218.25,150.71 L 201.61,123.33 C 199.76,120.1 196.22,118.08 192.74,118.14 L 154.71,118.53 C 156.49,120.12 158.19,121.57 159.64,123.65 C 173.22,143.69 186.21,165.87 198.51,185.19 L 218.25,151.53 L 244.47,194.33 L 222.05,227.06 L 198.82,186.44 C 192.78,197.31 186.07,208.14 179.46,217.19 C 179.34,217.27 179.23,217.22 179.22,217.08 C 182.09,209.63 186.47,202.3 189.14,195.32 L 150.5,128.09 C 147.56,122.54 140.84,118.25 135.49,118.25 H 93.54 L 172.06,247.81 C 181.15,261.85 196.15,261.2 206.59,248.19 L 222.08,228.06 L 237.32,255.52 C 239.39,259.31 243.25,261.65 247.17,261.65 H 291.66 L 248.22,193.18 Z"
-                    fill="white"
-                    className="anim-logo"
-                    id="logo-mark"
-                  >
-                    <animate
-                      attributeName="stroke-dashoffset"
-                      from="1000"
-                      to="0"
-                      dur="1.9s"
-                      fill="freeze"
-                      calcMode="spline"
-                      keySplines="0.22 1 0.36 1"
-                    />
-                    <animate
-                      attributeName="stroke"
-                      values="#FE5E50;#FFB4A2;#FFFFFF;rgba(255,255,255,0)"
-                      keyTimes="0;0.35;0.75;1"
-                      dur="2.6s"
-                      fill="freeze"
-                    />
-                    <animate
-                      attributeName="stroke-width"
-                      values="3.5;3;1.5;0"
-                      keyTimes="0;0.5;0.8;1"
-                      dur="2.6s"
-                      fill="freeze"
-                    />
-                    <animate
-                      attributeName="fill-opacity"
-                      values="0;0;0.4;1"
-                      keyTimes="0;0.45;0.75;1"
-                      dur="3s"
-                      fill="freeze"
-                      calcMode="spline"
-                      keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"
-                    />
-                    <animate
-                      attributeName="fill"
-                      values="#FE5E50;#FFA07A;#FFFFFF"
-                      keyTimes="0;0.6;1"
-                      dur="3s"
-                      fill="freeze"
-                    />
-                  </path>
-                </svg>
-              </div>
-            </div>
+        <HeaderLogo
+          targetRef={targetRef}
+          logoStyle={logoStyle}
+          isWordmarkVisible={isWordmarkVisible}
+          isScrolled={isScrolled}
+          isMobileMenuOpen={isMobileMenuOpen}
+          onNavigateHome={onNavigateHome}
+        />
 
-            {/* 
-              Wordmark: Positioned absolutely below the symbol mark
-              - Strictly isolated to opacity and transform to eliminate sub-pixel twitching
-              - Only dissolves into view after SVG mark has docked, with dedicated post-docking delay
-              - Fades out cleanly on scroll down
-            */}
-            <div
-              style={{
-                transition: 'opacity 350ms cubic-bezier(0.16, 1, 0.3, 1), transform 350ms cubic-bezier(0.16, 1, 0.3, 1)',
-                willChange: 'opacity, transform',
-              }}
-              className={`absolute top-[calc(100%-2px)] left-1/2 -translate-x-1/2 pointer-events-none whitespace-nowrap ${
-                !isWordmarkVisible || isScrolled || isMobileMenuOpen
-                  ? 'opacity-0 -translate-y-1 pointer-events-none'
-                  : 'opacity-100 translate-y-0'
-              }`}
-            >
-              <span className="text-[10px] sm:text-[11px] font-medium tracking-[0.24em] text-white whitespace-nowrap drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-                VIXCEE STUDIOS
-              </span>
-            </div>
-          </a>
-        </div>
-
-        {/* Right Side: Sign up (Synchronous cinematic slide-and-fade) */}
         <motion.div
           className={`flex-1 flex items-center justify-end ${
             isNavVisible ? 'pointer-events-auto' : 'pointer-events-none'
@@ -575,7 +328,6 @@ export const Header: React.FC<HeaderProps> = ({
         </motion.div>
       </div>
 
-      {/* Mobile Drawer - Modularized Extracted Subcomponent */}
       <MobileDrawer
         isMenuMounted={isMenuMounted}
         isMenuActive={isMenuActive}

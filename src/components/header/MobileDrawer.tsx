@@ -23,7 +23,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onOpenPrompts,
   onNavigateWork,
   onNavigateCaseStudies,
-  currentRoute,
+  currentRoute: _currentRoute,
 }) => {
   if (!isMenuMounted) return null;
 

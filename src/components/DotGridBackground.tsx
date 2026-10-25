@@ -15,7 +15,9 @@ function resolveVar(raw: string, el: HTMLElement): string {
   try {
     const resolved = getComputedStyle(el).getPropertyValue(varName).trim();
     if (resolved) return resolved;
-  } catch (_) {}
+  } catch {
+    // fallback if computed style unavailable
+  }
   if (fallback) return resolveVar(fallback, el);
   return '#F04E23';
 }
@@ -282,8 +284,8 @@ export const DotGridBackground: React.FC<DotGridBackgroundProps> = ({
 
             let x = d.bx;
             let y = d.by;
-            let scale = 1;
-            let alpha = 0.3;
+            let scale: number;
+            let alpha: number;
 
             if (cfg.enableRevolve) {
               const orbitR = (1 - t) * cfg.dotSpacing * 0.7 * inf;

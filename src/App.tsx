@@ -27,7 +27,7 @@ export type AppRoute = 'home' | 'case-studies' | 'case-study-detail' | 'work' | 
 
 export default function App() {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
-  const [activePromptId, setActivePromptId] = useState<string | null>(null);
+  const [activePromptId, _setActivePromptId] = useState<string | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [dockStage, setDockStage] = useState<DockStage>('initial');
 

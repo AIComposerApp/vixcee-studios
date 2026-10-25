@@ -42,8 +42,10 @@ describe('Server API Endpoints & Health Check', () => {
       body: JSON.stringify({}),
     });
     expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: string; issues: Record<string, unknown> };
+    const body = (await res.json()) as { success: boolean; error: string; code: string; issues: Record<string, unknown> };
+    expect(body.success).toBe(false);
     expect(body.error).toBe('Validation failed');
+    expect(body.code).toBe('VALIDATION_ERROR');
     expect(body.issues).toBeDefined();
   });
 
